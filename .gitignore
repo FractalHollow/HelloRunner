@@ -1,0 +1,16 @@
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild*/
+[Bb]uilds/
+UserSettings/
+Logs/
+MemoryCaptures/
+.vs/
+.vscode/*settings.json
+*.csproj
+*.sln
+*.user
+.gradle/
+*.apk
+*.aab

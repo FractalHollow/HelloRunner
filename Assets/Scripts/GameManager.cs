@@ -96,6 +96,9 @@ void BeginGameplay()
         if (score > hi) { PlayerPrefs.SetInt("HighScore", score); PlayerPrefs.Save(); }
         UpdateHighScoreUI();
 
+        // Final score
+        if (finalScoreText) finalScoreText.text = $"Score: {score}";
+
         var fader = gameOverPanel.GetComponent<PanelFader>();
         if (fader) fader.FadeIn();
         else gameOverPanel.SetActive(true);

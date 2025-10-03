@@ -37,10 +37,9 @@ public class PlayerGravityFlip : MonoBehaviour
             rb.gravityScale = gravityMagnitude * gravDir;
             rb.velocity = new Vector2(rb.velocity.x, 0f);  // crisp flip
 
-            Debug.Log($"Flip -> gravDir={gravDir} ( >0 = down, <0 = up )");
+            AudioManager.I?.PlayFlip();
+            // PLAY FX (working?) deopped in)
 
-
-            // PLAY FX
             var pos = transform.position;
             pos.y += (gravDir > 0 ? -0.2f : 0.2f);   // tiny offset opposite gravity
 

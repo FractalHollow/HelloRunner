@@ -25,6 +25,12 @@ public class GameManager : MonoBehaviour
     [Header("Options")]
     public bool pauseOnStart = true;
 
+    [Header("Pause")]
+    public GameObject pausePanel;     // assign PausePanel
+    public UnityEngine.UI.Button pauseButton; // assign PauseButton
+
+    bool paused = false;
+
     // runtime
     int score = 0;
     bool playing = false;
@@ -113,16 +119,64 @@ public class GameManager : MonoBehaviour
         highScoreText.text = $"Best: {hi}";
     }
 
+// Call from PauseButton
+public void PauseGame()
+{
+    if (paused || !playing) return;          // don't pause if not playing
+    paused = true;
+    player?.EnableControl(false); 
+    Time.timeScale = 0f;
+    if (pausePanel)
+    {
+        pausePanel.SetActive(true);
+        var f = pausePanel.GetComponent<PanelFader>();
+        if (f) f.FadeIn();
+    }
+    // Optional: dim music when paused (uncomment if desired)
+    // AudioManager.I?.SetMusicVolume(Mathf.Max(0.2f, AudioManager.I.CurrentMusic01));
+}
+
+    // Call from Resume button
+    public void ResumeGame()
+    {
+        if (!paused) return;
+        paused = false;
+        Time.timeScale = 1f;
+        if (pausePanel)
+        {
+            var f = pausePanel.GetComponent<PanelFader>();
+            if (f) f.FadeOut(() => pausePanel.SetActive(false));
+            else pausePanel.SetActive(false);
+        }
+    player?.EnableControl(true);
+    // Optional: restore music (only if you dimmed it above)
+        // AudioManager.I?.SetMusicVolume(PlayerPrefs.GetFloat("vol_music", 0.8f));
+    }
+
+// Optional: Android Back button / ESC to toggle
+void Update()
+{
+    if (playing && Input.GetKeyDown(KeyCode.Escape))
+    {
+        if (paused) ResumeGame();
+        else        PauseGame();
+    }
+}
+
     public void GameOver()
     {
         if (!playing) return;
         playing = false;
 
         if (spawner) spawner.StopSpawning();
-        if (player)  player.EnableControl(false);
+        if (player) player.EnableControl(false);
 
         // Crash SFX
         AudioManager.I.PlayCrash();
+
+        // Screen shake
+        var camShake = Camera.main.GetComponent<ScreenShake>();
+        if (camShake) camShake.Shake(0.25f, 0.15f);
 
         // Save high score
         int hi = PlayerPrefs.GetInt("HighScore", 0);

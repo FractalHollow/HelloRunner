@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;  // <— add at the top
 
 public class PlayerGravityFlip : MonoBehaviour
 {
@@ -30,6 +31,15 @@ public class PlayerGravityFlip : MonoBehaviour
 
         bool tapped = Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0) || Input.touchCount > 0;
 
+    bool tapDown =
+        Input.GetMouseButtonDown(0) ||
+        (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) ||
+        Input.GetKeyDown(KeyCode.Space);
+
+    if (!tapDown) return;
+
+    // NEW: ignore taps over UI (Pause button, sliders, etc.)
+    if (IsPointerOverUI()) return;
 
         if (tapped && Time.time >= nextFlipAllowed)
         {
@@ -71,4 +81,20 @@ public class PlayerGravityFlip : MonoBehaviour
         isAlive = false;
         FindObjectOfType<GameManager>()?.GameOver();
     }
+
+    bool IsPointerOverUI()
+{
+    if (EventSystem.current == null) return false;
+
+    // Mouse / editor
+    if (EventSystem.current.IsPointerOverGameObject()) return true;
+
+    // Touch (any finger)
+    for (int i = 0; i < Input.touchCount; i++)
+        if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+            return true;
+
+    return false;
+}
+
 }

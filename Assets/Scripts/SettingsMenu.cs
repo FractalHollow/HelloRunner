@@ -9,6 +9,13 @@ public class SettingsMenu : MonoBehaviour
     public Toggle musicMuteToggle;
     public Toggle sfxMuteToggle;
     public PanelFader fader;
+    public AboutMenu aboutMenu;  // drag your AboutPanel here in Inspector
+
+    public void OpenAbout()
+    {
+        aboutMenu?.Open();
+    }
+
 
     void OnEnable()
     {
@@ -61,6 +68,7 @@ public class SettingsMenu : MonoBehaviour
         AudioManager.I?.TestSfx();
         SyncFromAudioManager();
     }
+
 
     // ---- helpers ----
     void SyncFromAudioManager()

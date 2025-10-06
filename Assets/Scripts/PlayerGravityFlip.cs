@@ -45,7 +45,7 @@ public class PlayerGravityFlip : MonoBehaviour
         {
             gravDir *= -1;
             rb.gravityScale = gravityMagnitude * gravDir;
-            rb.velocity = new Vector2(rb.velocity.x, 0f);  // crisp flip
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);  // crisp flip
 
             AudioManager.I?.PlayFlip();
             // PLAY FX (working?) deopped in)
@@ -62,15 +62,15 @@ public class PlayerGravityFlip : MonoBehaviour
 
 
             // optional: zero vertical velocity so the flip is crisp/instant
-            rb.velocity = new Vector2(rb.velocity.x, 0f);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
 
             nextFlipAllowed = Time.time + flipCooldown;
         }
 
         // Clamp vertical speed so it never becomes unreadable
-        var v = rb.velocity;
+        var v = rb.linearVelocity;
         if (Mathf.Abs(v.y) > maxYSpeed) v.y = Mathf.Sign(v.y) * maxYSpeed;
-        rb.velocity = v;
+        rb.linearVelocity = v;
     }
 
     public void EnableControl(bool value) => canControl = value;
@@ -102,7 +102,7 @@ public void ResetState()
     isAlive = true;           // ensure alive
     canControl = false;       // StartGame will enable control
     var rb = GetComponent<Rigidbody2D>();
-    if (rb) { rb.velocity = Vector2.zero; rb.angularVelocity = 0f; }
+    if (rb) { rb.linearVelocity = Vector2.zero; rb.angularVelocity = 0f; }
     // if you flip gravity by sign, normalize it here if needed:
     // rb.gravityScale = Mathf.Abs(rb.gravityScale);
 }

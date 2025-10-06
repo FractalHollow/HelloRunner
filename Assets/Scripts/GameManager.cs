@@ -257,7 +257,7 @@ public class GameManager : MonoBehaviour
         var rb = t.GetComponent<Rigidbody2D>();
         if (rb)
         {
-            rb.velocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
             // If your gravity uses rb.gravityScale sign, normalize here if needed:
             // rb.gravityScale = Mathf.Abs(rb.gravityScale);

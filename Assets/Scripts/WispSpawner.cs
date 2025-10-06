@@ -40,7 +40,7 @@ public class WispSpawner : MonoBehaviour
             var go  = Instantiate(wispPrefab, pos, Quaternion.identity);
 
             var rb = go.GetComponent<Rigidbody2D>();
-            if (rb) rb.velocity = Vector2.left * moveSpeed;
+            if (rb) rb.linearVelocity = Vector2.left * moveSpeed;
 
         }
     }

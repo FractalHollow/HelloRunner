@@ -2,19 +2,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
     [Header("Refs")]
-    public PlayerGravityFlip player;     // your player controller
-    public Spawner spawner;              // your obstacle spawner
+    public PlayerGravityFlip player;
+    public Spawner spawner;
+    public WispSpawner wispSpawner;
 
     [Header("UI - Panels")]
     public GameObject startPanel;
     public GameObject gameOverPanel;
 
     [Header("UI - Buttons")]
-    public Button startButton;
+    public Button startButton;    // not required (StartScreen wires button), ok to leave null
     public Button restartButton;
 
     [Header("UI - Text")]
@@ -26,31 +28,55 @@ public class GameManager : MonoBehaviour
     public bool pauseOnStart = true;
 
     [Header("Pause")]
-    public GameObject pausePanel;     // assign PausePanel
-    public UnityEngine.UI.Button pauseButton; // assign PauseButton
+    public GameObject pausePanel;
+    public Button pauseButton;
 
+    // spawn reset
+    public Vector3 playerStartPos;
+    public Quaternion playerStartRot;
+
+    // state
     bool paused = false;
-
-    // runtime
     int score = 0;
     bool playing = false;
 
+    // singleton guard (prevents dupes)
+    static GameManager _inst;
+
+    // -------------------- LIFECYCLE --------------------
+
+    void Awake()
+    {
+        // kill duplicates
+        if (_inst != null && _inst != this) { Destroy(gameObject); return; }
+        _inst = this;
+
+        // if someone shoved us into DDOL, move back to active scene
+        if (gameObject.scene.name == "DontDestroyOnLoad")
+        {
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
+            Debug.LogWarning("[GM] Was in DontDestroyOnLoad — moved back to scene.");
+        }
+
+        if (player)
+        {
+            playerStartPos = player.transform.position;
+            playerStartRot = player.transform.rotation;
+        }
+    }
+
     void Start()
     {
-        // Button hooks
-        if (restartButton) restartButton.onClick.AddListener(Restart);
-        if (startButton)   startButton.onClick.AddListener(StartGame);
-
         // Initial state
         playing = false;
         if (player) player.EnableControl(false);
 
-        // Panels visible states + fade instant setup
+        // Panels initial states
         if (startPanel)
         {
             startPanel.SetActive(true);
             var f = startPanel.GetComponent<PanelFader>();
-            if (f) f.ShowInstant();
+            if (f) f.ShowInstant(); // alpha=1, interactable=true, blocksRaycasts=true
         }
         if (gameOverPanel)
         {
@@ -59,46 +85,106 @@ public class GameManager : MonoBehaviour
             if (f) f.HideInstant();
         }
 
-        // Pause world at start (menus still animate using unscaled time)
+        // Pause world at start (menus animate with unscaled time)
         if (pauseOnStart) Time.timeScale = 0f;
 
         score = 0;
         UpdateScoreUI();
         UpdateHighScoreUI();
+
+        // last-chance safety in case someone moved us after Awake
+        StartCoroutine(EnsureSceneLocal());
     }
 
-    // Called by Start button (or TapToStart if you kept it)
+    IEnumerator EnsureSceneLocal()
+    {
+        yield return null; // one frame later
+        if (gameObject.scene.name == "DontDestroyOnLoad")
+        {
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
+            Debug.LogWarning("[GM] Moved back to scene in Start().");
+        }
+    }
+
+    // -------------------- GAME FLOWS --------------------
+
+    // Called by StartScreen (after it fades & disables itself)
     public void StartGame()
     {
-        // Fade out StartPanel, then actually begin gameplay
-        if (startPanel)
-        {
-            var fader = startPanel.GetComponent<PanelFader>();
-            if (fader)
-            {
-                fader.FadeOut(() => BeginGameplay());
-                return;
-            }
-            else startPanel.SetActive(false);
-        }
+        Time.timeScale = 1f;
+        paused = false;
+        HideGameOverPanel();
 
+        // Reset world state
+        if (spawner)     spawner.StopSpawning();
+        if (wispSpawner) wispSpawner.StopSpawning();
+        ClearWorld();
+        ResetPlayerToStart();
+
+        // Fresh score/UI
+        score = 0;
+        UpdateScoreUI();
+
+        // Begin new run
         BeginGameplay();
     }
 
     void BeginGameplay()
     {
-        // Unpause and enable systems
+        Debug.Log("[GM] BeginGameplay()");
         Time.timeScale = 1f;
-        score = 0;
-        UpdateScoreUI();
         playing = true;
 
-        if (spawner) spawner.Begin();
-        if (player) player.EnableControl(true);
+        if (spawner)     spawner.Begin();
+        if (wispSpawner) wispSpawner.StartSpawning();
+        if (player)      player.EnableControl(true);
 
         AudioManager.I?.PlayMusic();
-
     }
+
+    public void GameOver()
+    {
+        if (!playing) return;
+        playing = false;
+
+        if (spawner)     spawner.StopSpawning();
+        if (wispSpawner) wispSpawner.StopSpawning();
+        if (player)      player.EnableControl(false);
+
+        AudioManager.I?.PlayCrash();
+
+        var cam = Camera.main;
+        if (cam)
+        {
+            var shake = cam.GetComponent<ScreenShake>();
+            if (shake) shake.Shake(0.25f, 0.15f);
+        }
+
+        int hi = PlayerPrefs.GetInt("HighScore", 0);
+        if (score > hi)
+        {
+            PlayerPrefs.SetInt("HighScore", score);
+            PlayerPrefs.Save();
+        }
+        UpdateHighScoreUI();
+
+        if (finalScoreText) finalScoreText.text = $"Score: {score}";
+
+        if (gameOverPanel)
+        {
+            gameOverPanel.SetActive(true);
+            var fader = gameOverPanel.GetComponent<PanelFader>();
+            if (fader) fader.FadeIn();
+        }
+    }
+
+    public void Restart()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    // -------------------- UI / INPUT --------------------
 
     public void AddPoint()
     {
@@ -119,90 +205,86 @@ public class GameManager : MonoBehaviour
         highScoreText.text = $"Best: {hi}";
     }
 
-// Call from PauseButton
-public void PauseGame()
-{
-    if (paused || !playing) return;          // don't pause if not playing
-    paused = true;
-    player?.EnableControl(false); 
-    Time.timeScale = 0f;
-    if (pausePanel)
+    public void PauseGame()
     {
-        pausePanel.SetActive(true);
-        var f = pausePanel.GetComponent<PanelFader>();
-        if (f) f.FadeIn();
-    }
-    // Optional: dim music when paused (uncomment if desired)
-    // AudioManager.I?.SetMusicVolume(Mathf.Max(0.2f, AudioManager.I.CurrentMusic01));
-}
+        if (paused || !playing) return;
+        paused = true;
+        player?.EnableControl(false);
+        Time.timeScale = 0f;
 
-    // Call from Resume button
+        if (pausePanel)
+        {
+            pausePanel.SetActive(true);
+            var f = pausePanel.GetComponent<PanelFader>();
+            if (f) f.FadeIn();
+        }
+    }
+
     public void ResumeGame()
     {
         if (!paused) return;
         paused = false;
         Time.timeScale = 1f;
+
         if (pausePanel)
         {
             var f = pausePanel.GetComponent<PanelFader>();
             if (f) f.FadeOut(() => pausePanel.SetActive(false));
-            else pausePanel.SetActive(false);
+            else  pausePanel.SetActive(false);
         }
-    player?.EnableControl(true);
-    // Optional: restore music (only if you dimmed it above)
-        // AudioManager.I?.SetMusicVolume(PlayerPrefs.GetFloat("vol_music", 0.8f));
+        player?.EnableControl(true);
     }
 
-// Optional: Android Back button / ESC to toggle
-void Update()
-{
-    if (playing && Input.GetKeyDown(KeyCode.Escape))
+    void Update()
     {
-        if (paused) ResumeGame();
-        else        PauseGame();
-    }
-}
-
-    public void GameOver()
-    {
-        if (!playing) return;
-        playing = false;
-
-        if (spawner) spawner.StopSpawning();
-        if (player) player.EnableControl(false);
-
-        // Crash SFX
-        AudioManager.I.PlayCrash();
-
-        // Screen shake
-        var camShake = Camera.main.GetComponent<ScreenShake>();
-        if (camShake) camShake.Shake(0.25f, 0.15f);
-
-        // Save high score
-        int hi = PlayerPrefs.GetInt("HighScore", 0);
-        if (score > hi)
+        if (playing && Input.GetKeyDown(KeyCode.Escape))
         {
-            PlayerPrefs.SetInt("HighScore", score);
-            PlayerPrefs.Save();
-        }
-        UpdateHighScoreUI();
-
-        // Show final score
-        if (finalScoreText) finalScoreText.text = $"Score: {score}";
-
-        // Show Game Over panel (fade if available)
-        if (gameOverPanel)
-        {
-            gameOverPanel.SetActive(true);
-            var fader = gameOverPanel.GetComponent<PanelFader>();
-            if (fader) fader.FadeIn();
+            if (paused) ResumeGame();
+            else        PauseGame();
         }
     }
 
-    public void Restart()
+    // -------------------- HELPERS --------------------
+
+    void ResetPlayerToStart()
     {
-        // Safety: unpause in case we were paused in menus
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (!player) return;
+
+        var t = player.transform;
+        t.position = playerStartPos;
+        t.rotation = playerStartRot;
+
+        var rb = t.GetComponent<Rigidbody2D>();
+        if (rb)
+        {
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+            // If your gravity uses rb.gravityScale sign, normalize here if needed:
+            // rb.gravityScale = Mathf.Abs(rb.gravityScale);
+        }
+
+        // If you created this helper in PlayerGravityFlip, great; if not, remove this call.
+        try { player.ResetState(); } catch { /* ok if not implemented */ }
+
+        player.EnableControl(false); // enable in BeginGameplay
+    }
+
+    void ClearWorld()
+    {
+        // obstacles: tag them "Obstacle"
+        var obstacles = GameObject.FindGameObjectsWithTag("Obstacle");
+        foreach (var o in obstacles) Destroy(o);
+
+        // wisps by component
+        var wisps = FindObjectsOfType<WispPickup>();
+        foreach (var w in wisps) Destroy(w.gameObject);
+    }
+
+    void HideGameOverPanel()
+    {
+        if (!gameOverPanel) return;
+        var f = gameOverPanel.GetComponent<PanelFader>();
+        if (f) f.HideInstant();
+        gameOverPanel.SetActive(false);
     }
 }

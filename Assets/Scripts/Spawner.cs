@@ -9,23 +9,28 @@ public class Spawner : MonoBehaviour
     public float difficultyRamp = 0.02f;
     public float minY = -2f, maxY = 2f;
 
-    private float currentInterval;
-    private bool spawning;
+    float currentInterval;
+    bool spawning;
+    Coroutine loop;
 
-    void Start()
+    void Awake()
     {
         currentInterval = startInterval;
-        Begin();
     }
 
     public void Begin()
     {
+        currentInterval = startInterval;   // reset difficulty each run
         if (spawning) return;
         spawning = true;
-        StartCoroutine(SpawnLoop());
+        loop = StartCoroutine(SpawnLoop());
     }
 
-    public void StopSpawning() => spawning = false;
+    public void StopSpawning()
+    {
+        spawning = false;
+        if (loop != null) { StopCoroutine(loop); loop = null; }
+    }
 
     IEnumerator SpawnLoop()
     {
@@ -33,6 +38,7 @@ public class Spawner : MonoBehaviour
         {
             Vector3 pos = new Vector3(transform.position.x, Random.Range(minY, maxY), 0f);
             Instantiate(obstaclePrefab, pos, Quaternion.identity);
+
             yield return new WaitForSeconds(currentInterval);
             currentInterval = Mathf.Max(minInterval, currentInterval - difficultyRamp);
         }

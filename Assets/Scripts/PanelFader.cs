@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using System; // <-- needed for Action
+using System;
 
 public class PanelFader : MonoBehaviour
 {
@@ -15,12 +15,22 @@ public class PanelFader : MonoBehaviour
     public void ShowInstant()
     {
         gameObject.SetActive(true);
-        if (group) group.alpha = 1f;
+        if (group)
+        {
+            group.alpha = 1f;
+            group.interactable = true;
+            group.blocksRaycasts = true;
+        }
     }
 
     public void HideInstant()
     {
-        if (group) group.alpha = 0f;
+        if (group)
+        {
+            group.alpha = 0f;
+            group.interactable = false;
+            group.blocksRaycasts = false;
+        }
         gameObject.SetActive(false);
     }
 
@@ -32,7 +42,6 @@ public class PanelFader : MonoBehaviour
 
     public void FadeOut(Action onComplete = null, bool deactivateAtEnd = true)
     {
-        // We assume the panel is currently visible (alpha ~1)
         StartCoroutine(Fade(1f, 0f, onComplete, deactivateAtEnd));
     }
 
@@ -41,14 +50,28 @@ public class PanelFader : MonoBehaviour
         float t = 0f;
         if (group) group.alpha = from;
 
+        // Pre-set interactivity for fade-out so clicks pass through immediately
+        if (group && to <= 0f)
+        {
+            group.interactable = false;
+            group.blocksRaycasts = false;
+        }
+
         while (t < duration)
         {
-            t += Time.unscaledDeltaTime; // unaffected by Time.timeScale
+            t += Time.unscaledDeltaTime;
             if (group) group.alpha = Mathf.Lerp(from, to, t / duration);
             yield return null;
         }
 
         if (group) group.alpha = to;
+
+        if (group && to > 0f)
+        {
+            group.interactable = true;
+            group.blocksRaycasts = true;
+        }
+
         if (deactivateAtEnd && to <= 0f) gameObject.SetActive(false);
         onComplete?.Invoke();
     }

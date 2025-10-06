@@ -31,15 +31,15 @@ public class PlayerGravityFlip : MonoBehaviour
 
         bool tapped = Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0) || Input.touchCount > 0;
 
-    bool tapDown =
-        Input.GetMouseButtonDown(0) ||
-        (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) ||
-        Input.GetKeyDown(KeyCode.Space);
+        bool tapDown =
+            Input.GetMouseButtonDown(0) ||
+            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) ||
+            Input.GetKeyDown(KeyCode.Space);
 
-    if (!tapDown) return;
+        if (!tapDown) return;
 
-    // NEW: ignore taps over UI (Pause button, sliders, etc.)
-    if (IsPointerOverUI()) return;
+        // NEW: ignore taps over UI (Pause button, sliders, etc.)
+        if (IsPointerOverUI()) return;
 
         if (tapped && Time.time >= nextFlipAllowed)
         {
@@ -83,18 +83,29 @@ public class PlayerGravityFlip : MonoBehaviour
     }
 
     bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+
+        // Mouse / editor
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+
+        // Touch (any finger)
+        for (int i = 0; i < Input.touchCount; i++)
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+
+        return false;
+    }
+
+public void ResetState()
 {
-    if (EventSystem.current == null) return false;
-
-    // Mouse / editor
-    if (EventSystem.current.IsPointerOverGameObject()) return true;
-
-    // Touch (any finger)
-    for (int i = 0; i < Input.touchCount; i++)
-        if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
-            return true;
-
-    return false;
+    isAlive = true;           // ensure alive
+    canControl = false;       // StartGame will enable control
+    var rb = GetComponent<Rigidbody2D>();
+    if (rb) { rb.velocity = Vector2.zero; rb.angularVelocity = 0f; }
+    // if you flip gravity by sign, normalize it here if needed:
+    // rb.gravityScale = Mathf.Abs(rb.gravityScale);
 }
+
 
 }

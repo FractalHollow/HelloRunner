@@ -11,18 +11,30 @@ public class GameManager : MonoBehaviour
     public Spawner spawner;
     public WispSpawner wispSpawner;
 
+    [Header("Run Scoring")]
+    public DistanceTracker distanceTracker;
+    public ScoreSystem scoreSystem;
+
     [Header("UI - Panels")]
     public GameObject startPanel;
     public GameObject gameOverPanel;
 
     [Header("UI - Buttons")]
-    public Button startButton;    // not required (StartScreen wires button), ok to leave null
+    public Button startButton;    // not required (StartScreen wires button)
     public Button restartButton;
 
-    [Header("UI - Text")]
-    public TMP_Text scoreText;
-    public TMP_Text finalScoreText;
-    public TMP_Text highScoreText;
+    [Header("UI - Text (HUD)")]
+    public TMP_Text distanceText;     // "123 m"
+    public TMP_Text scoreText;        // "Score: 456"
+    public TMP_Text wispTotalHUD;     // "Wisps: 1234" (total bank)
+
+    [Header("UI - Text (Game Over)")]
+    public TMP_Text finalScoreText;   // "Score: 456"
+    public TMP_Text highScoreText;    // "Best: 9999"
+    public TMP_Text finalDistanceText;// "Distance: 123 m"
+    public TMP_Text bestDistanceText; // "Best Distance: 456 m"
+    public TMP_Text wispsRunText;     // "+123 Wisps"
+    public TMP_Text wispTotalFinal;   // "Total Wisps: 2345"
 
     [Header("Options")]
     public bool pauseOnStart = true;
@@ -37,21 +49,19 @@ public class GameManager : MonoBehaviour
 
     // state
     bool paused = false;
-    int score = 0;
     bool playing = false;
 
-    // singleton guard (prevents dupes)
-    static GameManager _inst;
+    // currency
+    int wispsRun = 0;
+    int wispsTotal = 0;
 
-    // -------------------- LIFECYCLE --------------------
+    static GameManager _inst;
 
     void Awake()
     {
-        // kill duplicates
         if (_inst != null && _inst != this) { Destroy(gameObject); return; }
         _inst = this;
 
-        // if someone shoved us into DDOL, move back to active scene
         if (gameObject.scene.name == "DontDestroyOnLoad")
         {
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
@@ -63,20 +73,20 @@ public class GameManager : MonoBehaviour
             playerStartPos = player.transform.position;
             playerStartRot = player.transform.rotation;
         }
+
+        wispsTotal = PlayerPrefs.GetInt("wisps_total", 0);
     }
 
     void Start()
     {
-        // Initial state
         playing = false;
         if (player) player.EnableControl(false);
 
-        // Panels initial states
         if (startPanel)
         {
             startPanel.SetActive(true);
             var f = startPanel.GetComponent<PanelFader>();
-            if (f) f.ShowInstant(); // alpha=1, interactable=true, blocksRaycasts=true
+            if (f) f.ShowInstant();
         }
         if (gameOverPanel)
         {
@@ -85,20 +95,18 @@ public class GameManager : MonoBehaviour
             if (f) f.HideInstant();
         }
 
-        // Pause world at start (menus animate with unscaled time)
         if (pauseOnStart) Time.timeScale = 0f;
 
-        score = 0;
-        UpdateScoreUI();
         UpdateHighScoreUI();
+        UpdateWispHUD();
+        UpdateUILive();
 
-        // last-chance safety in case someone moved us after Awake
         StartCoroutine(EnsureSceneLocal());
     }
 
     IEnumerator EnsureSceneLocal()
     {
-        yield return null; // one frame later
+        yield return null;
         if (gameObject.scene.name == "DontDestroyOnLoad")
         {
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
@@ -108,25 +116,38 @@ public class GameManager : MonoBehaviour
 
     // -------------------- GAME FLOWS --------------------
 
-    // Called by StartScreen (after it fades & disables itself)
     public void StartGame()
     {
         Time.timeScale = 1f;
         paused = false;
         HideGameOverPanel();
 
-        // Reset world state
         if (spawner)     spawner.StopSpawning();
         if (wispSpawner) wispSpawner.StopSpawning();
         ClearWorld();
         ResetPlayerToStart();
 
-        // Fresh score/UI
-        score = 0;
-        UpdateScoreUI();
+        // Reset currency for this run
+        wispsRun = 0;
+        UpdateWispHUD();
 
-        // Begin new run
+        // Reset run scoring
+        if (distanceTracker)
+        {
+            distanceTracker.ResetRun();
+            distanceTracker.tracking = true;
+        }
+
+        // Self-wire ScoreSystem → tracker in case it wasn't set in Inspector
+        if (scoreSystem && !scoreSystem.tracker)
+            scoreSystem.tracker = distanceTracker;
+
+        // Ensure multipliers sane
+        if (scoreSystem && scoreSystem.baseMultiplier <= 0f)
+            scoreSystem.baseMultiplier = 1f;
+
         BeginGameplay();
+        UpdateUILive();
     }
 
     void BeginGameplay()
@@ -151,6 +172,8 @@ public class GameManager : MonoBehaviour
         if (wispSpawner) wispSpawner.StopSpawning();
         if (player)      player.EnableControl(false);
 
+        if (distanceTracker) distanceTracker.StopAndRecordBest();
+
         AudioManager.I?.PlayCrash();
 
         var cam = Camera.main;
@@ -160,15 +183,32 @@ public class GameManager : MonoBehaviour
             if (shake) shake.Shake(0.25f, 0.15f);
         }
 
-        int hi = PlayerPrefs.GetInt("HighScore", 0);
-        if (score > hi)
-        {
-            PlayerPrefs.SetInt("HighScore", score);
-            PlayerPrefs.Save();
-        }
-        UpdateHighScoreUI();
+        // Final scoring snapshot
+        int finalScore = scoreSystem ? scoreSystem.CurrentScore : 0;
 
-        if (finalScoreText) finalScoreText.text = $"Score: {score}";
+        // High score
+        int hi = PlayerPrefs.GetInt("HighScore", 0);
+        if (finalScore > hi)
+        {
+            PlayerPrefs.SetInt("HighScore", finalScore);
+        }
+
+        // Bank run wisps into total
+        wispsTotal += wispsRun;
+        PlayerPrefs.SetInt("wisps_total", wispsTotal);
+        PlayerPrefs.Save();
+
+        UpdateHighScoreUI();
+        UpdateWispHUD();
+
+        // Fill final UI
+        if (finalScoreText)    finalScoreText.text    = $"Score: {finalScore:N0}";
+        if (finalDistanceText) finalDistanceText.text = $"Distance: {(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
+        if (bestDistanceText)  bestDistanceText.text  = $"Best Distance: {(int)(distanceTracker ? distanceTracker.bestDistance : 0f)} m";
+        if (wispsRunText)      wispsRunText.text      = $"+{wispsRun} Embers";
+        if (wispTotalFinal)    wispTotalFinal.text    = $"Total Embers: {wispsTotal:N0}";
+        if (scoreText)         scoreText.text         = $"Score: {finalScore:N0}";
+        if (distanceText)      distanceText.text      = $"{(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
 
         if (gameOverPanel)
         {
@@ -186,24 +226,21 @@ public class GameManager : MonoBehaviour
 
     // -------------------- UI / INPUT --------------------
 
-    public void AddPoint()
-    {
-        if (!playing) return;
-        score++;
-        UpdateScoreUI();
-    }
-
-    void UpdateScoreUI()
-    {
-        if (scoreText) scoreText.text = score.ToString();
-    }
+    // Old scoring shim (safe to delete after removing calls elsewhere)
+    public void AddPoint() { /* no-op */ }
 
     void UpdateHighScoreUI()
     {
         if (!highScoreText) return;
         int hi = PlayerPrefs.GetInt("HighScore", 0);
-        highScoreText.text = $"Best: {hi}";
+        highScoreText.text = $"Best: {hi:N0}";
     }
+
+void UpdateWispHUD()
+{
+    // HUD shows Embers collected THIS RUN
+    if (wispTotalHUD) wispTotalHUD.text = $"Embers: {wispsRun}";
+}
 
     public void PauseGame()
     {
@@ -242,7 +279,27 @@ public class GameManager : MonoBehaviour
             if (paused) ResumeGame();
             else        PauseGame();
         }
+
+        if (playing) UpdateUILive();
     }
+
+    void UpdateUILive()
+    {
+        if (distanceText && distanceTracker)
+            distanceText.text = $"{(int)distanceTracker.distance} m";
+
+        if (scoreText && scoreSystem)
+            scoreText.text = $"Score: {scoreSystem.CurrentScore:N0}";
+    }
+
+    // -------------------- CURRENCY --------------------
+public void AddWisps(int amount)
+{
+    if (amount <= 0) return;
+    wispsRun += amount;
+    UpdateWispHUD();               // <- updates HUD immediately
+    AudioManager.I?.PlayPickup();  // plays your pickup sound
+}
 
     // -------------------- HELPERS --------------------
 
@@ -259,11 +316,8 @@ public class GameManager : MonoBehaviour
         {
             rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
-            // If your gravity uses rb.gravityScale sign, normalize here if needed:
-            // rb.gravityScale = Mathf.Abs(rb.gravityScale);
         }
 
-        // If you created this helper in PlayerGravityFlip, great; if not, remove this call.
         try { player.ResetState(); } catch { /* ok if not implemented */ }
 
         player.EnableControl(false); // enable in BeginGameplay
@@ -271,11 +325,9 @@ public class GameManager : MonoBehaviour
 
     void ClearWorld()
     {
-        // obstacles: tag them "Obstacle"
         var obstacles = GameObject.FindGameObjectsWithTag("Obstacle");
         foreach (var o in obstacles) Destroy(o);
 
-        // wisps by component
         var wisps = FindObjectsOfType<WispPickup>();
         foreach (var w in wisps) Destroy(w.gameObject);
     }

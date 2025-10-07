@@ -15,8 +15,8 @@ public class WispPickup : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         Currency.I?.Add(amount);
-        // Optional SFX:
-        // AudioManager.I?.PlayPickup();
+        FindObjectOfType<GameManager>()?.AddWisps(1); // or the amount you want
+        AudioManager.I?.PlayPickup(); // your pickup SFX
 
         // play burst
         if (pickupBurst)

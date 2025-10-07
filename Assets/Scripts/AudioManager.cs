@@ -122,6 +122,17 @@ public class AudioManager : MonoBehaviour
         if (clip && sfxSource) sfxSource.PlayOneShot(clip);
     }
 
+// --- SFX: Wisp Pickup ---
+[SerializeField] private AudioClip pickupSFX;  // assign in Inspector
+[SerializeField, Range(0f, 1f)] private float pickupVolume = 0.8f;
+
+public void PlayPickup()
+{
+    if (pickupSFX == null) return;
+    AudioSource.PlayClipAtPoint(pickupSFX, Camera.main.transform.position, pickupVolume);
+}
+
+
     // Expose current states so SettingsMenu can sync UI
     public float CurrentMusic01 => music01;
     public float CurrentSfx01   => sfx01;

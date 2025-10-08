@@ -47,6 +47,8 @@ public class GameManager : MonoBehaviour
     public Vector3 playerStartPos;
     public Quaternion playerStartRot;
 
+    public UpgradesPanelController upgradesPanel; // assign in Inspector later
+
     // state
     bool paused = false;
     bool playing = false;
@@ -122,7 +124,7 @@ public class GameManager : MonoBehaviour
         paused = false;
         HideGameOverPanel();
 
-        if (spawner)     spawner.StopSpawning();
+        if (spawner) spawner.StopSpawning();
         if (wispSpawner) wispSpawner.StopSpawning();
         ClearWorld();
         ResetPlayerToStart();
@@ -156,9 +158,9 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         playing = true;
 
-        if (spawner)     spawner.Begin();
+        if (spawner) spawner.Begin();
         if (wispSpawner) wispSpawner.StartSpawning();
-        if (player)      player.EnableControl(true);
+        if (player) player.EnableControl(true);
 
         AudioManager.I?.PlayMusic();
     }
@@ -168,9 +170,9 @@ public class GameManager : MonoBehaviour
         if (!playing) return;
         playing = false;
 
-        if (spawner)     spawner.StopSpawning();
+        if (spawner) spawner.StopSpawning();
         if (wispSpawner) wispSpawner.StopSpawning();
-        if (player)      player.EnableControl(false);
+        if (player) player.EnableControl(false);
 
         if (distanceTracker) distanceTracker.StopAndRecordBest();
 
@@ -202,13 +204,13 @@ public class GameManager : MonoBehaviour
         UpdateWispHUD();
 
         // Fill final UI
-        if (finalScoreText)    finalScoreText.text    = $"Score: {finalScore:N0}";
+        if (finalScoreText) finalScoreText.text = $"Score: {finalScore:N0}";
         if (finalDistanceText) finalDistanceText.text = $"Distance: {(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
-        if (bestDistanceText)  bestDistanceText.text  = $"Best Distance: {(int)(distanceTracker ? distanceTracker.bestDistance : 0f)} m";
-        if (wispsRunText)      wispsRunText.text      = $"+{wispsRun} Embers";
-        if (wispTotalFinal)    wispTotalFinal.text    = $"Total Embers: {wispsTotal:N0}";
-        if (scoreText)         scoreText.text         = $"Score: {finalScore:N0}";
-        if (distanceText)      distanceText.text      = $"{(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
+        if (bestDistanceText) bestDistanceText.text = $"Best Distance: {(int)(distanceTracker ? distanceTracker.bestDistance : 0f)} m";
+        if (wispsRunText) wispsRunText.text = $"+{wispsRun} Embers";
+        if (wispTotalFinal) wispTotalFinal.text = $"Total Embers: {wispsTotal:N0}";
+        if (scoreText) scoreText.text = $"Score: {finalScore:N0}";
+        if (distanceText) distanceText.text = $"{(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
 
         if (gameOverPanel)
         {
@@ -236,11 +238,11 @@ public class GameManager : MonoBehaviour
         highScoreText.text = $"Best: {hi:N0}";
     }
 
-void UpdateWispHUD()
-{
-    // HUD shows Embers collected THIS RUN
-    if (wispTotalHUD) wispTotalHUD.text = $"Embers: {wispsRun}";
-}
+    void UpdateWispHUD()
+    {
+        // HUD shows Embers collected THIS RUN
+        if (wispTotalHUD) wispTotalHUD.text = $"Embers: {wispsRun}";
+    }
 
     public void PauseGame()
     {
@@ -267,7 +269,7 @@ void UpdateWispHUD()
         {
             var f = pausePanel.GetComponent<PanelFader>();
             if (f) f.FadeOut(() => pausePanel.SetActive(false));
-            else  pausePanel.SetActive(false);
+            else pausePanel.SetActive(false);
         }
         player?.EnableControl(true);
     }
@@ -277,7 +279,7 @@ void UpdateWispHUD()
         if (playing && Input.GetKeyDown(KeyCode.Escape))
         {
             if (paused) ResumeGame();
-            else        PauseGame();
+            else PauseGame();
         }
 
         if (playing) UpdateUILive();
@@ -293,13 +295,13 @@ void UpdateWispHUD()
     }
 
     // -------------------- CURRENCY --------------------
-public void AddWisps(int amount)
-{
-    if (amount <= 0) return;
-    wispsRun += amount;
-    UpdateWispHUD();               // <- updates HUD immediately
-    AudioManager.I?.PlayPickup();  // plays your pickup sound
-}
+    public void AddWisps(int amount)
+    {
+        if (amount <= 0) return;
+        wispsRun += amount;
+        UpdateWispHUD();               // <- updates HUD immediately
+        AudioManager.I?.PlayPickup();  // plays your pickup sound
+    }
 
     // -------------------- HELPERS --------------------
 
@@ -339,4 +341,84 @@ public void AddWisps(int amount)
         if (f) f.HideInstant();
         gameOverPanel.SetActive(false);
     }
+    
+// ==================== UPGRADES / EMBERS HELPERS ====================
+
+// Difficulty modifier flags (read by Spawner at Begin())
+//public bool mod_EnemyVerticalMovement;
+//public bool mod_EnemyProjectiles;
+
+// Current bank from PlayerPrefs (keep in sync with your wispsTotal field)
+public int GetWispsBank() => PlayerPrefs.GetInt("wisps_total", 0);
+public bool CanAfford(int cost) => GetWispsBank() >= cost;
+
+// Spend from the BANK (not this-run). Also refresh Upgrades UI if open.
+public bool TrySpendWisps(int amount)
+{
+    if (amount <= 0) return true;
+    int bank = PlayerPrefs.GetInt("wisps_total", 0);
+    if (bank < amount) return false;
+    bank -= amount;
+    PlayerPrefs.SetInt("wisps_total", bank);
+    PlayerPrefs.Save();
+
+    // keep your in-memory field in sync if you have one
+    try { wispsTotal = bank; } catch { /* ok if field name differs */ }
+
+    RefreshUpgradesUI();
+    return true;
+}
+
+// Called after purchases or when panel opens to refresh labels/buttons
+public void RefreshUpgradesUI()
+{
+    upgradesPanel?.RefreshAll();
+}
+
+// Convenience opener for your Den button
+public void OpenUpgradesPanel()
+{
+    upgradesPanel?.Open();
+}
+
+// Apply effects for purchased upgrades and update score modifier
+public void ApplyUpgrade(UpgradeDef def)
+{
+    if (def == null) return;
+    int level = PlayerPrefs.GetInt($"upgrade_{def.id}", 0);
+
+    switch (def.effectType)
+    {
+        case UpgradeDef.EffectType.ComboBoost:
+            if (scoreSystem) scoreSystem.upgradeMultiplier = 1f + 0.1f * level;
+            break;
+
+       // case UpgradeDef.EffectType.RunModifier_Vertical:
+       //     mod_EnemyVerticalMovement = level > 0;
+       //     break;
+
+        //case UpgradeDef.EffectType.RunModifier_Projectiles:
+        //    mod_EnemyProjectiles = level > 0;
+        //    break;
+
+        // These are not implemented yet—safe no-ops:
+        case UpgradeDef.EffectType.Shield:
+        case UpgradeDef.EffectType.Magnet:
+        case UpgradeDef.EffectType.SmallerHitbox:
+            break;
+    }
+
+    // Update score bonus from difficulty toggles
+    if (scoreSystem)
+    {
+        float modBonus = 1f;
+        //if (mod_EnemyVerticalMovement) modBonus *= 1.10f; // +10% score
+        //if (mod_EnemyProjectiles)      modBonus *= 1.20f; // +20% score
+        scoreSystem.modifierMultiplier = modBonus;
+    }
+
+    RefreshUpgradesUI();
+}
+
+
 }

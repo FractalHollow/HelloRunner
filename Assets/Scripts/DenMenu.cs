@@ -15,6 +15,8 @@ public class DenMenu : MonoBehaviour
 
     const string KEY_STORE_UNLOCKED = "store_unlocked";
 
+    public UpgradesPanelController upgradesPanel;
+
     void Start()
     {
         // Subscribe to currency changes so the UI updates live
@@ -100,7 +102,10 @@ public void OnUnlockStore()  // rename this too if you like
         Debug.Log("Open Upgrades: TODO");
     }
 
-    public void OnOpenUpgrades()     { Debug.Log("Open Upgrades: TODO"); }
+public void OpenUpgradesPanel()
+{
+    upgradesPanel.Open();
+}
     public void OnOpenAchievements() { Debug.Log("Open Achievements: TODO"); }
     public void OnOpenPrestige()     { Debug.Log("Open Prestige: TODO"); }
 }

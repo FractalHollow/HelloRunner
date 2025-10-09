@@ -75,12 +75,24 @@ public class PlayerGravityFlip : MonoBehaviour
 
     public void EnableControl(bool value) => canControl = value;
 
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (!isAlive) return;
-        isAlive = false;
-        FindObjectOfType<GameManager>()?.GameOver();
-    }
+void OnCollisionEnter2D(Collision2D collision)
+{
+    if (!isAlive) return;
+
+    var shield = GetComponent<PlayerShield>();
+    // If currently invulnerable, ignore this hit
+    if (shield && shield.IsInvulnerable) return;
+
+    // If we can absorb this hit now, do it and bail
+    if (shield && shield.TryAbsorbHit())
+        return;
+
+    // Otherwise, normal death
+    isAlive = false;
+    FindObjectOfType<GameManager>()?.GameOver();
+}
+
+
 
     bool IsPointerOverUI()
     {

@@ -104,6 +104,7 @@ public class GameManager : MonoBehaviour
         UpdateUILive();
 
         StartCoroutine(EnsureSceneLocal());
+        ApplyAllOwnedUpgrades();
     }
 
     IEnumerator EnsureSceneLocal()
@@ -147,6 +148,13 @@ public class GameManager : MonoBehaviour
         // Ensure multipliers sane
         if (scoreSystem && scoreSystem.baseMultiplier <= 0f)
             scoreSystem.baseMultiplier = 1f;
+
+        // Reset per-run shields (based on owned level applied earlier)
+        if (player)
+        {
+            var ps = player.GetComponent<PlayerShield>();
+            if (ps) ps.SetCharges(ps.maxCharges);
+        }
 
         BeginGameplay();
         UpdateUILive();
@@ -381,44 +389,103 @@ public void OpenUpgradesPanel()
     upgradesPanel?.Open();
 }
 
-// Apply effects for purchased upgrades and update score modifier
-public void ApplyUpgrade(UpgradeDef def)
-{
-    if (def == null) return;
-    int level = PlayerPrefs.GetInt($"upgrade_{def.id}", 0);
-
-    switch (def.effectType)
+    // Apply effects for purchased upgrades and update score modifier
+    public void ApplyUpgrade(UpgradeDef def)
     {
-        case UpgradeDef.EffectType.ComboBoost:
-            if (scoreSystem) scoreSystem.upgradeMultiplier = 1f + 0.1f * level;
-            break;
+        if (def == null) return;
+        int level = PlayerPrefs.GetInt($"upgrade_{def.id}", 0);
 
-       // case UpgradeDef.EffectType.RunModifier_Vertical:
-       //     mod_EnemyVerticalMovement = level > 0;
-       //     break;
+        switch (def.effectType)
+        {
+            case UpgradeDef.EffectType.ComboBoost:
+                if (scoreSystem) scoreSystem.upgradeMultiplier = 1f + 0.1f * level;
+                break;
 
-        //case UpgradeDef.EffectType.RunModifier_Projectiles:
-        //    mod_EnemyProjectiles = level > 0;
-        //    break;
+            case UpgradeDef.EffectType.SmallerHitbox:
+                {
+                    var tight = FindObjectOfType<ColliderTightener2D>();
+                    if (tight) tight.ApplyLevel(level);
+                    break;
+                }
 
-        // These are not implemented yet—safe no-ops:
-        case UpgradeDef.EffectType.Shield:
-        case UpgradeDef.EffectType.Magnet:
-        case UpgradeDef.EffectType.SmallerHitbox:
-            break;
-    }
+            case UpgradeDef.EffectType.Magnet:
+                {
+                    // Find or add the magnet component on the player
+                    var magnet = FindObjectOfType<PlayerMagnet>();
+                    if (!magnet && player) magnet = player.GetComponent<PlayerMagnet>();
+                    if (!magnet && player) magnet = player.gameObject.AddComponent<PlayerMagnet>();
 
-    // Update score bonus from difficulty toggles
-    if (scoreSystem)
-    {
-        float modBonus = 1f;
-        //if (mod_EnemyVerticalMovement) modBonus *= 1.10f; // +10% score
-        //if (mod_EnemyProjectiles)      modBonus *= 1.20f; // +20% score
-        scoreSystem.modifierMultiplier = modBonus;
-    }
+                    if (magnet)
+                    {
+                        if (level <= 0)
+                        {
+                            magnet.enabled = false;
+                        }
+                        else
+                        {
+                            // Simple scale: base 1.5 + 0.5 per level (tweak as you like)
+                            magnet.radius = 3.5f + 0.5f * (level - 1);
+                            magnet.pullSpeed = 6f;       // you can tune later
+                            magnet.maxChaseSpeed = 10f;  // cap movement speed of pickups
+                            magnet.enabled = true;
+                        }
+                    }
+                    break;
+                }
 
-    RefreshUpgradesUI();
+            case UpgradeDef.EffectType.Shield:
+                {
+                    if (!player) break;
+                    var ps = player.GetComponent<PlayerShield>();
+                    if (!ps) ps = player.gameObject.AddComponent<PlayerShield>();
+
+                    // Example tiering: L1=1 charge, L2=2 charges, L3=2 charges + (regen later)
+                    int charges = 0;
+                    if (level == 1) charges = 1;
+                    else if (level >= 2) charges = 2;
+
+                    // We only *store* desired max; actual per-run reset happens in StartGame()
+                    ps.maxCharges = charges;
+                    ps.charges = Mathf.Min(ps.charges, ps.maxCharges);
+                    ps.RefreshVisual(); // if you make it public; otherwise keep internal
+                    break;
+                }
+
+
+
+
+                break;
+                
+            // case UpgradeDef.EffectType.RunModifier_Vertical:
+            //     mod_EnemyVerticalMovement = level > 0;
+            //     break;
+
+            //case UpgradeDef.EffectType.RunModifier_Projectiles:
+            //    mod_EnemyProjectiles = level > 0;
+            //    break;
+        }
+
+        // Update score bonus from difficulty toggles
+        if (scoreSystem)
+        {
+            float modBonus = 1f;
+            //if (mod_EnemyVerticalMovement) modBonus *= 1.10f; // +10% score
+            //if (mod_EnemyProjectiles)      modBonus *= 1.20f; // +20% score
+            scoreSystem.modifierMultiplier = modBonus;
+        }
+
+        RefreshUpgradesUI();
+    
+   
 }
 
-
+ void ApplyAllOwnedUpgrades()
+{
+    var defs = Resources.LoadAll<UpgradeDef>("Upgrades");
+    foreach (var d in defs)
+    {
+        // Re-use your method so each upgrade applies itself
+        ApplyUpgrade(d);
+    }
+}
 }

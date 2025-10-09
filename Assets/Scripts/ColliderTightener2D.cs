@@ -1,52 +1,61 @@
 using UnityEngine;
 
-[ExecuteAlways]
 [RequireComponent(typeof(BoxCollider2D))]
 public class ColliderTightener2D : MonoBehaviour
 {
-    [Range(0.5f, 1f)] public float widthFactor  = 0.90f; // 90% width
-    [Range(0.5f, 1f)] public float heightFactor = 0.90f; // 90% height
-    public Vector2 pixelInset = Vector2.zero;            // optional exact pixels to trim inside
+    [Header("Base size (no upgrade)")]
+    [Range(0.5f,1f)] public float baseWidthFactor  = 0.95f;
+    [Range(0.5f,1f)] public float baseHeightFactor = 0.95f;
 
-    SpriteRenderer sr;
+    [Header("Per-level shrink")]
+    [Range(0f,0.2f)] public float perLevelWidth  = 0.03f;
+    [Range(0f,0.2f)] public float perLevelHeight = 0.03f;
+
+    [Header("Clamps")]
+    [Range(0.5f,1f)] public float minWidth  = 0.80f;
+    [Range(0.5f,1f)] public float minHeight = 0.80f;
+
+    int currentLevel = 0;
     BoxCollider2D col;
+    SpriteRenderer sr;
 
-    void OnEnable() { Apply(); }
-    void OnValidate() { Apply(); }
+    void Awake()
+    {
+        col = GetComponent<BoxCollider2D>();
+        sr  = GetComponentInChildren<SpriteRenderer>();
+        ApplyLevel(currentLevel); // apply defaults on load
+    }
 
-    void Apply()
+    void OnValidate()
     {
         if (!col) col = GetComponent<BoxCollider2D>();
-        if (!sr) sr = GetComponentInChildren<SpriteRenderer>();
+        if (!sr)  sr  = GetComponentInChildren<SpriteRenderer>();
+        ApplyLevel(currentLevel);
+    }
 
-        // If you have no sprite, just scale existing size.
-        if (!sr)
+    public void ApplyLevel(int level)
+    {
+        currentLevel = Mathf.Max(0, level);
+
+        // compute factors from level
+        float w = Mathf.Max(minWidth,  baseWidthFactor  - perLevelWidth  * currentLevel);
+        float h = Mathf.Max(minHeight, baseHeightFactor - perLevelHeight * currentLevel);
+
+        // base on current collider size if no sprite; else base on sprite bounds in local space
+        if (sr && sr.sprite)
+        {
+            var lossy = transform.lossyScale;
+            float sx = Mathf.Abs(lossy.x) < 1e-5f ? 1f : Mathf.Abs(lossy.x);
+            float sy = Mathf.Abs(lossy.y) < 1e-5f ? 1f : Mathf.Abs(lossy.y);
+            var b = sr.bounds; // world
+            Vector2 localSize = new Vector2(b.size.x / sx, b.size.y / sy);
+            col.size = new Vector2(localSize.x * w, localSize.y * h);
+            col.offset = Vector2.zero;
+        }
+        else
         {
             var s = col.size;
-            col.size = new Vector2(s.x * widthFactor, s.y * heightFactor);
-            return;
+            col.size = new Vector2(s.x * w, s.y * h);
         }
-
-        // Use the sprite's world bounds as a baseline, then shrink.
-        var b = sr.bounds;
-        // Convert world size to local collider size
-        var lossy = transform.lossyScale;
-        float sx = Mathf.Approximately(lossy.x, 0f) ? 1f : lossy.x;
-        float sy = Mathf.Approximately(lossy.y, 0f) ? 1f : lossy.y;
-
-        Vector2 localSize = new Vector2(b.size.x / sx, b.size.y / sy);
-
-        // Optional pixel inset -> convert pixels to world -> then to local
-        var sprite = sr.sprite;
-        Vector2 insetLocal = Vector2.zero;
-        if (sprite != null && (pixelInset.x != 0 || pixelInset.y != 0))
-        {
-            float ppu = sprite.pixelsPerUnit > 0 ? sprite.pixelsPerUnit : 100f;
-            Vector2 worldInset = pixelInset / ppu;
-            insetLocal = new Vector2(worldInset.x / sx, worldInset.y / sy);
-        }
-
-        col.size = new Vector2(localSize.x * widthFactor, localSize.y * heightFactor) - insetLocal;
-        col.offset = Vector2.zero; // center; adjust if your sprite is off-center
     }
 }

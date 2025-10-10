@@ -80,17 +80,26 @@ void OnCollisionEnter2D(Collision2D collision)
     if (!isAlive) return;
 
     var shield = GetComponent<PlayerShield>();
-    // If currently invulnerable, ignore this hit
+
+    // i-frames ignore: if invulnerable, ignore the hit entirely
     if (shield && shield.IsInvulnerable) return;
 
-    // If we can absorb this hit now, do it and bail
+    // Try to consume a shield
     if (shield && shield.TryAbsorbHit())
-        return;
+    {
+        // If we hit floor/ceiling, immediately flip+bounce so we don't glide
+        if (collision.collider.CompareTag("Ground") || collision.collider.CompareTag("Ceiling"))
+        {
+            ForceFlipAndBounce(5f); // tweak speed
+        }
+        return; // shield ate the hit; no death
+    }
 
-    // Otherwise, normal death
+    // Normal death
     isAlive = false;
     FindObjectOfType<GameManager>()?.GameOver();
 }
+
 
 
 
@@ -109,15 +118,31 @@ void OnCollisionEnter2D(Collision2D collision)
         return false;
     }
 
-public void ResetState()
+public void ForceFlipAndBounce(float bounceSpeed = 7f)
 {
-    isAlive = true;           // ensure alive
-    canControl = false;       // StartGame will enable control
+    // 1) Flip gravity (use your own flip if you have it)
     var rb = GetComponent<Rigidbody2D>();
-    if (rb) { rb.linearVelocity = Vector2.zero; rb.angularVelocity = 0f; }
-    // if you flip gravity by sign, normalize it here if needed:
-    // rb.gravityScale = Mathf.Abs(rb.gravityScale);
+    if (rb)
+    {
+        rb.gravityScale *= -1f;     // if you already have a Flip() method, call that instead
+        // 2) Give a clean vertical impulse away from the surface
+        var v = rb.linearVelocity;
+        v.y = Mathf.Sign(rb.gravityScale) * -bounceSpeed; // if gravity is positive (down), push up; vice versa
+        rb.linearVelocity = v;
+    }
+
 }
+
+
+    public void ResetState()
+    {
+        isAlive = true;           // ensure alive
+        canControl = false;       // StartGame will enable control
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb) { rb.linearVelocity = Vector2.zero; rb.angularVelocity = 0f; }
+        // if you flip gravity by sign, normalize it here if needed:
+        // rb.gravityScale = Mathf.Abs(rb.gravityScale);
+    }
 
 
 }

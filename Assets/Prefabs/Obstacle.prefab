@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -6563405105876755829}
   - component: {fileID: -6387878850501237297}
   - component: {fileID: 8037183317178308209}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Obstacle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -136,7 +136,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.98, y: 0.95}
+  m_Size: {x: 0.95, y: 0.95}
   m_EdgeRadius: 0
 --- !u!114 &-6563405105876755829
 MonoBehaviour:
@@ -181,9 +181,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4e8fb59250bda141a3d7c5d8174175c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  widthFactor: 0.98
-  heightFactor: 0.95
-  pixelInset: {x: 0, y: 0}
+  baseWidthFactor: 0.95
+  baseHeightFactor: 0.95
+  perLevelWidth: 0.03
+  perLevelHeight: 0.03
+  minWidth: 0.8
+  minHeight: 0.8
 --- !u!1 &6778813871091706985
 GameObject:
   m_ObjectHideFlags: 0
@@ -195,7 +198,7 @@ GameObject:
   - component: {fileID: 250946080081532973}
   - component: {fileID: 1102055765414996529}
   - component: {fileID: 473821053913104319}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Scoregate
   m_TagString: Untagged
   m_Icon: {fileID: 0}

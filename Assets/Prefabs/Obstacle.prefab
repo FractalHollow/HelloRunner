@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -6563405105876755829}
   - component: {fileID: -6387878850501237297}
   - component: {fileID: 8037183317178308209}
+  - component: {fileID: 8280138451153953793}
   m_Layer: 7
   m_Name: Obstacle
   m_TagString: Untagged
@@ -31,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 12, y: 12, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 250946080081532973}
@@ -164,6 +165,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afbb9da1c0016c149bd1c02bef9ef39e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemies:
+  - frameA: {fileID: 7535315870893460384, guid: 0e93026dc863ec64bb1aebb01e9c8e71, type: 3}
+    frameB: {fileID: -6095974835456678855, guid: 0e93026dc863ec64bb1aebb01e9c8e71, type: 3}
+    fps: 0
+  - frameA: {fileID: 2174250831874822905, guid: 3499e0ceb5de1184cafb0c813a78c726, type: 3}
+    frameB: {fileID: 6395210367398914269, guid: 3499e0ceb5de1184cafb0c813a78c726, type: 3}
+    fps: 0
+  - frameA: {fileID: -2142845185569449812, guid: 0dd4439b4e1834a4baeb149dde1a2f76, type: 3}
+    frameB: {fileID: 8163130377769843535, guid: 0dd4439b4e1834a4baeb149dde1a2f76, type: 3}
+    fps: 0
+  - frameA: {fileID: 2734814057924167405, guid: 7773e0eb1e94ee547b78c40187dc6835, type: 3}
+    frameB: {fileID: -6298185664337237929, guid: 7773e0eb1e94ee547b78c40187dc6835, type: 3}
+    fps: 0
+  defaultFps: 1.5
   enemySprites:
   - {fileID: 21300000, guid: 3ea3433d714c59240bf5bd5ccecdd5f7, type: 3}
   - {fileID: 21300000, guid: 8e806c70cc1bf464990dceaf1f32a8fb, type: 3}
@@ -187,6 +202,21 @@ MonoBehaviour:
   perLevelHeight: 0.03
   minWidth: 0.8
   minHeight: 0.8
+--- !u!114 &8280138451153953793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3600456050249954644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3638e5fa43529140972798d9c75e29f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frameA: {fileID: 0}
+  frameB: {fileID: 0}
+  fps: 1.5
 --- !u!1 &6778813871091706985
 GameObject:
   m_ObjectHideFlags: 0

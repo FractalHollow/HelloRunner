@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
 
     [Header("UI - Buttons")]
     public Button startButton;    // not required (StartScreen wires button)
-    public Button restartButton;
+    public Button restartButton; //"End Run" button on Pause Panel
 
     [Header("UI - Text (HUD)")]
     public TMP_Text distanceText;     // "123 m"
@@ -35,6 +35,9 @@ public class GameManager : MonoBehaviour
     public TMP_Text bestDistanceText; // "Best Distance: 456 m"
     public TMP_Text wispsRunText;     // "+123 Wisps"
     public TMP_Text wispTotalFinal;   // "Total Wisps: 2345"
+
+    [Header("UI - Settings")]
+    public SettingsMenu settingsMenu;   // drag your Settings Panel object (with SettingsMenu.cs) here
 
     [Header("Options")]
     public bool pauseOnStart = true;
@@ -67,7 +70,6 @@ public class GameManager : MonoBehaviour
         if (gameObject.scene.name == "DontDestroyOnLoad")
         {
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
-            Debug.LogWarning("[GM] Was in DontDestroyOnLoad — moved back to scene.");
         }
 
         if (player)
@@ -284,13 +286,21 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (playing && Input.GetKeyDown(KeyCode.Escape))
+        if (playing && Input.GetKeyDown(KeyCode.Escape))   // ← works on Android Back
         {
-            if (paused) ResumeGame();
-            else PauseGame();
+            if (paused)
+            {
+                if (settingsMenu && settingsMenu.gameObject.activeSelf)
+                    settingsMenu.Close();
+                else
+                    ResumeGame();
+            }
+            else
+            {
+                PauseGame();
+            }
         }
 
-        if (playing) UpdateUILive();
     }
 
     void UpdateUILive()
@@ -349,45 +359,45 @@ public class GameManager : MonoBehaviour
         if (f) f.HideInstant();
         gameOverPanel.SetActive(false);
     }
-    
-// ==================== UPGRADES / EMBERS HELPERS ====================
 
-// Difficulty modifier flags (read by Spawner at Begin())
-//public bool mod_EnemyVerticalMovement;
-//public bool mod_EnemyProjectiles;
+    // ==================== UPGRADES / EMBERS HELPERS ====================
 
-// Current bank from PlayerPrefs (keep in sync with your wispsTotal field)
-public int GetWispsBank() => PlayerPrefs.GetInt("wisps_total", 0);
-public bool CanAfford(int cost) => GetWispsBank() >= cost;
+    // Difficulty modifier flags (read by Spawner at Begin())
+    //public bool mod_EnemyVerticalMovement;
+    //public bool mod_EnemyProjectiles;
 
-// Spend from the BANK (not this-run). Also refresh Upgrades UI if open.
-public bool TrySpendWisps(int amount)
-{
-    if (amount <= 0) return true;
-    int bank = PlayerPrefs.GetInt("wisps_total", 0);
-    if (bank < amount) return false;
-    bank -= amount;
-    PlayerPrefs.SetInt("wisps_total", bank);
-    PlayerPrefs.Save();
+    // Current bank from PlayerPrefs (keep in sync with your wispsTotal field)
+    public int GetWispsBank() => PlayerPrefs.GetInt("wisps_total", 0);
+    public bool CanAfford(int cost) => GetWispsBank() >= cost;
 
-    // keep your in-memory field in sync if you have one
-    try { wispsTotal = bank; } catch { /* ok if field name differs */ }
+    // Spend from the BANK (not this-run). Also refresh Upgrades UI if open.
+    public bool TrySpendWisps(int amount)
+    {
+        if (amount <= 0) return true;
+        int bank = PlayerPrefs.GetInt("wisps_total", 0);
+        if (bank < amount) return false;
+        bank -= amount;
+        PlayerPrefs.SetInt("wisps_total", bank);
+        PlayerPrefs.Save();
 
-    RefreshUpgradesUI();
-    return true;
-}
+        // keep your in-memory field in sync if you have one
+        try { wispsTotal = bank; } catch { /* ok if field name differs */ }
 
-// Called after purchases or when panel opens to refresh labels/buttons
-public void RefreshUpgradesUI()
-{
-    upgradesPanel?.RefreshAll();
-}
+        RefreshUpgradesUI();
+        return true;
+    }
 
-// Convenience opener for your Den button
-public void OpenUpgradesPanel()
-{
-    upgradesPanel?.Open();
-}
+    // Called after purchases or when panel opens to refresh labels/buttons
+    public void RefreshUpgradesUI()
+    {
+        upgradesPanel?.RefreshAll();
+    }
+
+    // Convenience opener for your Den button
+    public void OpenUpgradesPanel()
+    {
+        upgradesPanel?.Open();
+    }
 
     // Apply effects for purchased upgrades and update score modifier
     public void ApplyUpgrade(UpgradeDef def)
@@ -451,18 +461,13 @@ public void OpenUpgradesPanel()
                     break;
                 }
 
+                // case UpgradeDef.EffectType.RunModifier_Vertical:
+                //     mod_EnemyVerticalMovement = level > 0;
+                //     break;
 
-
-
-                break;
-                
-            // case UpgradeDef.EffectType.RunModifier_Vertical:
-            //     mod_EnemyVerticalMovement = level > 0;
-            //     break;
-
-            //case UpgradeDef.EffectType.RunModifier_Projectiles:
-            //    mod_EnemyProjectiles = level > 0;
-            //    break;
+                //case UpgradeDef.EffectType.RunModifier_Projectiles:
+                //    mod_EnemyProjectiles = level > 0;
+                //    break;
         }
 
         // Update score bonus from difficulty toggles
@@ -475,17 +480,61 @@ public void OpenUpgradesPanel()
         }
 
         RefreshUpgradesUI();
-    
-   
-}
 
- void ApplyAllOwnedUpgrades()
-{
-    var defs = Resources.LoadAll<UpgradeDef>("Upgrades");
-    foreach (var d in defs)
-    {
-        // Re-use your method so each upgrade applies itself
-        ApplyUpgrade(d);
+
     }
-}
+
+    void ApplyAllOwnedUpgrades()
+    {
+        var defs = Resources.LoadAll<UpgradeDef>("Upgrades");
+        foreach (var d in defs)
+        {
+            // Re-use your method so each upgrade applies itself
+            ApplyUpgrade(d);
+        }
+    }
+
+    public void OpenSettingsProxy()
+    {
+        Debug.Log("[GM] Settings button clicked");
+        if (settingsMenu)
+        {
+            settingsMenu.Open();
+            Debug.Log("[GM] SettingsMenu.Open() called on " + settingsMenu.gameObject.name);
+        }
+        else
+        {
+            Debug.LogWarning("[GM] settingsMenu ref is null");
+        }
+    }
+
+// Called by PausePanel “End Run” button
+public void EndRun()
+    {
+        // Only valid during a run; ignore if already at start or already game over
+        if (!playing) return;
+
+        // Ensure we’re not paused so faders/timers use unscaled/normal flow
+        // (If your faders use unscaled time, this is still fine.)
+        paused = false;
+        Time.timeScale = 1f;
+
+        // Hide Pause overlay if it’s up
+        if (pausePanel)
+        {
+            var f = pausePanel.GetComponent<PanelFader>();
+            if (f) f.HideInstant();
+            pausePanel.SetActive(false);
+        }
+
+        // Stop immediate control & spawning to avoid one more frame of inputs/spawns
+        if (player) player.EnableControl(false);
+        if (spawner) spawner.StopSpawning();
+        if (wispSpawner) wispSpawner.StopSpawning();
+
+        // Let the standard Game Over flow do the rest (distance snapshot, hi score, banking, UI)
+        GameOver();
+    }
+
+
 }

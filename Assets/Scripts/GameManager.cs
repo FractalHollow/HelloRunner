@@ -27,6 +27,8 @@ public class GameManager : MonoBehaviour
     public TMP_Text distanceText;     // "123 m"
     public TMP_Text scoreText;        // "Score: 456"
     public TMP_Text wispTotalHUD;     // "Wisps: 1234" (total bank)
+    float _hudProbeTimer = 0f;
+    public bool hudProbeEnabled = true; // toggle off when done
 
     [Header("UI - Text (Game Over)")]
     public TMP_Text finalScoreText;   // "Score: 456"
@@ -285,23 +287,24 @@ public class GameManager : MonoBehaviour
     }
 
     void Update()
+{
+    if (playing && Input.GetKeyDown(KeyCode.Escape))   // Android Back maps to Escape
     {
-        if (playing && Input.GetKeyDown(KeyCode.Escape))   // ← works on Android Back
+        if (paused)
         {
-            if (paused)
-            {
-                if (settingsMenu && settingsMenu.gameObject.activeSelf)
-                    settingsMenu.Close();
-                else
-                    ResumeGame();
-            }
-            else
-            {
-                PauseGame();
-            }
+            if (settingsMenu && settingsMenu.gameObject.activeSelf) settingsMenu.Close();
+            else ResumeGame();
         }
-
+        else
+        {
+            PauseGame();
+        }
     }
+
+    if (playing) UpdateUILive();
+}
+
+
 
     void UpdateUILive()
     {
@@ -382,6 +385,9 @@ public class GameManager : MonoBehaviour
 
         // keep your in-memory field in sync if you have one
         try { wispsTotal = bank; } catch { /* ok if field name differs */ }
+
+        // play purchase SFX on successful spend
+        AudioManager.I?.PlayPurchase();
 
         RefreshUpgradesUI();
         return true;

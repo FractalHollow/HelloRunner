@@ -922,7 +922,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Restart
+  m_text: End Run
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d09b7790238219443ba728daa969ccd2, type: 2}
   m_sharedMaterial: {fileID: 6643556769826710504, guid: d09b7790238219443ba728daa969ccd2, type: 2}
@@ -1405,10 +1405,10 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1570379538}
-        m_TargetAssemblyTypeName: SettingsMenu, Assembly-CSharp
-        m_MethodName: OnSfxMuteChanged
-        m_Mode: 0
+      - m_Target: {fileID: 1194164680}
+        m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
+        m_MethodName: SetSfxMuted
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -1595,10 +1595,10 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1570379538}
-        m_TargetAssemblyTypeName: SettingsMenu, Assembly-CSharp
-        m_MethodName: OnSfxChanged
-        m_Mode: 0
+      - m_Target: {fileID: 1194164680}
+        m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
+        m_MethodName: SetSfxVolume
+        m_Mode: 4
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -3131,9 +3131,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1570379538}
-        m_TargetAssemblyTypeName: SettingsMenu, Assembly-CSharp
-        m_MethodName: OnTestMusic
+      - m_Target: {fileID: 1194164680}
+        m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
+        m_MethodName: TestMusic
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3944,9 +3944,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1570379538}
-        m_TargetAssemblyTypeName: SettingsMenu, Assembly-CSharp
-        m_MethodName: OnTestSfx
+      - m_Target: {fileID: 1194164680}
+        m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
+        m_MethodName: TestSfx
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5904,10 +5904,10 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1570379538}
-        m_TargetAssemblyTypeName: SettingsMenu, Assembly-CSharp
-        m_MethodName: OnMusicMuteChanged
-        m_Mode: 0
+      - m_Target: {fileID: 1194164680}
+        m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
+        m_MethodName: SetMusicMuted
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -7653,9 +7653,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Fractal Hollow Games\n\n\n\n\n\n\n\nThis is my first ever project as a
-    solo developer. I hope you enjoy! \n\nFeel free to contact me at info@fractalhollow.com\n\nMusic
-    Credit: Elegant Chill Loop by Sonican"
+  m_text: "Fractal Hollow Games\n\n\nThis is my first ever project as a solo developer.
+    Thank you for playing; I hope you enjoy! \n\n\nFeel free to contact me at hello@fractalhollow.com
+    with feedback\n\n\nMusic: Elegant Chill Loop by Sonican"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d09b7790238219443ba728daa969ccd2, type: 2}
   m_sharedMaterial: {fileID: 6643556769826710504, guid: d09b7790238219443ba728daa969ccd2, type: 2}
@@ -8198,12 +8198,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mixer: {fileID: 24100000, guid: ce6a7d0814a09ec41be85b6ab8cb0d72, type: 2}
+  musicVolParam: MusicVol
+  sfxVolParam: SFXVol
   musicSource: {fileID: 1194164683}
   sfxSource: {fileID: 1194164682}
   musicLoop: {fileID: 8300000, guid: 10d540e756052cc4bb26e10e1977672b, type: 3}
   flipClip: {fileID: 8300000, guid: 30933eba5ec3fea498ac7495dbdca379, type: 3}
   crashClip: {fileID: 8300000, guid: 70f130ec37ecc54449172822fc627683, type: 3}
+  sfxPurchase: {fileID: 8300000, guid: c3b166abcd8b9664cb878d3155c6ab81, type: 3}
   pickupSFX: {fileID: 8300000, guid: c48904584937af34b92ff87d53212b55, type: 3}
+  sfxPurchaseVolume: 0.9
   pickupVolume: 0.8
 --- !u!4 &1194164681
 Transform:
@@ -8980,6 +8984,7 @@ MonoBehaviour:
   distanceText: {fileID: 1622409006}
   scoreText: {fileID: 918246864}
   wispTotalHUD: {fileID: 605458800}
+  hudProbeEnabled: 1
   finalScoreText: {fileID: 930816129}
   highScoreText: {fileID: 432827473}
   finalDistanceText: {fileID: 1075781595}
@@ -15620,10 +15625,10 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1570379538}
-        m_TargetAssemblyTypeName: SettingsMenu, Assembly-CSharp
-        m_MethodName: OnMusicChanged
-        m_Mode: 0
+      - m_Target: {fileID: 1194164680}
+        m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
+        m_MethodName: SetMusicVolume
+        m_Mode: 4
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

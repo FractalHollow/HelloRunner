@@ -37,6 +37,34 @@ public class AudioManager : MonoBehaviour
     bool muteMusic;
     bool muteSfx;
 
+    const float MIN_AUDIBLE = 0.001f;  // floor to avoid -80 dB unless explicitly muted
+
+    // Slider floor so a tiny move can't drive the mixer to -80dB.
+    // 0.1 ≈ -20 dB (quiet but still audible). Adjust later if you like.
+    public const float SLIDER_FLOOR = 0.1f;
+
+
+    [ContextMenu("Audio: Reset to Defaults")]
+public void ResetToDefaults()
+{
+    // Defaults
+    music01 = 0.8f;
+    sfx01   = 1.0f;
+    muteMusic = false;
+    muteSfx   = false;
+
+    PlayerPrefs.SetFloat("vol_music", music01);
+    PlayerPrefs.SetFloat("vol_sfx",   sfx01);
+    PlayerPrefs.SetInt("mute_music",  0);
+    PlayerPrefs.SetInt("mute_sfx",    0);
+    PlayerPrefs.Save();
+
+    ApplyMusicVolume();
+    ApplySfxVolume();
+
+    Debug.Log("[Audio] Reset to defaults.");
+}
+
     void Awake()
     {
         if (I != null && I != this) { Destroy(gameObject); return; }
@@ -80,54 +108,58 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+
+
     // ---------------- volume mapping ----------------
     float ToDecibels(float v) => (v <= 0.0001f) ? -80f : Mathf.Log10(Mathf.Clamp01(v)) * 20f;
     float FromDecibels(float db) => (db <= -80f) ? 0f : Mathf.Clamp01(Mathf.Pow(10f, db / 20f));
 
     // ---------------- public API used by UI ----------------
-    public void SetMusicVolume(float v)
-    {
-        music01 = Mathf.Clamp01(v);
-        PlayerPrefs.SetFloat(KEY_MUSIC, music01);
-        ApplyMusicVolume();
-    }
+public void SetMusicVolume(float v)
+{
+    music01 = Mathf.Clamp01(v);
+    PlayerPrefs.SetFloat(KEY_MUSIC, music01);
+    ApplyMusicVolume();
+}
 
-    public void SetSfxVolume(float v)
-    {
-        sfx01 = Mathf.Clamp01(v);
-        PlayerPrefs.SetFloat(KEY_SFX, sfx01);
-        ApplySfxVolume();
-    }
+public void SetSfxVolume(float v)
+{
+    sfx01 = Mathf.Clamp01(v);
+    PlayerPrefs.SetFloat(KEY_SFX, sfx01);
+    ApplySfxVolume();
+}
 
-    public void SetMusicMuted(bool muted)
-    {
-        muteMusic = muted;
-        PlayerPrefs.SetInt(KEY_MUTE_MUSIC, muteMusic ? 1 : 0);
-        ApplyMusicVolume();
-    }
+public void SetMusicMuted(bool muted)
+{
+    muteMusic = muted;
+    PlayerPrefs.SetInt(KEY_MUTE_MUSIC, muted ? 1 : 0);
+    ApplyMusicVolume();
+}
 
-    public void SetSfxMuted(bool muted)
-    {
-        muteSfx = muted;
-        PlayerPrefs.SetInt(KEY_MUTE_SFX, muteSfx ? 1 : 0);
-        ApplySfxVolume();
-    }
+public void SetSfxMuted(bool muted)
+{
+    muteSfx = muted;
+    PlayerPrefs.SetInt(KEY_MUTE_SFX, muted ? 1 : 0);
+    ApplySfxVolume();
+}
 
-    void ApplyMusicVolume()
-    {
-        float db = muteMusic ? -80f : ToDecibels(music01);
-        if (mixer) mixer.SetFloat(musicVolParam, db);
-        // fallback if no mixer assigned
-        if (!mixer && musicSource) { musicSource.mute = muteMusic; musicSource.volume = music01; }
-    }
 
-    void ApplySfxVolume()
-    {
-        float db = muteSfx ? -80f : ToDecibels(sfx01);
-        if (mixer) mixer.SetFloat(sfxVolParam, db);
-        // fallback if no mixer assigned
-        if (!mixer && sfxSource) { sfxSource.mute = muteSfx; sfxSource.volume = sfx01; }
-    }
+
+ void ApplyMusicVolume()
+{
+    float db = muteMusic ? -80f : ToDecibels(music01);
+    if (mixer) { mixer.SetFloat(musicVolParam, db); }
+    else if (musicSource) { musicSource.mute = muteMusic; musicSource.volume = music01; }
+    Debug.Log($"[AM] ApplyMusicVolume -> {(mixer ? "Mixer" : "Source")} db={db:0.##} vol={music01:0.###} mute={muteMusic}");
+}
+void ApplySfxVolume()
+{
+    float db = muteSfx ? -80f : ToDecibels(sfx01);
+    if (mixer) { mixer.SetFloat(sfxVolParam, db); }
+    else if (sfxSource) { sfxSource.mute = muteSfx; sfxSource.volume = sfx01; }
+    Debug.Log($"[AM] ApplySfxVolume -> {(mixer ? "Mixer" : "Source")} db={db:0.##} vol={sfx01:0.###} mute={muteSfx}");
+}
+
 
     // ---------------- playback helpers ----------------
     public void PlayMusic()

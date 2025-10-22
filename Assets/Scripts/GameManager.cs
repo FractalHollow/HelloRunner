@@ -58,9 +58,6 @@ public class GameManager : MonoBehaviour
     bool paused = false;
     bool playing = false;
 
-    // currency
-    int wispsRun = 0;
-    int wispsTotal = 0;
 
     static GameManager _inst;
 
@@ -179,6 +176,8 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
+        Debug.Log("[GM] === GameOver() called ===");
+
         if (!playing) return;
         playing = false;
 
@@ -207,10 +206,16 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.SetInt("HighScore", finalScore);
         }
 
-        // Bank run wisps into total
-        wispsTotal += wispsRun;
-        PlayerPrefs.SetInt("wisps_total", wispsTotal);
-        PlayerPrefs.Save();
+        // --- Debug snapshot before and after banking ---
+        Debug.Log($"[GM] GameOver START | Run: {wispsRun} | Bank (pre): {GetWispsBank()}");
+
+        int bank = GetWispsBank();
+        bank += wispsRun;
+        SetWispsBank(bank);
+
+        Debug.Log($"[GM] GameOver END | Run: {wispsRun} | Bank (post): {GetWispsBank()}");
+
+
 
         UpdateHighScoreUI();
         UpdateWispHUD();
@@ -220,7 +225,7 @@ public class GameManager : MonoBehaviour
         if (finalDistanceText) finalDistanceText.text = $"Distance: {(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
         if (bestDistanceText) bestDistanceText.text = $"Best Distance: {(int)(distanceTracker ? distanceTracker.bestDistance : 0f)} m";
         if (wispsRunText) wispsRunText.text = $"+{wispsRun} Embers";
-        if (wispTotalFinal) wispTotalFinal.text = $"Total Embers: {wispsTotal:N0}";
+        if (wispTotalFinal) wispTotalFinal.text = $"Total Embers: {bank:N0}";
         if (scoreText) scoreText.text = $"Score: {finalScore:N0}";
         if (distanceText) distanceText.text = $"{(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
 
@@ -230,6 +235,12 @@ public class GameManager : MonoBehaviour
             var fader = gameOverPanel.GetComponent<PanelFader>();
             if (fader) fader.FadeIn();
         }
+
+        // reset run currency so it can't be re-added accidentally
+        wispsRun = 0;
+        Debug.Log("[GM] wispsRun reset to 0 after GameOver");
+
+
     }
 
     public void Restart()
@@ -315,14 +326,77 @@ public class GameManager : MonoBehaviour
             scoreText.text = $"Score: {scoreSystem.CurrentScore:N0}";
     }
 
-    // -------------------- CURRENCY --------------------
-    public void AddWisps(int amount)
+// -------------------- CURRENCY --------------------
+
+// ====== In-Memory Totals ======
+int wispsRun = 0;     // earned this run
+int wispsTotal = 0;   // total bank (mirrors PlayerPrefs)
+
+// ====== Core Accessors ======
+
+    // Read the total from PlayerPrefs
+    public int GetWispsBank()
     {
-        if (amount <= 0) return;
-        wispsRun += amount;
-        UpdateWispHUD();               // <- updates HUD immediately
-        AudioManager.I?.PlayPickup();  // plays your pickup sound
+        return PlayerPrefs.GetInt("wisps_total", 0);
     }
+
+    // Write a new total and refresh UI
+    public void SetWispsBank(int value)
+    {
+        value = Mathf.Max(0, value);
+        PlayerPrefs.SetInt("wisps_total", value);
+        PlayerPrefs.Save();
+
+        wispsTotal = value;           // keep local copy in sync
+        RefreshAllCurrencyUI();       // update any open panels
+    }
+
+    // Add or subtract from the bank
+    public void AddToWispsBank(int delta)
+    {
+        int newValue = GetWispsBank() + delta;
+        SetWispsBank(newValue);
+    }
+
+    // Check if player can afford a cost
+    public bool CanAfford(int cost)
+    {
+        return GetWispsBank() >= cost;
+    }
+
+    // Try to spend Wisps; return true if successful
+    public bool TrySpendWisps(int amount)
+    {
+        if (amount <= 0) return true;
+
+        int bank = GetWispsBank();
+        if (bank < amount) return false;
+
+        AddToWispsBank(-amount);
+        AudioManager.I?.PlayPurchase();
+        return true;
+    }
+
+// Add Wisps earned during this run
+public void AddWisps(int amount)
+{
+    if (amount <= 0) return;
+    wispsRun += amount;
+    UpdateWispHUD();              // live HUD update (run only)
+    AudioManager.I?.PlayPickup(); // pickup sound
+}
+
+// ====== UI Refresh ======
+
+// Update all panels that show totals
+public void RefreshAllCurrencyUI()
+{
+    UpdateWispHUD();               // run HUD (shows this-run or bank depending on your design)
+    upgradesPanel?.RefreshAll();   // refresh buttons/prices
+    // If you later have a DenPanel, refresh it here:
+    // denPanel?.RefreshTotals(GetWispsBank());
+}
+
 
     // -------------------- HELPERS --------------------
 
@@ -368,30 +442,6 @@ public class GameManager : MonoBehaviour
     // Difficulty modifier flags (read by Spawner at Begin())
     //public bool mod_EnemyVerticalMovement;
     //public bool mod_EnemyProjectiles;
-
-    // Current bank from PlayerPrefs (keep in sync with your wispsTotal field)
-    public int GetWispsBank() => PlayerPrefs.GetInt("wisps_total", 0);
-    public bool CanAfford(int cost) => GetWispsBank() >= cost;
-
-    // Spend from the BANK (not this-run). Also refresh Upgrades UI if open.
-    public bool TrySpendWisps(int amount)
-    {
-        if (amount <= 0) return true;
-        int bank = PlayerPrefs.GetInt("wisps_total", 0);
-        if (bank < amount) return false;
-        bank -= amount;
-        PlayerPrefs.SetInt("wisps_total", bank);
-        PlayerPrefs.Save();
-
-        // keep your in-memory field in sync if you have one
-        try { wispsTotal = bank; } catch { /* ok if field name differs */ }
-
-        // play purchase SFX on successful spend
-        AudioManager.I?.PlayPurchase();
-
-        RefreshUpgradesUI();
-        return true;
-    }
 
     // Called after purchases or when panel opens to refresh labels/buttons
     public void RefreshUpgradesUI()

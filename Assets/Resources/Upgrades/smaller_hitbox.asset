@@ -14,8 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: smaller_hitbox
   displayName: Smaller Hitbox
-  description: Shrinks your collider for safer grazing
-  baseCost: 50
-  costScale: 1.5
-  maxLevel: 3
+  description: Reduce collision size to {v0}% of base.
+  descriptionTemplate: 
+  baseCost: 55
+  costScale: 1.45
+  maxLevel: 5
+  unlockDistance: 0
+  dependencies: []
+  v0PerTier:
+  - 0.9
+  - 0.85
+  - 0.8
+  - 0.75
+  - 0.7
+  v1PerTier: []
+  v2PerTier: []
   effectType: 3

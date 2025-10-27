@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public PlayerGravityFlip player;
     public Spawner spawner;
     public WispSpawner wispSpawner;
+    public static event System.Action<int> OnBankChanged;
 
     [Header("Run Scoring")]
     public DistanceTracker distanceTracker;
@@ -347,8 +348,9 @@ int wispsTotal = 0;   // total bank (mirrors PlayerPrefs)
         PlayerPrefs.SetInt("wisps_total", value);
         PlayerPrefs.Save();
 
-        wispsTotal = value;           // keep local copy in sync
-        RefreshAllCurrencyUI();       // update any open panels
+        wispsTotal = value;            // keep local copy in sync
+        RefreshAllCurrencyUI();        // update any open panels       
+        OnBankChanged?.Invoke(value);  // 🔔 Notify listeners (e.g., DenMenu)
     }
 
     // Add or subtract from the bank

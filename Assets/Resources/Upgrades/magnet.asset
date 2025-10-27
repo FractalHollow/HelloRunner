@@ -14,8 +14,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: magnet
   displayName: Magnet
-  description: Attract nearby Embers.
-  baseCost: 75
-  costScale: 1.6
-  maxLevel: 3
+  description: Pull embers from {v0}m; pull speed {v1}.
+  descriptionTemplate: 
+  baseCost: 60
+  costScale: 1.5
+  maxLevel: 5
+  unlockDistance: 0
+  dependencies: []
+  v0PerTier:
+  - 3.5
+  - 4
+  - 4.5
+  - 5
+  - 6
+  v1PerTier:
+  - 6
+  - 6.5
+  - 7
+  - 7.5
+  - 8
+  v2PerTier: []
   effectType: 2

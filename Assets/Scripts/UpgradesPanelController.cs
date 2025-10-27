@@ -33,12 +33,21 @@ public class UpgradesPanelController : MonoBehaviour
     void BuildIfNeeded()
     {
         if (built) return;
+
         foreach (var def in allDefs)
         {
             var rowGO = Instantiate(upgradeRowPrefab, contentParent);
             var row = rowGO.GetComponent<UpgradeButton>();
             int owned = PlayerPrefs.GetInt($"upgrade_{def.id}", 0);
-            row.Setup(gameManager, def, owned);
+
+            // NEW: pass bank and best distance so the row can decide lock/cost/tier
+            row.Setup(
+                gameManager,
+                def,
+                owned,
+                GetBestDistanceMeters(),
+                gameManager ? gameManager.GetWispsBank() : 0
+            );
         }
         built = true;
     }
@@ -47,15 +56,30 @@ public class UpgradesPanelController : MonoBehaviour
     {
         if (emberBankText) emberBankText.text = $"Embers: {gameManager.GetWispsBank():N0}";
 
+        float best = GetBestDistanceMeters();
+        int bank = gameManager ? gameManager.GetWispsBank() : 0;
+
         // refresh all rows' interactable state
         foreach (Transform child in contentParent)
         {
             var btn = child.GetComponent<UpgradeButton>();
             if (btn != null)
             {
-                // trick: call Setup again to refresh cost/interactable using current bank
-                btn.Setup(gameManager, btn.def, PlayerPrefs.GetInt($"upgrade_{btn.def.id}", 0));
+                // Re-run setup with fresh bank & distance; keeps logic in one place
+                int owned = PlayerPrefs.GetInt($"upgrade_{btn.def.id}", 0);
+                btn.Setup(gameManager, btn.def, owned, best, bank);
             }
         }
+    }
+
+    float GetBestDistanceMeters()
+    {
+        // Prefer live tracker value if present; fall back to PlayerPrefs
+        if (gameManager && gameManager.distanceTracker)
+            return gameManager.distanceTracker.bestDistance;
+
+        // Fallback key — change if your DistanceTracker uses a different key
+        return PlayerPrefs.GetFloat("best_distance_m", 0f);
+
     }
 }

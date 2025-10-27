@@ -14,8 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: shield
   displayName: Shield
-  description: Ignore one crash per run.
-  baseCost: 100
-  costScale: 1.7
+  description: Gain up to {v0} shield charge(s).
+  descriptionTemplate: 
+  baseCost: 50
+  costScale: 1.6
   maxLevel: 2
+  unlockDistance: 0
+  dependencies: []
+  v0PerTier: []
+  v1PerTier: []
+  v2PerTier: []
   effectType: 1

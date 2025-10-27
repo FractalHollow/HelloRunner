@@ -1,66 +1,118 @@
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
+using TMPro;
 
 public class UpgradeButton : MonoBehaviour
 {
-    [Header("Wiring")]
-    public TMP_Text nameText;
-    public TMP_Text levelText;
-    public TMP_Text costText;
-    public Button buyButton;
+    [Header("UI Refs")]
+    [SerializeField] TMP_Text nameText;
+    [SerializeField] TMP_Text descText;
+    [SerializeField] TMP_Text tierText;
+    [SerializeField] TMP_Text costText;
+    [SerializeField] Button buyButton;
+
+    [Header("Locked UI")]
+    [SerializeField] GameObject lockedGroup;   // e.g. an overlay panel
+    [SerializeField] TMP_Text lockedText;      // "Unlocks at 100 m" or dependency text
 
     [HideInInspector] public UpgradeDef def;
-    int currentLevel;
+
     GameManager gm;
+    int ownedTier;
+    float bestDistance;
+    int bank;
 
-    // ---- PUBLIC API ----
-    public void Setup(GameManager gameManager, UpgradeDef definition, int ownedLevel)
+    // Keep Setup signature your controller expects, but add data we need
+    public void Setup(GameManager gm, UpgradeDef def, int ownedTier, float bestDistanceMeters, int currentBank)
     {
-        gm = gameManager;
-        def = definition;
-        currentLevel = ownedLevel;
-
-        // (Re)wire the button each time we setup
-        if (buyButton != null)
-        {
-            buyButton.onClick.RemoveAllListeners();
-            buyButton.onClick.AddListener(Buy);
-        }
+        this.gm = gm;
+        this.def = def;
+        this.ownedTier = Mathf.Max(0, ownedTier);
+        this.bestDistance = bestDistanceMeters;
+        this.bank = currentBank;
 
         Refresh();
     }
 
-    public int GetLevel() => currentLevel;
-
-    // ---- INTERNAL ----
     void Refresh()
     {
-        if (def == null) return;
+        if (!def) return;
 
-        if (nameText)  nameText.text  = def.displayName;
-        if (levelText) levelText.text = $"Lv {currentLevel}/{def.maxLevel}";
+        // Title **Changed from "titleText" to "nameText"**
+        if (nameText) nameText.text = def.displayName;
 
-        int nextCost = Mathf.RoundToInt(def.baseCost * Mathf.Pow(def.costScale, currentLevel));
-        if (costText)  costText.text  = $"{nextCost} Embers";
+        // Lock check (distance + dependencies)
+        bool lockedByDistance = bestDistance < def.unlockDistance;
+
+        bool depsOk = def.AreDependenciesMet(id => PlayerPrefs.GetInt($"upgrade_{id}", 0));
+        bool lockedByDeps = !depsOk;
+
+        bool locked = lockedByDistance || lockedByDeps;
+
+        // Maxed?
+        bool maxed = ownedTier >= def.MaxTier;
+
+        // Next tier to buy (1-based)
+        int nextTier = Mathf.Clamp(ownedTier + 1, 1, def.MaxTier);
+
+        // Description (for next tier)
+        if (descText)
+        {
+            if (!maxed)
+                descText.text = def.GetDescriptionForTier(nextTier);
+            else
+                descText.text = "Max level reached.";
+        }
+
+        // Tier label
+        if (tierText)
+        {
+            tierText.text = maxed
+                ? $"Tier {ownedTier}/{def.MaxTier}"
+                : $"Tier {ownedTier}/{def.MaxTier} → {nextTier}";
+        }
+
+        // Cost & button state
+        int cost = def.GetCostForTier(nextTier);
+        bool canAfford = !maxed && !locked && gm && gm.CanAfford(cost);
+
+        if (costText)
+            costText.text = maxed ? "-" : cost.ToString("N0");
 
         if (buyButton)
-            buyButton.interactable = currentLevel < def.maxLevel && gm != null && gm.CanAfford(nextCost);
+        {
+            buyButton.interactable = canAfford;
+            buyButton.onClick.RemoveAllListeners();
+            if (canAfford)
+                buyButton.onClick.AddListener(() => Buy(cost, nextTier));
+        }
+
+        // Locked visuals
+        if (lockedGroup) lockedGroup.SetActive(locked);
+        if (locked && lockedText)
+        {
+            if (lockedByDistance && lockedByDeps)
+                lockedText.text = $"Unlocks at {def.unlockDistance} m\n+ Dependencies not met";
+            else if (lockedByDistance)
+                lockedText.text = $"Unlocks at {def.unlockDistance} m";
+            else if (lockedByDeps)
+                lockedText.text = "Requires other upgrades";
+        }
     }
 
-    void Buy()
+    void Buy(int cost, int nextTier)
     {
-        if (gm == null || def == null) return;
-
-        int cost = Mathf.RoundToInt(def.baseCost * Mathf.Pow(def.costScale, currentLevel));
+        if (gm == null) return;
         if (!gm.TrySpendWisps(cost)) return;
 
-        currentLevel++;
-        PlayerPrefs.SetInt($"upgrade_{def.id}", currentLevel);
+        ownedTier = nextTier;
+        PlayerPrefs.SetInt($"upgrade_{def.id}", ownedTier);
         PlayerPrefs.Save();
 
+        // Let GameManager apply the effect data if needed (optional immediate apply)
         gm.ApplyUpgrade(def);
+
+        // Ask the panel to refresh everything (including bank text)
         gm.RefreshUpgradesUI();
-        Refresh();
     }
 }

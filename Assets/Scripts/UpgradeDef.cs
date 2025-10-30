@@ -16,7 +16,7 @@ public class UpgradeDef : ScriptableObject
     [Tooltip("Cost growth per tier. TierN = baseCost * costScale^(N-1)")]
     public float costScale = 1.5f;
     [Tooltip("Maximum purchasable level/tiers for this upgrade.")]
-    public int maxLevel = 3; // kept for backward-compatibility (aka maxTier)
+    public int maxLevel = 5; // kept for backward-compatibility (aka maxTier)
 
     [Header("Progress Gating")]
     [Tooltip("Minimum best distance needed for this upgrade to appear in the shop.")]
@@ -63,6 +63,8 @@ public class UpgradeDef : ScriptableObject
         PlayerProjectiles
     }
     public EffectType effectType;
+
+    
 
     // ----------------- Helpers (safe defaults) -----------------
 

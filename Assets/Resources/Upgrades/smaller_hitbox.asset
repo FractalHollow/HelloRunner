@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: smaller_hitbox
   m_EditorClassIdentifier: 
   id: smaller_hitbox
-  displayName: Smaller Hitbox
-  description: Reduce collision size to {v0}% of base.
+  displayName: Tiny Hitbox
+  description: Reduce collision size to {v0}%.
   descriptionTemplate: 
   baseCost: 55
   costScale: 1.45
   maxLevel: 5
-  unlockDistance: 0
+  unlockDistance: 100
   dependencies: []
   v0PerTier:
   - 0.9

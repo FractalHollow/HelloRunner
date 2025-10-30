@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: magnet
   displayName: Magnet
-  description: Pull embers from {v0}m; pull speed {v1}.
+  description: Pull embers from {v0}m.
   descriptionTemplate: 
   baseCost: 60
   costScale: 1.5

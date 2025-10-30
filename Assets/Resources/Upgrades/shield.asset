@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: shield
   displayName: Shield
-  description: Gain up to {v0} shield charge(s).
+  description: Gain {v0} shield charge(s).
   descriptionTemplate: 
   baseCost: 50
   costScale: 1.6
   maxLevel: 2
-  unlockDistance: 0
+  unlockDistance: 50
   dependencies: []
   v0PerTier: []
   v1PerTier: []

@@ -10,10 +10,17 @@ public class UpgradeButton : MonoBehaviour
     [SerializeField] TMP_Text tierText;
     [SerializeField] TMP_Text costText;
     [SerializeField] Button buyButton;
+    [SerializeField] Image buyButtonImage; // optional, assign in Inspector for tint
 
     [Header("Locked UI")]
-    [SerializeField] GameObject lockedGroup;   // e.g. an overlay panel
-    [SerializeField] TMP_Text lockedText;      // "Unlocks at 100 m" or dependency text
+    [SerializeField] GameObject lockedGroup;
+    [SerializeField] TMP_Text lockedText;
+
+    [Header("Colors")]
+    [SerializeField] Color colorAffordable = new Color(1f, 0.55f, 0.1f, 1f);   // orange
+    [SerializeField] Color colorCantAfford = new Color(0.5f, 0.5f, 0.5f, 0.9f);
+    [SerializeField] Color colorMaxed     = new Color(0.35f, 0.8f, 0.4f, 0.9f);
+    [SerializeField] Color colorLocked    = new Color(0.35f, 0.35f, 0.35f, 0.9f);
 
     [HideInInspector] public UpgradeDef def;
 
@@ -22,7 +29,7 @@ public class UpgradeButton : MonoBehaviour
     float bestDistance;
     int bank;
 
-    // Keep Setup signature your controller expects, but add data we need
+    // Called by the panel controller when building the list
     public void Setup(GameManager gm, UpgradeDef def, int ownedTier, float bestDistanceMeters, int currentBank)
     {
         this.gm = gm;
@@ -34,72 +41,93 @@ public class UpgradeButton : MonoBehaviour
         Refresh();
     }
 
-    void Refresh()
+    public void Refresh()
     {
         if (!def) return;
 
-        // Title **Changed from "titleText" to "nameText"**
         if (nameText) nameText.text = def.displayName;
 
-        // Lock check (distance + dependencies)
         bool lockedByDistance = bestDistance < def.unlockDistance;
-
         bool depsOk = def.AreDependenciesMet(id => PlayerPrefs.GetInt($"upgrade_{id}", 0));
         bool lockedByDeps = !depsOk;
-
         bool locked = lockedByDistance || lockedByDeps;
 
-        // Maxed?
         bool maxed = ownedTier >= def.MaxTier;
-
-        // Next tier to buy (1-based)
         int nextTier = Mathf.Clamp(ownedTier + 1, 1, def.MaxTier);
 
-        // Description (for next tier)
         if (descText)
-        {
-            if (!maxed)
-                descText.text = def.GetDescriptionForTier(nextTier);
-            else
-                descText.text = "Max level reached.";
-        }
+            descText.text = maxed ? "Max level reached." : def.GetDescriptionForTier(nextTier);
 
-        // Tier label
         if (tierText)
-        {
-            tierText.text = maxed
-                ? $"Tier {ownedTier}/{def.MaxTier}"
-                : $"Tier {ownedTier}/{def.MaxTier} → {nextTier}";
-        }
+            tierText.text = $"Tier {ownedTier}/{def.MaxTier}" + (maxed ? "" : $" → {nextTier}");
 
-        // Cost & button state
         int cost = def.GetCostForTier(nextTier);
         bool canAfford = !maxed && !locked && gm && gm.CanAfford(cost);
 
         if (costText)
             costText.text = maxed ? "-" : cost.ToString("N0");
 
-        if (buyButton)
-        {
-            buyButton.interactable = canAfford;
-            buyButton.onClick.RemoveAllListeners();
-            if (canAfford)
-                buyButton.onClick.AddListener(() => Buy(cost, nextTier));
-        }
+        // ----- STATE LOGIC -----
+        if (locked)
+            SetLocked(lockedByDistance, lockedByDeps);
+        else if (maxed)
+            SetMaxed();
+        else if (canAfford)
+            SetAffordable();
+        else
+            SetCantAfford();
 
-        // Locked visuals
-        if (lockedGroup) lockedGroup.SetActive(locked);
-        if (locked && lockedText)
+        // Handle click
+        buyButton.onClick.RemoveAllListeners();
+        if (canAfford)
+            buyButton.onClick.AddListener(() => Buy(cost, nextTier));
+    }
+
+    // ===== Helper state visuals =====
+    void SetAffordable()
+    {
+        buyButton.interactable = true;
+        TintButton(colorAffordable);
+        if (lockedGroup) lockedGroup.SetActive(false);
+    }
+
+    void SetCantAfford()
+    {
+        buyButton.interactable = false;
+        TintButton(colorCantAfford);
+        if (lockedGroup) lockedGroup.SetActive(false);
+    }
+
+    void SetMaxed()
+    {
+        buyButton.interactable = false;
+        TintButton(colorMaxed);
+        if (lockedGroup) lockedGroup.SetActive(false);
+    }
+
+    void SetLocked(bool byDistance, bool byDeps)
+    {
+        buyButton.interactable = false;
+        TintButton(colorLocked);
+
+        if (lockedGroup) lockedGroup.SetActive(true);
+        if (lockedText)
         {
-            if (lockedByDistance && lockedByDeps)
+            if (byDistance && byDeps)
                 lockedText.text = $"Unlocks at {def.unlockDistance} m\n+ Dependencies not met";
-            else if (lockedByDistance)
+            else if (byDistance)
                 lockedText.text = $"Unlocks at {def.unlockDistance} m";
-            else if (lockedByDeps)
+            else if (byDeps)
                 lockedText.text = "Requires other upgrades";
         }
     }
 
+    void TintButton(Color c)
+    {
+        if (buyButtonImage) buyButtonImage.color = c;
+    }
+
+    // ===== Purchase logic =====
     void Buy(int cost, int nextTier)
     {
         if (gm == null) return;
@@ -109,10 +137,7 @@ public class UpgradeButton : MonoBehaviour
         PlayerPrefs.SetInt($"upgrade_{def.id}", ownedTier);
         PlayerPrefs.Save();
 
-        // Let GameManager apply the effect data if needed (optional immediate apply)
         gm.ApplyUpgrade(def);
-
-        // Ask the panel to refresh everything (including bank text)
         gm.RefreshUpgradesUI();
     }
 }

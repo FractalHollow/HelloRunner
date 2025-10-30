@@ -34,7 +34,9 @@ public class DistanceTracker : MonoBehaviour
     void Update()
     {
         if (tracking && metersPerSecond > 0f)
-            distance += metersPerSecond * Time.unscaledDeltaTime * (Time.timeScale); 
+            distance += metersPerSecond * Time.unscaledDeltaTime * (Time.timeScale);
         // Using scaled time so pause (timeScale=0) halts distance.
     }
+    
+    
 }

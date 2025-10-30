@@ -1,6 +1,7 @@
 // UpgradesPanelController.cs
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class UpgradesPanelController : MonoBehaviour
 {
@@ -15,7 +16,17 @@ public class UpgradesPanelController : MonoBehaviour
 
     void Awake()
     {
-        allDefs = Resources.LoadAll<UpgradeDef>("Upgrades");
+        // Load and sort so the list feels progressive
+        allDefs = Resources.LoadAll<UpgradeDef>("Upgrades")
+            .OrderBy(d => d.unlockDistance)
+            .ThenBy(d => d.displayName)
+            .ToArray();
+    }
+
+    void OnEnable()
+    {
+        // If panel is re-enabled, make sure the UI reflects latest bank/distance
+        if (built) RefreshAll();
     }
 
     public void Open()
@@ -34,19 +45,32 @@ public class UpgradesPanelController : MonoBehaviour
     {
         if (built) return;
 
+        if (!gameManager)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
+        float best = GetBestDistanceMeters();
+        int bank = gameManager ? gameManager.GetWispsBank() : 0;
+
         foreach (var def in allDefs)
         {
             var rowGO = Instantiate(upgradeRowPrefab, contentParent);
             var row = rowGO.GetComponent<UpgradeButton>();
+            if (!row)
+            {
+                Debug.LogWarning("UpgradeRow prefab is missing UpgradeButton component.");
+                continue;
+            }
+
             int owned = PlayerPrefs.GetInt($"upgrade_{def.id}", 0);
 
-            // NEW: pass bank and best distance so the row can decide lock/cost/tier
             row.Setup(
                 gameManager,
                 def,
                 owned,
-                GetBestDistanceMeters(),
-                gameManager ? gameManager.GetWispsBank() : 0
+                best,
+                bank
             );
         }
         built = true;
@@ -54,21 +78,24 @@ public class UpgradesPanelController : MonoBehaviour
 
     public void RefreshAll()
     {
-        if (emberBankText) emberBankText.text = $"Embers: {gameManager.GetWispsBank():N0}";
+        if (!gameManager)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
 
-        float best = GetBestDistanceMeters();
         int bank = gameManager ? gameManager.GetWispsBank() : 0;
+        float best = GetBestDistanceMeters();
 
-        // refresh all rows' interactable state
+        if (emberBankText) emberBankText.text = $"Embers: {bank:N0}";
+
+        // Refresh all rows with current bank & distance
         foreach (Transform child in contentParent)
         {
             var btn = child.GetComponent<UpgradeButton>();
-            if (btn != null)
-            {
-                // Re-run setup with fresh bank & distance; keeps logic in one place
-                int owned = PlayerPrefs.GetInt($"upgrade_{btn.def.id}", 0);
-                btn.Setup(gameManager, btn.def, owned, best, bank);
-            }
+            if (btn == null || btn.def == null) continue;
+
+            int owned = PlayerPrefs.GetInt($"upgrade_{btn.def.id}", 0);
+            btn.Setup(gameManager, btn.def, owned, best, bank);
         }
     }
 
@@ -78,8 +105,17 @@ public class UpgradesPanelController : MonoBehaviour
         if (gameManager && gameManager.distanceTracker)
             return gameManager.distanceTracker.bestDistance;
 
-        // Fallback key — change if your DistanceTracker uses a different key
         return PlayerPrefs.GetFloat("best_distance_m", 0f);
+    }
 
+    // Optional: Use this if you ever add/remove upgrade defs at runtime.
+    public void Rebuild()
+    {
+        foreach (Transform child in contentParent)
+            Destroy(child.gameObject);
+
+        built = false;
+        BuildIfNeeded();
+        RefreshAll();
     }
 }

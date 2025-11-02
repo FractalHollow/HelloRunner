@@ -19,7 +19,7 @@ MonoBehaviour:
   baseCost: 55
   costScale: 1.45
   maxLevel: 5
-  unlockDistance: 100
+  unlockDistance: 80
   dependencies: []
   v0PerTier:
   - 0.9

@@ -240,6 +240,8 @@ public class GameManager : MonoBehaviour
         // reset run currency so it can't be re-added accidentally
         wispsRun = 0;
         Debug.Log("[GM] wispsRun reset to 0 after GameOver");
+        
+        CheckUnlocks();
 
 
     }
@@ -566,8 +568,19 @@ public void RefreshAllCurrencyUI()
         }
     }
 
-// Called by PausePanel “End Run” button
-public void EndRun()
+    void CheckUnlocks()
+        {
+            float best = distanceTracker ? distanceTracker.bestDistance : PlayerPrefs.GetFloat("best_distance_m", 0f);
+            if (best >= 100 && PlayerPrefs.GetInt("mods_unlocked", 0) == 0)
+            {
+                PlayerPrefs.SetInt("mods_unlocked", 1);
+                PlayerPrefs.Save();
+                // optional: toast “Run Modifiers unlocked!”
+            }
+        }
+
+    // Called by PausePanel “End Run” button
+    public void EndRun()
     {
         // Only valid during a run; ignore if already at start or already game over
         if (!playing) return;

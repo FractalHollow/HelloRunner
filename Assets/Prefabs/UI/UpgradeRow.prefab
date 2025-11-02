@@ -150,7 +150,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Unlocks at 100 m
+  m_text: Unlocks at 80(w) m
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9f56224255521be44b2217fbfc96a58e, type: 2}
   m_sharedMaterial: {fileID: 4852822245866545763, guid: 9f56224255521be44b2217fbfc96a58e, type: 2}

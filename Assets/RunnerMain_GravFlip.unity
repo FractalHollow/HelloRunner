@@ -679,7 +679,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -81.22583, y: 108.93738}
+  m_AnchoredPosition: {x: -81.22583, y: 108.937256}
   m_SizeDelta: {x: 742.5596, y: 140.324}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &32838096
@@ -2229,6 +2229,7 @@ MonoBehaviour:
   colorTwo: {r: 0.216981, g: 0.68744314, b: 1, a: 0.64705884}
   playerLayerName: Player
   obstacleLayerName: Obstacle
+  enemyProjectileLayerName: EnemyProjectile
   freezeXDuringInvuln: 1
 --- !u!1 &231376295
 GameObject:
@@ -5985,7 +5986,7 @@ MonoBehaviour:
   minY: -8
   maxY: 8
   allowVerticalMovement: 0
-  allowProjectiles: 0
+  respectHazardsToggle: 1
 --- !u!4 &671540001
 Transform:
   m_ObjectHideFlags: 0
@@ -6018,7 +6019,7 @@ MonoBehaviour:
   yBounds: {x: -3.5, y: 3.5}
   clampToSafeZone: 1
   intervalRange: {x: 0.8, y: 1.8}
-  moveSpeed: 5
+  baseMoveSpeed: 5
 --- !u!1 &674809963
 GameObject:
   m_ObjectHideFlags: 0
@@ -10085,6 +10086,8 @@ MonoBehaviour:
   playerStartPos: {x: 0, y: 0, z: 0}
   playerStartRot: {x: 0, y: 0, z: 0, w: 0}
   upgradesPanel: {fileID: 7709592574260189304}
+  speedMultWhenOn: 1.25
+  rewardBonusPerMod: 0.25
 --- !u!4 &1345499409
 Transform:
   m_ObjectHideFlags: 0

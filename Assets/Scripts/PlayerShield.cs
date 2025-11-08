@@ -24,6 +24,7 @@ public class PlayerShield : MonoBehaviour
     [Header("Collision Ghosting")]
     public string playerLayerName = "Player";
     public string obstacleLayerName = "Obstacle";
+    public string enemyProjectileLayerName = "EnemyProjectile"; 
     public bool freezeXDuringInvuln = true;
 
     AudioSource audioSrc;
@@ -31,7 +32,7 @@ public class PlayerShield : MonoBehaviour
     SpriteRenderer shieldSR;
     Rigidbody2D rb;
     RigidbodyConstraints2D originalConstraints;
-    int playerLayer = -1, obstacleLayer = -1;
+    int playerLayer = -1, obstacleLayer = -1, enemyProjLayer = -1; 
 
     void Awake()
     {
@@ -50,6 +51,7 @@ public class PlayerShield : MonoBehaviour
 
         playerLayer   = LayerMask.NameToLayer(playerLayerName);
         obstacleLayer = LayerMask.NameToLayer(obstacleLayerName);
+        enemyProjLayer = LayerMask.NameToLayer(enemyProjectileLayerName);
 
         // Make sure burst doesn’t auto-fire
 if (breakBurst)
@@ -81,8 +83,10 @@ if (breakBurst)
     /// Called from collision; returns true if the hit was absorbed.
     public bool TryAbsorbHit()
     {
-        if (charges <= 0) return false;
+            // If currently invulnerable, treat as absorbed without consuming a charge
+        if (IsInvulnerable) return true;
 
+        if (charges <= 0) return false;
         charges--;
 
         // SFX
@@ -158,6 +162,9 @@ if (breakBurst)
     {
         if (playerLayer >= 0 && obstacleLayer >= 0)
             Physics2D.IgnoreLayerCollision(playerLayer, obstacleLayer, on);
+
+        if (playerLayer >= 0 && enemyProjLayer >= 0) // ⬅ NEW
+            Physics2D.IgnoreLayerCollision(playerLayer, enemyProjLayer, on);
     }
 
     IEnumerator BlinkCo()

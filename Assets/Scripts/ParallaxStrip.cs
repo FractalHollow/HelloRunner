@@ -10,10 +10,12 @@ public class ParallaxStrip : MonoBehaviour
     private Transform _right;
     private float _tileWidth;
     private float _anchorX;
+    GameManager gm;
 
-    void Awake()
+   void Awake()
     {
-        // Auto-detect two SpriteRenderer children if not assigned
+        gm = FindObjectOfType<GameManager>();   // ⬅ cache once
+
         if (tileA == null || tileB == null)
         {
             SpriteRenderer[] srs = GetComponentsInChildren<SpriteRenderer>(true);
@@ -27,49 +29,33 @@ public class ParallaxStrip : MonoBehaviour
             tileB = srs[1].transform;
         }
 
-        // Ensure _left is the one with the smaller X
-        if (tileA.position.x <= tileB.position.x)
-        {
-            _left = tileA;
-            _right = tileB;
-        }
-        else
-        {
-            _left = tileB;
-            _right = tileA;
-        }
+        if (tileA.position.x <= tileB.position.x) { _left = tileA; _right = tileB; }
+        else { _left = tileB; _right = tileA; }
 
-        // Measure world-space width of a tile (includes scaling)
         _tileWidth = Mathf.Max(GetWorldWidth(_left), GetWorldWidth(_right));
-
-        // Where the loop anchor starts (your A's original X)
         _anchorX = _left.position.x;
 
-        // Snap spacing to exactly one width
         Vector3 r = _right.position;
         _right.position = new Vector3(_left.position.x + _tileWidth, r.y, r.z);
     }
 
     void Update()
     {
-        float dx = -speed * Time.deltaTime;
+        float mult = (gm ? gm.RunSpeedMultiplier : 1f);     // ⬅ NEW
+        float dx = -speed * mult * Time.deltaTime;          // ⬅ NEW
 
         _left.position  += new Vector3(dx, 0f, 0f);
         _right.position += new Vector3(dx, 0f, 0f);
 
-        // Keep references ordered (left.x <= right.x)
         if (_left.position.x > _right.position.x)
         {
             Transform t = _left; _left = _right; _right = t;
         }
 
-        // When right reaches/passes anchor, recycle left to the far right
         if (_right.position.x <= _anchorX)
         {
             Vector3 lp = _left.position;
             _left.position = new Vector3(_right.position.x + _tileWidth, lp.y, lp.z);
-
-            // Swap so names remain correct next frame
             Transform t = _left; _left = _right; _right = t;
         }
     }

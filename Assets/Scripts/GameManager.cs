@@ -59,6 +59,18 @@ public class GameManager : MonoBehaviour
     bool paused = false;
     bool playing = false;
 
+    // --- Run Modifiers tuning ---
+    [Header("Run Modifiers Tuning")]
+    public float speedMultWhenOn = 1.25f;   // world speed when Speed mod is ON
+    public float rewardBonusPerMod = 0.25f; // +25% score/embers per enabled mod
+
+    // --- Convenience flags pulled from PlayerPrefs ---
+    public bool ModSpeedOn   => PlayerPrefs.GetInt("mod_speed_on", 0) == 1;
+    public bool ModHazardsOn => PlayerPrefs.GetInt("mod_hazards_on", 0) == 1;
+
+    // --- Multipliers other systems can read ---
+    public float RunSpeedMultiplier => ModSpeedOn ? speedMultWhenOn : 1f;
+
 
     static GameManager _inst;
 
@@ -197,8 +209,9 @@ public class GameManager : MonoBehaviour
             if (shake) shake.Shake(0.25f, 0.15f);
         }
 
-        // Final scoring snapshot
-        int finalScore = scoreSystem ? scoreSystem.CurrentScore : 0;
+        // Final scoring snapshot (includes run-modifier bonus)
+        int finalScore = ComputeScoreWithMods();
+
 
         // High score
         int hi = PlayerPrefs.GetInt("HighScore", 0);
@@ -326,7 +339,8 @@ public class GameManager : MonoBehaviour
             distanceText.text = $"{(int)distanceTracker.distance} m";
 
         if (scoreText && scoreSystem)
-            scoreText.text = $"Score: {scoreSystem.CurrentScore:N0}";
+            scoreText.text = $"Score: {ComputeScoreWithMods():N0}";
+
     }
 
 // -------------------- CURRENCY --------------------
@@ -381,14 +395,18 @@ int wispsTotal = 0;   // total bank (mirrors PlayerPrefs)
         return true;
     }
 
-// Add Wisps earned during this run
-public void AddWisps(int amount)
+// Add Wisps earned during this run (scaled by run modifiers)
+public void AddWisps(int baseAmount)
 {
-    if (amount <= 0) return;
-    wispsRun += amount;
-    UpdateWispHUD();              // live HUD update (run only)
-    AudioManager.I?.PlayPickup(); // pickup sound
+    if (baseAmount <= 0) return;
+
+    int finalAmount = Mathf.Max(1, Mathf.RoundToInt(baseAmount * CurrentWispMultiplier()));
+    wispsRun += finalAmount;
+
+    UpdateWispHUD();               // live HUD update (run only)
+    AudioManager.I?.PlayPickup();  // pickup sound
 }
+
 
 // ====== UI Refresh ======
 
@@ -577,6 +595,31 @@ public void RefreshAllCurrencyUI()
                 PlayerPrefs.Save();
                 // optional: toast “Run Modifiers unlocked!”
             }
+        }
+
+
+        public float CurrentScoreMultiplier()
+        {
+            float mult = 1f;
+            if (ModSpeedOn)   mult += rewardBonusPerMod;
+            if (ModHazardsOn) mult += rewardBonusPerMod;
+            // later: add prestige/achievements here
+            return mult;
+        }
+
+            public float CurrentWispMultiplier()
+            {
+                float mult = 1f;
+                if (ModSpeedOn) mult += rewardBonusPerMod;
+                if (ModHazardsOn) mult += rewardBonusPerMod;
+                return mult;
+            }
+
+        int ComputeScoreWithMods()
+        {
+            int raw = scoreSystem ? scoreSystem.CurrentScore : 0;
+            float mult = CurrentScoreMultiplier();
+            return Mathf.Max(0, Mathf.RoundToInt(raw * mult));
         }
 
     // Called by PausePanel “End Run” button

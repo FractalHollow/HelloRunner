@@ -3,52 +3,100 @@ using System.Collections;
 
 public class EnemyShooter : MonoBehaviour
 {
-    public Transform firePoint;     // empty child, slightly in front of the enemy
-    public GameObject projectilePrefab;
+    [Header("Wiring")]
+    public Transform firePoint;              // optional; auto-creates if null
+    public GameObject projectilePrefab;      // PF_EnemyProjectile
+
+    [Header("Timing")]
     public float intervalMin = 1.2f;
     public float intervalMax = 2.0f;
+
+    [Header("Projectile")]
     public float projectileSpeed = 8f;
-    public bool aimAtPlayerY = true;  // vertical lead
+    public bool aimAtPlayerY = true;        // if false -> straight left
+
+    [Header("Debug")]
+    public bool debugLogs = false;
+    public Color gizmoColor = Color.red;
 
     GameManager gm;
     Transform player;
+    Coroutine loop;
 
     void Awake()
     {
         gm = FindObjectOfType<GameManager>();
         var p = FindObjectOfType<PlayerGravityFlip>();
         player = p ? p.transform : null;
+
+        // Auto-create a firePoint if none assigned
+        if (!firePoint)
+        {
+            var fp = new GameObject("firePoint");
+            fp.transform.SetParent(transform);
+            fp.transform.localPosition = new Vector3(-0.5f, 0f, 0f); // slightly left of enemy
+            firePoint = fp.transform;
+        }
     }
 
     void OnEnable()
     {
-        StartCoroutine(FireLoop());
+        if (loop == null) loop = StartCoroutine(FireLoop());
+    }
+
+    void OnDisable()
+    {
+        if (loop != null) { StopCoroutine(loop); loop = null; }
     }
 
     IEnumerator FireLoop()
     {
-        // Only fire when hazards mod is ON
+        // small delay so spawns settle
+        yield return new WaitForSeconds(0.25f);
+
         while (true)
         {
-            yield return new WaitForSeconds(Random.Range(intervalMin, intervalMax));
-
-            if (!(gm && gm.ModHazardsOn)) continue;
-            if (!firePoint || !projectilePrefab) continue;
-
-            Vector2 dir = Vector2.left;
-            if (aimAtPlayerY && player)
+            // Only when Hazards is ON
+            if (gm && gm.ModHazardsOn)
             {
-                var v = (new Vector2(firePoint.position.x - 10f, player.position.y) - (Vector2)firePoint.position);
-                dir = v.normalized.sqrMagnitude < 0.001f ? Vector2.left : v.normalized;
+                FireOnce();
             }
 
-            var go = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-            var proj = go.GetComponent<Projectile2D>();
-            if (proj)
-            {
-                proj.dir = dir;
-                proj.speed = projectileSpeed;
-            }
+            float wait = Random.Range(intervalMin, intervalMax);
+            yield return new WaitForSeconds(wait);
         }
+    }
+
+    void FireOnce()
+    {
+        if (!projectilePrefab || !firePoint) return;
+
+        // Direction
+        Vector2 dir = Vector2.left; // default
+        if (aimAtPlayerY && player)
+        {
+            Vector2 to = new Vector2(firePoint.position.x - 10f, player.position.y) - (Vector2)firePoint.position;
+            if (to.sqrMagnitude > 0.0001f) dir = to.normalized;
+        }
+
+        // Spawn
+        var go = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+        var proj = go.GetComponent<Projectile2D>();
+        if (proj)
+        {
+            proj.dir = dir;
+            proj.speed = projectileSpeed;
+        }
+
+        if (debugLogs)
+            Debug.Log($"[EnemyShooter] Fired projectile from {name} at {firePoint.position} dir={dir}");
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (!firePoint) return;
+        Gizmos.color = gizmoColor;
+        Gizmos.DrawSphere(firePoint.position, 0.06f);
+        Gizmos.DrawLine(firePoint.position, firePoint.position + Vector3.left * 0.75f);
     }
 }

@@ -61,7 +61,7 @@ public class GameManager : MonoBehaviour
 
     // --- Run Modifiers tuning ---
     [Header("Run Modifiers Tuning")]
-    public float speedMultWhenOn = 1.25f;   // world speed when Speed mod is ON
+    public float speedMultWhenOn = 1.5f;   // world speed when Speed mod is ON
     public float rewardBonusPerMod = 0.25f; // +25% score/embers per enabled mod
 
     // --- Convenience flags pulled from PlayerPrefs ---

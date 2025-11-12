@@ -88,7 +88,7 @@ public class DenMenu : MonoBehaviour
 
         if (!unlocked && unlockUpgradesButton)
         {
-            bool canAfford = gm && gm.CanAfford(50);
+            bool canAfford = gm && gm.CanAfford(25);
             unlockUpgradesButton.interactable = canAfford;
         }
     }
@@ -108,7 +108,7 @@ public class DenMenu : MonoBehaviour
 
     public void OnUnlockStore()
     {
-        const int COST = 50;
+        const int COST = 25;
         if (gm && gm.TrySpendWisps(COST)) // ✅ spend via GameManager
         {
             PlayerPrefs.SetInt(KEY_STORE_UNLOCKED, 1);

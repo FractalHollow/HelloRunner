@@ -20,6 +20,9 @@ public class AudioManager : MonoBehaviour
     public AudioClip crashClip;
     public AudioClip sfxPurchase;
     [SerializeField] private AudioClip pickupSFX;  // wisp pickup
+    public AudioClip sfxShootDefault;          // optional default if caller passes null
+    [Range(0f,1f)] public float shootVolume = 0.8f;
+
 
     [Header("Volumes")]
     [Range(0f, 1f)] public float sfxPurchaseVolume = 0.9f;
@@ -106,9 +109,26 @@ public void ResetToDefaults()
             sfxSource.loop = false;
             sfxSource.playOnAwake = false;
         }
+
+        // Make sure SFX plays as 2D (no distance falloff)
+        sfxSource.spatialBlend = 0f;
+
     }
 
+        public void Play2D(AudioClip clip, float vol01 = 1f)
+        {
+            if (!clip || !sfxSource) return;
+            // honor SFX volume and (optional) mixer routing
+            sfxSource.PlayOneShot(clip, Mathf.Clamp01(vol01) * sfx01);
+        }
 
+        public void PlayShoot(AudioClip clipOverride = null, float vol01 = -1f)
+        {
+            var clip = clipOverride ? clipOverride : sfxShootDefault;
+            if (!clip) return;
+            float v = (vol01 >= 0f) ? vol01 : shootVolume;
+            Play2D(clip, v);
+        }
 
     // ---------------- volume mapping ----------------
     float ToDecibels(float v) => (v <= 0.0001f) ? -80f : Mathf.Log10(Mathf.Clamp01(v)) * 20f;

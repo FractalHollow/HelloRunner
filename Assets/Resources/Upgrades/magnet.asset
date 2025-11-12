@@ -14,24 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: magnet
   displayName: Magnet
-  description: Pull embers from {v0}m.
-  descriptionTemplate: 
-  baseCost: 60
+  description: Pull embers to you.
+  descriptionTemplate: Pull embers from {v0_m} m.
+  baseCost: 15
   costScale: 1.5
   maxLevel: 5
   unlockDistance: 0
   dependencies: []
   v0PerTier:
   - 3.5
-  - 4
   - 4.5
-  - 5
-  - 6
-  v1PerTier:
-  - 6
+  - 5.5
   - 6.5
-  - 7
-  - 7.5
-  - 8
+  - 15
+  v1PerTier: []
   v2PerTier: []
   effectType: 2

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ParallaxStrip : MonoBehaviour
 {
-    public float speed = 1.0f;          // units/second to the left
+    public float speed = 4.0f;          // units/second to the left
     public Transform tileA;              // optional: assign in Inspector
     public Transform tileB;              // optional: assign in Inspector
 

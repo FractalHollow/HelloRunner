@@ -19,6 +19,10 @@ public class EnemyShooter : MonoBehaviour
     public bool debugLogs = false;
     public Color gizmoColor = Color.red;
 
+    [Header("SFX")]
+    public AudioClip launchClip;
+    [Range(0f,1f)] public float launchVol = 0.8f;
+
     GameManager gm;
     Transform player;
     Coroutine loop;
@@ -88,8 +92,11 @@ public class EnemyShooter : MonoBehaviour
             proj.speed = projectileSpeed;
         }
 
-        if (debugLogs)
-            Debug.Log($"[EnemyShooter] Fired projectile from {name} at {firePoint.position} dir={dir}");
+        if (launchClip)
+            {
+                AudioManager.I?.PlayShoot(launchClip, launchVol);
+            }
+
     }
 
     void OnDrawGizmosSelected()

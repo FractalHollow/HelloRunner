@@ -184,7 +184,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ba4b0f976589924093dcbcadc5e7722, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseSpeed: 3
+  baseSpeed: 6
   destroyX: -15
 --- !u!114 &-6387878850501237297
 MonoBehaviour:
@@ -270,6 +270,8 @@ MonoBehaviour:
   aimAtPlayerY: 1
   debugLogs: 1
   gizmoColor: {r: 1, g: 0, b: 0, a: 1}
+  launchClip: {fileID: 8300000, guid: c626a22003cc27e4694e143a14ad8ebe, type: 3}
+  launchVol: 0.68
 --- !u!1 &6778813871091706985
 GameObject:
   m_ObjectHideFlags: 0

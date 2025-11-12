@@ -91,26 +91,44 @@ public class UpgradeDef : ScriptableObject
         return arr[idx];
     }
 
-    /// <summary>
-    /// Utility: build a description string replacing {v0},{v1},{v2} with the tier values.
-    /// Falls back to 'description' if template is empty.
-    /// </summary>
-    public string GetDescriptionForTier(int tier)
-    {
-        if (string.IsNullOrEmpty(descriptionTemplate))
-            return description;
+public string GetDescriptionForTier(int tier)
+{
+    if (string.IsNullOrEmpty(descriptionTemplate))
+        return description;
 
-        string s = descriptionTemplate;
-        s = s.Replace("{v0}", GetV0(tier).ToString("0.##"));
-        s = s.Replace("{v1}", GetV1(tier).ToString("0.##"));
-        s = s.Replace("{v2}", GetV2(tier).ToString("0.##"));
-        return s;
-    }
+    float v0 = GetV0(tier);
+    float v1 = GetV1(tier);
+    float v2 = GetV2(tier);
 
-    /// <summary>
-    /// Quick dependency check callback. Pass a function that returns the owned tier for an upgradeId.
+    string s = descriptionTemplate;
+
+    // generic numeric
+    s = s.Replace("{v0}", v0.ToString("0.##"));
+    s = s.Replace("{v1}", v1.ToString("0.##"));
+    s = s.Replace("{v2}", v2.ToString("0.##"));
+
+    // typed formats
+    s = s.Replace("{v0_i}", Mathf.RoundToInt(v0).ToString());
+    s = s.Replace("{v1_i}", Mathf.RoundToInt(v1).ToString());
+    s = s.Replace("{v2_i}", Mathf.RoundToInt(v2).ToString());
+
+    s = s.Replace("{v0_m}", v0.ToString("0.0"));   // meters w/ 1 decimal
+    s = s.Replace("{v1_m}", v1.ToString("0.0"));
+    s = s.Replace("{v2_m}", v2.ToString("0.0"));
+
+    s = s.Replace("{v0_pct}", Mathf.RoundToInt(v0).ToString());
+    s = s.Replace("{v1_pct}", Mathf.RoundToInt(v1).ToString());
+    s = s.Replace("{v2_pct}", Mathf.RoundToInt(v2).ToString());
+
+    // simple pluralization helper for shield charges based on v0_i
+    s = s.Replace("{charge_s}", (Mathf.RoundToInt(v0) == 1) ? "charge" : "charges");
+
+    return s;
+}
+
+
+    /// Dependency check callback. Pass a function that returns the owned tier for an upgradeId.
     /// Example usage: def.AreDependenciesMet(id => PlayerPrefs.GetInt($"upgrade_{id}", 0));
-    /// </summary>
     public bool AreDependenciesMet(System.Func<string, int> getTierById)
     {
         if (dependencies == null || dependencies.Length == 0) return true;

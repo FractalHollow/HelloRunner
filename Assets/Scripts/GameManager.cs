@@ -253,9 +253,6 @@ public class GameManager : MonoBehaviour
         // reset run currency so it can't be re-added accidentally
         wispsRun = 0;
         Debug.Log("[GM] wispsRun reset to 0 after GameOver");
-        
-        CheckUnlocks();
-
 
     }
 
@@ -336,7 +333,7 @@ public class GameManager : MonoBehaviour
     void UpdateUILive()
     {
         if (distanceText && distanceTracker)
-            distanceText.text = $"{(int)distanceTracker.distance} m";
+            distanceText.text = $"Dist: {(int)distanceTracker.distance} m";
 
         if (scoreText && scoreSystem)
             scoreText.text = $"Score: {ComputeScoreWithMods():N0}";
@@ -483,6 +480,20 @@ public void RefreshAllCurrencyUI()
         if (def == null) return;
         int level = PlayerPrefs.GetInt($"upgrade_{def.id}", 0);
 
+    // --- Run Modifiers unlock via purchase ---
+        if (def.id == "mods_info")
+        {
+            int levelb = PlayerPrefs.GetInt($"upgrade_{def.id}", 0);
+            if (levelb >= 1 && PlayerPrefs.GetInt("mods_unlocked", 0) == 0)
+            {
+                PlayerPrefs.SetInt("mods_unlocked", 1);
+                PlayerPrefs.Save();
+                FindObjectOfType<StartScreen>()?.RefreshLockUI();
+            }
+            RefreshUpgradesUI();
+            return;
+        }
+
         switch (def.effectType)
         {
             case UpgradeDef.EffectType.ComboBoost:
@@ -498,28 +509,31 @@ public void RefreshAllCurrencyUI()
 
             case UpgradeDef.EffectType.Magnet:
                 {
-                    // Find or add the magnet component on the player
                     var magnet = FindObjectOfType<PlayerMagnet>();
                     if (!magnet && player) magnet = player.GetComponent<PlayerMagnet>();
                     if (!magnet && player) magnet = player.gameObject.AddComponent<PlayerMagnet>();
 
-                    if (magnet)
+                    if (!magnet || level <= 0)
                     {
-                        if (level <= 0)
-                        {
-                            magnet.enabled = false;
-                        }
-                        else
-                        {
-                            // Simple scale: base 1.5 + 0.5 per level (tweak as you like)
-                            magnet.radius = 3.5f + 0.5f * (level - 1);
-                            magnet.pullSpeed = 6f;       // you can tune later
-                            magnet.maxChaseSpeed = 10f;  // cap movement speed of pickups
-                            magnet.enabled = true;
-                        }
+                        if (magnet) magnet.enabled = false;
+                        break;
                     }
+
+                    // Pull per-tier numbers from UpgradeDef
+                    // v0 = radius (meters), v1 = pullSpeed, v2 = maxChaseSpeed
+                    float r  = def.GetV0(level);
+                    float ps = def.GetV1(level);
+                    float ms = def.GetV2(level);
+
+                    // Provide sane fallbacks if tiers left blank
+                    magnet.radius        = (r  > 0f) ? r  : 3.5f + 0.8f * (level - 1);
+                    magnet.pullSpeed     = (ps > 0f) ? ps : 8f;
+                    magnet.maxChaseSpeed = (ms > 0f) ? ms : 14f;
+
+                    magnet.enabled = true;
                     break;
                 }
+
 
             case UpgradeDef.EffectType.Shield:
                 {
@@ -586,16 +600,7 @@ public void RefreshAllCurrencyUI()
         }
     }
 
-    void CheckUnlocks()
-        {
-            float best = distanceTracker ? distanceTracker.bestDistance : PlayerPrefs.GetFloat("best_distance_m", 0f);
-            if (best >= 100 && PlayerPrefs.GetInt("mods_unlocked", 0) == 0)
-            {
-                PlayerPrefs.SetInt("mods_unlocked", 1);
-                PlayerPrefs.Save();
-                // optional: toast “Run Modifiers unlocked!”
-            }
-        }
+
 
 
         public float CurrentScoreMultiplier()

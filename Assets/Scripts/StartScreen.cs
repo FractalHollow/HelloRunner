@@ -6,11 +6,11 @@ public class StartScreen : MonoBehaviour
     [Header("Core")]
     [SerializeField] Button startButton;
     [SerializeField] PanelFader fader;
-    [SerializeField] GameManager gm;   // ← drag the scene GameManager here
+    [SerializeField] GameManager gm;   // drag the scene GameManager here
 
     [Header("Run Modifiers")]
-    [SerializeField] Button runModifiersButton;   // ← assign Btn_RunModifiers (on StartPanel)
-    [SerializeField] GameObject runModifiersPanel; // ← assign Panel_RunModifiers (the panel to open)
+    [SerializeField] Button runModifiersButton;     // Btn_RunModifiers on StartPanel
+    [SerializeField] GameObject runModifiersPanel;  // Panel_RunModifiers to open
 
     CanvasGroup cg;
 
@@ -24,7 +24,7 @@ public class StartScreen : MonoBehaviour
     {
         if (cg) { cg.alpha = 1f; cg.interactable = true; cg.blocksRaycasts = true; }
         Wire();
-        UpdateRunModifiersVisibility();
+        RefreshLockUI();  // show/hide the button based on purchase
     }
 
     void Wire()
@@ -47,14 +47,6 @@ public class StartScreen : MonoBehaviour
             runModifiersButton.onClick.RemoveAllListeners();
             runModifiersButton.onClick.AddListener(OpenRunModifiers);
         }
-        // If it's null, we just skip wiring—feature remains optional.
-    }
-
-    void UpdateRunModifiersVisibility()
-    {
-        bool unlocked = PlayerPrefs.GetInt("mods_unlocked", 0) == 1;
-        if (runModifiersButton)
-            runModifiersButton.gameObject.SetActive(unlocked);
     }
 
     void OpenRunModifiers()
@@ -86,9 +78,15 @@ public class StartScreen : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // Call this after a run ends if you want to refresh visibility without disabling/enabling the panel.
-    public void RefreshUI()
+    // Only show the button if the purchasable unlock has been bought.
+    public void RefreshLockUI()
     {
-        UpdateRunModifiersVisibility();
+        bool unlocked = PlayerPrefs.GetInt("mods_unlocked", 0) == 1;
+        if (runModifiersButton)
+            runModifiersButton.gameObject.SetActive(unlocked);
     }
+
+
+    // Legacy alias if other code calls it
+    public void RefreshUI() => RefreshLockUI();
 }

@@ -43,7 +43,33 @@ public class UpgradeButton : MonoBehaviour
 
     public void Refresh()
     {
-        if (!def) return;
+    if (!def) return;
+
+        // ---------- INFO-ONLY / DUMMY ROWS ----------
+        if (def.MaxTier <= 0)
+        {
+            if (nameText) nameText.text = def.displayName;
+
+            bool infoLocked = bestDistance < def.unlockDistance;
+
+            if (descText)
+            {
+                descText.text = infoLocked
+                    ? $"Unlocks at {def.unlockDistance} m"
+                    : "Unlocked — toggle from the Start screen.";
+            }
+
+            if (tierText) tierText.text = "";       // no tier label
+            if (costText) costText.text = "";       // no price
+            if (buyButton) buyButton.gameObject.SetActive(false); // hide Buy
+
+            if (lockedGroup) lockedGroup.SetActive(infoLocked);
+
+            return; // done
+        }
+
+
+    // ---------- NORMAL UPGRADE ROWS CONTINUE BELOW ----------
 
         if (nameText) nameText.text = def.displayName;
 

@@ -10,6 +10,7 @@ public class UpgradesPanelController : MonoBehaviour
     public TMP_Text emberBankText;
     public Transform contentParent;      // ScrollView/Viewport/Content
     public GameObject upgradeRowPrefab;  // UpgradeRow.prefab
+    public TMP_Text bestDistanceText;
 
     UpgradeDef[] allDefs;
     bool built;
@@ -86,6 +87,7 @@ public class UpgradesPanelController : MonoBehaviour
         int bank = gameManager ? gameManager.GetWispsBank() : 0;
         float best = GetBestDistanceMeters();
 
+         if (bestDistanceText) bestDistanceText.text = $"Best: {(int)best} m";
         if (emberBankText) emberBankText.text = $"Embers: {bank:N0}";
 
         // Refresh all rows with current bank & distance

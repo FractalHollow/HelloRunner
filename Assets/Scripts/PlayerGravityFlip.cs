@@ -140,8 +140,6 @@ public void ForceFlipAndBounce(float bounceSpeed = 7f)
         canControl = false;       // StartGame will enable control
         var rb = GetComponent<Rigidbody2D>();
         if (rb) { rb.linearVelocity = Vector2.zero; rb.angularVelocity = 0f; }
-        // if you flip gravity by sign, normalize it here if needed:
-        // rb.gravityScale = Mathf.Abs(rb.gravityScale);
     }
 
 

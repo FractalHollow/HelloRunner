@@ -10,20 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8cd9dfb2658fd2549a2ad2c87a0d80e4, type: 3}
-  m_Name: shield
+  m_Name: mods_info
   m_EditorClassIdentifier: 
-  id: shield
-  displayName: Shield
-  description: Gain shield charge.
-  descriptionTemplate: Gain {v0_i} shield {charge_s}.
-  baseCost: 30
-  costScale: 1.6
-  maxLevel: 2
-  unlockDistance: 100
+  id: mods_info
+  displayName: Run Modifiers
+  description: Higher risk, higher rewards.
+  descriptionTemplate: 
+  baseCost: 40
+  costScale: 1
+  maxLevel: 1
+  unlockDistance: 150
   dependencies: []
-  v0PerTier:
-  - 1
-  - 2
+  v0PerTier: []
   v1PerTier: []
   v2PerTier: []
-  effectType: 1
+  effectType: 0

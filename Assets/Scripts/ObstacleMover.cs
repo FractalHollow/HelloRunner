@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ObstacleMover : MonoBehaviour
 {
-    public float baseSpeed = 3f;   // renamed for clarity
+    public float baseSpeed = 6f;   // renamed for clarity
     public float destroyX = -15f;
 
     GameManager gm;

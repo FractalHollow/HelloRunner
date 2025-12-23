@@ -100,9 +100,10 @@ public class ObstacleAppearance : MonoBehaviour
 
         // Local-space size from sprite rect & PPU
         var ppu = s.pixelsPerUnit;
+        const float shrink = 0.9f; // 90% of visual
         Vector2 localSize = s.rect.size / ppu;
-        col.size = localSize;
-
+        col.size = localSize * shrink;
+    
         // Center the collider on the sprite pivot (bounds are in local units)
         col.offset = s.bounds.center;
     }

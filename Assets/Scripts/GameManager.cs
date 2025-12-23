@@ -95,6 +95,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0; // on Android this is fine; device will still vsync
+        
         playing = false;
         if (player) player.EnableControl(false);
 
@@ -536,30 +539,42 @@ public void RefreshAllCurrencyUI()
 
 
             case UpgradeDef.EffectType.Shield:
+            {
+                if (!player) break;
+
+                var ps = player.GetComponent<PlayerShield>() ?? player.gameObject.AddComponent<PlayerShield>();
+
+                // --- Charges from V0 (fallback to old logic if V0 not filled) ---
+                int charges;
+                if (level > 0)
                 {
-                    if (!player) break;
-                    var ps = player.GetComponent<PlayerShield>();
-                    if (!ps) ps = player.gameObject.AddComponent<PlayerShield>();
+                    // V0 is authoring-time "charges per tier": e.g. [1,2,2]
+                    charges = Mathf.RoundToInt(def.GetV0(level));
+                    if (charges <= 0) charges = (level >= 2) ? 2 : (level >= 1 ? 1 : 0); // safety
+                }
+                else charges = 0;
 
-                    // Example tiering: L1=1 charge, L2=2 charges, L3=2 charges + (regen later)
-                    int charges = 0;
-                    if (level == 1) charges = 1;
-                    else if (level >= 2) charges = 2;
+                ps.maxCharges = charges;
+                ps.charges    = Mathf.Min(ps.charges, ps.maxCharges);
+                ps.RefreshVisual();
 
-                    // We only *store* desired max; actual per-run reset happens in StartGame()
-                    ps.maxCharges = charges;
-                    ps.charges = Mathf.Min(ps.charges, ps.maxCharges);
-                    ps.RefreshVisual(); // if you make it public; otherwise keep internal
-                    break;
+                // --- Regen at L3+ using V1 cooldown seconds (e.g. [0,0,12]) ---
+                bool enableRegen = (level >= 3);
+                ps.regenEnabled  = enableRegen;
+
+                if (enableRegen)
+                {
+                    float cd = def.GetV1(level);          // cooldown seconds for this tier
+                    if (cd > 0f) ps.regenCooldown = cd;   // keep existing default if not provided
                 }
 
-                // case UpgradeDef.EffectType.RunModifier_Vertical:
-                //     mod_EnemyVerticalMovement = level > 0;
-                //     break;
+                // Start/stop the coroutine based on flag (method lives on PlayerShield)
+                ps.BeginRegenIfNeeded();
 
-                //case UpgradeDef.EffectType.RunModifier_Projectiles:
-                //    mod_EnemyProjectiles = level > 0;
-                //    break;
+                break;
+            }
+
+
         }
 
         // Update score bonus from difficulty toggles

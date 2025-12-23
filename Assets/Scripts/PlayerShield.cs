@@ -8,7 +8,7 @@ public class PlayerShield : MonoBehaviour
     public int maxCharges = 0;   // set by upgrades
 
     [Header("Invulnerability")]
-    public float invulnDuration = 0.5f;      // seconds after absorb
+    public float invulnDuration = 1.5f;      // seconds after absorb
     float invulnUntil = 0f;
     public bool IsInvulnerable => Time.time < invulnUntil;
 
@@ -16,6 +16,9 @@ public class PlayerShield : MonoBehaviour
     public GameObject shieldVisual;          // ring shown while charges > 0
     public ParticleSystem breakBurst;        // one-shot burst when a charge is used
     public AudioClip shieldBreakClip;        // SFX on absorb
+    public AudioClip shieldRegenClip;
+    [Range(0f, 1f)] public float shieldRegenVolume = 0.8f;
+
 
     [Header("Visual Tiers (2 vs 1 charges)")]
     public Color colorOne = new Color(0.45f, 0.9f, 1f, 0.45f);  // 1 charge
@@ -24,7 +27,7 @@ public class PlayerShield : MonoBehaviour
     [Header("Collision Ghosting")]
     public string playerLayerName = "Player";
     public string obstacleLayerName = "Obstacle";
-    public string enemyProjectileLayerName = "EnemyProjectile"; 
+    public string enemyProjectileLayerName = "EnemyProjectile";
     public bool freezeXDuringInvuln = true;
 
     AudioSource audioSrc;
@@ -32,13 +35,21 @@ public class PlayerShield : MonoBehaviour
     SpriteRenderer shieldSR;
     Rigidbody2D rb;
     RigidbodyConstraints2D originalConstraints;
-    int playerLayer = -1, obstacleLayer = -1, enemyProjLayer = -1; 
+    int playerLayer = -1, obstacleLayer = -1, enemyProjLayer = -1;
+
+    [Header("Regen")]
+    public bool regenEnabled = false;
+    public float regenCooldown = 12f;
+    Coroutine regenCo;
+    float regenEta = -1f;   // when regen completes (used by UI + logic)
+
+    [Header("Regen UI")]
+    public UnityEngine.UI.Image regenRing;  // drag a UI Image here (type = Filled → Radial)
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
 
-        //cache the ring SR and all child SRs for blinking
         blinkRenderers = GetComponentsInChildren<SpriteRenderer>(true);
         if (shieldVisual) shieldSR = shieldVisual.GetComponent<SpriteRenderer>();
 
@@ -46,48 +57,54 @@ public class PlayerShield : MonoBehaviour
         if (!audioSrc) audioSrc = gameObject.AddComponent<AudioSource>();
         audioSrc.playOnAwake = false;
 
-        blinkRenderers = GetComponentsInChildren<SpriteRenderer>(true);
-        if (shieldVisual) shieldSR = shieldVisual.GetComponent<SpriteRenderer>();
-
-        playerLayer   = LayerMask.NameToLayer(playerLayerName);
-        obstacleLayer = LayerMask.NameToLayer(obstacleLayerName);
+        playerLayer    = LayerMask.NameToLayer(playerLayerName);
+        obstacleLayer  = LayerMask.NameToLayer(obstacleLayerName);
         enemyProjLayer = LayerMask.NameToLayer(enemyProjectileLayerName);
 
         // Make sure burst doesn’t auto-fire
-if (breakBurst)
-{
-    var main = breakBurst.main;
-    main.loop = false;
-    main.playOnAwake = false;
+        if (breakBurst)
+        {
+            var main = breakBurst.main;
+            main.loop = false;
+            main.playOnAwake = false;
 
-    var emission = breakBurst.emission;
-    emission.rateOverTime = 0f;
-
-    // Replace bursts with an empty array (not null)
-    emission.SetBursts(System.Array.Empty<ParticleSystem.Burst>()); // ✅
-
-    // (Optional belt-and-suspenders: clear any already-configured bursts)
-    // if (emission.burstCount > 0) emission.SetBursts(System.Array.Empty<ParticleSystem.Burst>());
-}
-
+            var emission = breakBurst.emission;
+            emission.rateOverTime = 0f;
+            emission.SetBursts(System.Array.Empty<ParticleSystem.Burst>());
+        }
     }
 
     /// Called by GM at run start
     public void SetCharges(int max)
     {
         maxCharges = Mathf.Max(0, max);
-        charges    = maxCharges;
+        charges = maxCharges;
         RefreshVisual();
+
+        // Reset regen timer for a clean run start
+        regenEta = -1f;
+
+        // If regen is enabled and we aren't full at start (rare), begin cooldown
+        BeginRegenIfNeeded();
     }
 
     /// Called from collision; returns true if the hit was absorbed.
     public bool TryAbsorbHit()
     {
-            // If currently invulnerable, treat as absorbed without consuming a charge
+        // If currently invulnerable, treat as absorbed without consuming a charge
         if (IsInvulnerable) return true;
 
         if (charges <= 0) return false;
+
         charges--;
+
+        // 🔁 IMPORTANT FIX:
+        // If we took shield damage and regen is enabled, restart the cooldown NOW.
+        // This ensures a second hit mid-cooldown pushes regen back.
+        if (regenEnabled && charges < maxCharges)
+        {
+            RestartRegenCooldown();
+        }
 
         // SFX
         if (shieldBreakClip && audioSrc) audioSrc.PlayOneShot(shieldBreakClip);
@@ -108,6 +125,23 @@ if (breakBurst)
         return true;
     }
 
+    void RestartRegenCooldown()
+    {
+        // Ensure regen loop is running
+        BeginRegenIfNeeded();
+
+        // Push the regen completion time forward
+        regenEta = Time.time + regenCooldown;
+
+        // Optional: make the ring immediately show "fresh cooldown started"
+        // (Since your UI currently fills 0→1, set to 0 at the start.)
+        if (regenRing)
+        {
+            regenRing.enabled = true;
+            regenRing.fillAmount = 0f;
+        }
+    }
+
     public void RefreshVisual()
     {
         if (!shieldVisual) return;
@@ -116,7 +150,6 @@ if (breakBurst)
 
         if (shieldSR)
         {
-            // 2+ charges = brighter/less transparent; 1 charge = dimmer/more transparent
             shieldSR.color = (charges >= 2) ? colorTwo : colorOne;
         }
     }
@@ -125,16 +158,15 @@ if (breakBurst)
 
     void StartInvulnerability(float duration)
     {
-        invulnUntil = Time.time + duration;
+        // Use the later of existing timer or new timer
+        invulnUntil = Mathf.Max(invulnUntil, Time.time + duration);
 
-        // Ignore collisions with obstacles
         EnableGhostCollisions(true);
 
-        // Freeze X to prevent physics shove
         if (freezeXDuringInvuln && rb)
         {
             originalConstraints = rb.constraints;
-            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y); // zero horizontal push
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             rb.constraints = originalConstraints | RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
         }
 
@@ -148,14 +180,12 @@ if (breakBurst)
     {
         while (IsInvulnerable) yield return null;
 
-        // Restore collisions
         EnableGhostCollisions(false);
 
-        // Restore constraints
         if (freezeXDuringInvuln && rb)
             rb.constraints = originalConstraints;
 
-        SetAlpha(1f); // ensure visible at end
+        SetAlpha(1f);
     }
 
     void EnableGhostCollisions(bool on)
@@ -163,7 +193,7 @@ if (breakBurst)
         if (playerLayer >= 0 && obstacleLayer >= 0)
             Physics2D.IgnoreLayerCollision(playerLayer, obstacleLayer, on);
 
-        if (playerLayer >= 0 && enemyProjLayer >= 0) // ⬅ NEW
+        if (playerLayer >= 0 && enemyProjLayer >= 0)
             Physics2D.IgnoreLayerCollision(playerLayer, enemyProjLayer, on);
     }
 
@@ -187,21 +217,98 @@ if (breakBurst)
         SetAlpha(1f);
     }
 
-void SetAlpha(float a)
-{
-    if (blinkRenderers == null) return;
-    for (int i = 0; i < blinkRenderers.Length; i++)
+    void SetAlpha(float a)
     {
-        var r = blinkRenderers[i];
-        if (!r) continue;
-        if (r == shieldSR) continue;   // <-- don’t blink the ring
-        var c = r.color; c.a = a; r.color = c;
+        if (blinkRenderers == null) return;
+        for (int i = 0; i < blinkRenderers.Length; i++)
+        {
+            var r = blinkRenderers[i];
+            if (!r) continue;
+            if (r == shieldSR) continue;   // don’t blink the ring
+            var c = r.color; c.a = a; r.color = c;
+        }
     }
-}
-
 
     void StopCoroutineSafe(string name)
     {
         try { StopCoroutine(name); } catch { }
+    }
+
+    // ---------- Regen ----------
+
+    public void BeginRegenIfNeeded()
+    {
+        if (!regenEnabled)
+        {
+            StopRegen();
+            return;
+        }
+
+        if (regenCo == null)
+            regenCo = StartCoroutine(RegenLoop());
+    }
+
+    void StopRegen()
+    {
+        if (regenCo != null)
+        {
+            StopCoroutine(regenCo);
+            regenCo = null;
+        }
+        regenEta = -1f;
+    }
+
+    IEnumerator RegenLoop()
+    {
+        while (regenEnabled)
+        {
+            // Wait until we need a charge
+            while (regenEnabled && charges >= maxCharges)
+            {
+                regenEta = -1f;
+                yield return null;
+            }
+            if (!regenEnabled) break;
+
+            // If nobody has started a cooldown yet, start one.
+            if (regenEta < 0f)
+                regenEta = Time.time + regenCooldown;
+
+            // Wait until regen time is reached (regenEta can be pushed back by hits)
+            while (regenEnabled && Time.time < regenEta)
+                yield return null;
+
+            if (!regenEnabled) break;
+
+            if (charges < maxCharges)
+            {
+                charges++;
+                RefreshVisual();
+
+                // Regen SFX (only when a charge is actually restored)
+                if (shieldRegenClip && audioSrc)
+                audioSrc.PlayOneShot(shieldRegenClip, shieldRegenVolume);
+            }
+
+            // If still not full, schedule the next one; else clear.
+            regenEta = (charges < maxCharges) ? Time.time + regenCooldown : -1f;
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (!regenRing) return;
+
+        if (!regenEnabled || charges >= maxCharges || regenEta < 0f)
+        {
+            regenRing.enabled = false;
+            return;
+        }
+
+        regenRing.enabled = true;
+
+        // Your current behavior: fill increases 0 → 1 as cooldown elapses
+        float elapsed01 = Mathf.Clamp01(1f - ((regenEta - Time.time) / regenCooldown));
+        regenRing.fillAmount = elapsed01;
     }
 }

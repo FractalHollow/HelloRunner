@@ -15,15 +15,21 @@ MonoBehaviour:
   id: shield
   displayName: Shield
   description: Gain shield charge.
-  descriptionTemplate: Gain {v0_i} shield {charge_s}.
+  descriptionTemplate: 'Gain {v0_i} shield charge(s). (Regen cooldown: {v1_i}s)'
   baseCost: 30
   costScale: 1.6
-  maxLevel: 2
+  maxLevel: 5
   unlockDistance: 100
   dependencies: []
   v0PerTier:
   - 1
   - 2
-  v1PerTier: []
+  - 2
+  v1PerTier:
+  - 0
+  - 0
+  - 12
+  - 9
+  - 7
   v2PerTier: []
   effectType: 1

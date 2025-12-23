@@ -5,7 +5,11 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/RunnerMain_GravFlip.unity
+    guid: 1f5ab251171393e498a8d10c9d6687f9
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

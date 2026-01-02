@@ -147,6 +147,10 @@ public class GameManager : MonoBehaviour
         ClearWorld();
         ResetPlayerToStart();
 
+        // Record stats at run start (persists across prestiges)
+        StatsManager.RecordRunStarted(ModSpeedOn, ModHazardsOn);
+        StatsManager.Save();
+
         // Reset currency for this run
         wispsRun = 0;
         UpdateWispHUD();
@@ -192,7 +196,9 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        Debug.Log("[GM] === GameOver() called ===");
+
+        int runDistM = (int)(distanceTracker ? distanceTracker.distance : 0f);
+        // bestDistance is updated by StopAndRecordBest(), so call that first (you already do)
 
         if (!playing) return;
         playing = false;
@@ -212,9 +218,17 @@ public class GameManager : MonoBehaviour
             if (shake) shake.Shake(0.25f, 0.15f);
         }
 
+        int bestDistM = (int)(distanceTracker ? distanceTracker.bestDistance : 0f);
+
         // Final scoring snapshot (includes run-modifier bonus)
         int finalScore = ComputeScoreWithMods();
 
+        int runEmbersEarned = wispsRun;
+        AchievementManager.I?.EvaluateUnlocksOnGameOver(bestDistM, runDistM, finalScore, runEmbersEarned);
+
+        // lifetime distance
+        StatsManager.AddLifetimeDistance(runDistM);
+        StatsManager.Save();
 
         // High score
         int hi = PlayerPrefs.GetInt("HighScore", 0);
@@ -405,6 +419,9 @@ public void AddWisps(int baseAmount)
 
     UpdateWispHUD();               // live HUD update (run only)
     AudioManager.I?.PlayPickup();  // pickup sound
+
+    StatsManager.AddLifetimeEmbersEarned(finalAmount);
+
 }
 
 

@@ -6,17 +6,33 @@ public class AchievementManager : MonoBehaviour
     public static AchievementManager I { get; private set; }
 
     [Header("Toast (Game Over)")]
-    public AchievementToast toast; // assign in Inspector (toast object on GameOver panel)
+    public AchievementToast toast; // optional: will auto-find if null
 
-    List<AchievementDef> defs = new List<AchievementDef>();
+    private readonly List<AchievementDef> defs = new List<AchievementDef>();
 
     void Awake()
     {
-        if (I != null && I != this) { Destroy(gameObject); return; }
+        // Singleton
+        if (I != null && I != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
         I = this;
         DontDestroyOnLoad(gameObject);
 
         LoadDefs();
+
+        EnsureToast();
+    }
+
+    void EnsureToast()
+    {
+        if (toast) return;
+
+        // Unity 6: can include inactive objects
+        toast = FindFirstObjectByType<AchievementToast>(FindObjectsInactive.Include);
+        Debug.Log($"[Achievements] Auto-found toast: {(toast ? toast.name : "NONE")}");
     }
 
     void LoadDefs()
@@ -34,19 +50,14 @@ public class AchievementManager : MonoBehaviour
     public bool IsUnlocked(string id) => PlayerPrefs.GetInt(KUnlocked(id), 0) == 1;
     public bool IsClaimed(string id) => PlayerPrefs.GetInt(KClaimed(id), 0) == 1;
 
-    void SetUnlocked(string id)
-    {
-        PlayerPrefs.SetInt(KUnlocked(id), 1);
-    }
-
-    void SetClaimed(string id)
-    {
-        PlayerPrefs.SetInt(KClaimed(id), 1);
-    }
+    void SetUnlocked(string id) => PlayerPrefs.SetInt(KUnlocked(id), 1);
+    void SetClaimed(string id) => PlayerPrefs.SetInt(KClaimed(id), 1);
 
     // --- Progress reading ---
     public int GetProgress(AchievementDef def, int bestDistanceM, int runDistanceM, int runScore, int runEmbersEarned)
     {
+        if (def == null) return 0;
+
         switch (def.progressType)
         {
             case AchievementDef.ProgressType.BestDistanceM:
@@ -66,8 +77,12 @@ public class AchievementManager : MonoBehaviour
 
             case AchievementDef.ProgressType.HazardsModRuns:
                 return StatsManager.HazardsModRuns;
+
+            default:
+                // If you add new enum values later and forget to update this,
+                // we still compile and just treat as 0 progress until implemented.
+                return 0;
         }
-        return 0;
     }
 
     public bool IsComplete(AchievementDef def, int bestDistanceM, int runDistanceM, int runScore, int runEmbersEarned)
@@ -76,10 +91,12 @@ public class AchievementManager : MonoBehaviour
         return p >= def.targetValue;
     }
 
-    // Call this ONLY at GameOver (as you requested)
+    // Call this ONLY at GameOver
     public List<AchievementDef> EvaluateUnlocksOnGameOver(int bestDistanceM, int runDistanceM, int runScore, int runEmbersEarned)
     {
         var newlyUnlocked = new List<AchievementDef>();
+
+        Debug.Log($"[Achievements] Evaluate @GameOver | best={bestDistanceM} runDist={runDistanceM} runEmbers={runEmbersEarned}");
 
         foreach (var def in defs)
         {
@@ -90,13 +107,28 @@ public class AchievementManager : MonoBehaviour
             {
                 SetUnlocked(def.id);
                 newlyUnlocked.Add(def);
+                Debug.Log($"[Achievements] UNLOCKED: {def.id} ({def.displayName})");
             }
         }
+
+        Debug.Log($"[Achievements] Newly unlocked count: {newlyUnlocked.Count}");
 
         if (newlyUnlocked.Count > 0)
         {
             PlayerPrefs.Save();
-            toast?.ShowUnlocked(newlyUnlocked);
+
+            EnsureToast();
+
+            Debug.Log($"[Achievements] toast is {(toast ? "SET" : "NULL")}");
+            if (toast)
+            {
+                toast.ShowUnlocked(newlyUnlocked);
+                Debug.Log("[Achievements] toast.ShowUnlocked() CALLED");
+            }
+            else
+            {
+                Debug.LogWarning("[Achievements] toast is NULL - cannot show toast.");
+            }
         }
 
         return newlyUnlocked;
@@ -111,9 +143,7 @@ public class AchievementManager : MonoBehaviour
 
         int reward = Mathf.Max(0, def.rewardEmbers);
         if (reward > 0)
-        {
             gm.AddToWispsBank(reward);
-        }
 
         SetClaimed(def.id);
         PlayerPrefs.Save();

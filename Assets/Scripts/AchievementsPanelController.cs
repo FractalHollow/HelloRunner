@@ -42,8 +42,12 @@ public class AchievementsPanelController : MonoBehaviour
             return;
         }
 
-        // We use best distance from PlayerPrefs (same key DistanceTracker uses)
-        int bestDistM = PlayerPrefs.GetInt("best_distance_m", 0);
+        int bestDistM = 0;
+        if (gm != null && gm.distanceTracker != null)
+            bestDistM = (int)gm.distanceTracker.bestDistance;
+        else
+            bestDistM = PlayerPrefs.GetInt("best_distance_m", 0); // fallback
+
 
         var defs = am.GetAllDefs();
         foreach (var def in defs)

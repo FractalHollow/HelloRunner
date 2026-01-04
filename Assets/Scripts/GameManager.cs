@@ -223,9 +223,6 @@ public class GameManager : MonoBehaviour
         // Final scoring snapshot (includes run-modifier bonus)
         int finalScore = ComputeScoreWithMods();
 
-        int runEmbersEarned = wispsRun;
-        AchievementManager.I?.EvaluateUnlocksOnGameOver(bestDistM, runDistM, finalScore, runEmbersEarned);
-
         // lifetime distance
         StatsManager.AddLifetimeDistance(runDistM);
         StatsManager.Save();
@@ -266,6 +263,9 @@ public class GameManager : MonoBehaviour
             var fader = gameOverPanel.GetComponent<PanelFader>();
             if (fader) fader.FadeIn();
         }
+
+        int runEmbersEarned = wispsRun;
+        AchievementManager.I?.EvaluateUnlocksOnGameOver(bestDistM, runDistM, finalScore, runEmbersEarned);
 
         // reset run currency so it can't be re-added accidentally
         wispsRun = 0;

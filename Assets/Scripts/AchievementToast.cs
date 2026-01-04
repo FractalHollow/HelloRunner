@@ -11,13 +11,15 @@ public class AchievementToast : MonoBehaviour
     public TMP_Text bodyText;
 
     [Header("Timing")]
-    public float visibleSeconds = 3.0f;
+    public float visibleSeconds = 4.5f;
 
     Coroutine routine;
 
     void Awake()
     {
         if (!group) group = GetComponent<CanvasGroup>();
+
+        // Keep object active; hide with alpha so we avoid activation timing issues.
         HideInstant();
     }
 
@@ -29,34 +31,13 @@ public class AchievementToast : MonoBehaviour
             group.interactable = false;
             group.blocksRaycasts = false;
         }
-        gameObject.SetActive(false);
     }
 
     public void ShowUnlocked(List<AchievementDef> unlocked)
     {
         if (unlocked == null || unlocked.Count == 0) return;
 
-        if (routine != null) StopCoroutine(routine);
-        routine = StartCoroutine(ShowRoutine(unlocked));
-    }
-
-    IEnumerator ShowRoutine(List<AchievementDef> unlocked)
-    {
-        gameObject.SetActive(true);
-
-        int count = unlocked.Count;
-        if (titleText) titleText.text = (count == 1) ? "Achievement Unlocked!" : $"{count} Achievements Unlocked!";
-
-        // List up to 3 names
-        int max = Mathf.Min(3, count);
-        string s = "";
-        for (int i = 0; i < max; i++)
-        {
-            s += $"• {unlocked[i].displayName}\n";
-        }
-        if (count > max) s += $"• +{count - max} more\n";
-        if (bodyText) bodyText.text = s.TrimEnd();
-
+        // Ensure visible immediately
         if (group)
         {
             group.alpha = 1f;
@@ -64,7 +45,31 @@ public class AchievementToast : MonoBehaviour
             group.blocksRaycasts = false;
         }
 
+        if (routine != null) StopCoroutine(routine);
+        routine = StartCoroutine(ShowRoutine(unlocked));
+    }
+
+    IEnumerator ShowRoutine(List<AchievementDef> unlocked)
+    {
+        int count = unlocked.Count;
+
+        if (titleText)
+            titleText.text = (count == 1) ? "Achievement Unlocked!" : $"{count} Achievements Unlocked!";
+
+        // List up to 3 names
+        if (bodyText)
+        {
+            int max = Mathf.Min(3, count);
+            string s = "";
+            for (int i = 0; i < max; i++)
+                s += $"• {unlocked[i].displayName}\n";
+            if (count > max) s += $"• +{count - max} more\n";
+            bodyText.text = s.TrimEnd();
+        }
+
         yield return new WaitForSecondsRealtime(visibleSeconds);
+
         HideInstant();
+        routine = null;
     }
 }

@@ -7,6 +7,7 @@ public class AchievementRowUI : MonoBehaviour
     public TMP_Text titleText;
     public TMP_Text progressText;
     public Button claimButton;
+    public TMP_Text descriptionText;
 
     AchievementDef _def;
     GameManager _gm;
@@ -18,6 +19,7 @@ public class AchievementRowUI : MonoBehaviour
 
         if (titleText) titleText.text = def ? def.displayName : "Achievement";
         if (progressText) progressText.text = $"{progress}/{target}";
+        if (descriptionText) descriptionText.text = def ? def.description : "";
 
         if (claimButton)
         {

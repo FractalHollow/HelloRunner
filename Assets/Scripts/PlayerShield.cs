@@ -258,6 +258,31 @@ public class PlayerShield : MonoBehaviour
         regenEta = -1f;
     }
 
+        public void StopAllRegen()
+        {
+            // Disable regen logic
+            regenEnabled = false;
+
+            // Stop regen coroutine safely
+            if (regenCo != null)
+            {
+                StopCoroutine(regenCo);
+                regenCo = null;
+            }
+
+            // Clear regen timing
+            regenEta = -1f;
+
+            // Hide and reset regen UI ring
+            if (regenRing)
+            {
+                regenRing.enabled = false;
+                regenRing.fillAmount = 0f;
+            }
+        }
+
+
+
     IEnumerator RegenLoop()
     {
         while (regenEnabled)

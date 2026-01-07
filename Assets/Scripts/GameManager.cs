@@ -58,6 +58,7 @@ public class GameManager : MonoBehaviour
     // state
     bool paused = false;
     bool playing = false;
+    public bool IsPlaying => playing;
 
     // --- Run Modifiers tuning ---
     [Header("Run Modifiers Tuning")]
@@ -206,7 +207,11 @@ public class GameManager : MonoBehaviour
         if (spawner) spawner.StopSpawning();
         if (wispSpawner) wispSpawner.StopSpawning();
         if (player) player.EnableControl(false);
-
+        if (player)
+        {
+            var ps = player.GetComponent<PlayerShield>();
+            if (ps) ps.StopAllRegen(); 
+        }
         if (distanceTracker) distanceTracker.StopAndRecordBest();
 
         AudioManager.I?.PlayCrash();
@@ -412,6 +417,7 @@ int wispsTotal = 0;   // total bank (mirrors PlayerPrefs)
 // Add Wisps earned during this run (scaled by run modifiers)
 public void AddWisps(int baseAmount)
 {
+    if (!playing) return;           // ✅ prevents post-death pickups
     if (baseAmount <= 0) return;
 
     int finalAmount = Mathf.Max(1, Mathf.RoundToInt(baseAmount * CurrentWispMultiplier()));

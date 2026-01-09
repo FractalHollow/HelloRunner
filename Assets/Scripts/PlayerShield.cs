@@ -8,7 +8,7 @@ public class PlayerShield : MonoBehaviour
     public int maxCharges = 0;   // set by upgrades
 
     [Header("Invulnerability")]
-    public float invulnDuration = 1.5f;      // seconds after absorb
+    public float invulnDuration = 1.8f;      // seconds after absorb
     float invulnUntil = 0f;
     public bool IsInvulnerable => Time.time < invulnUntil;
 

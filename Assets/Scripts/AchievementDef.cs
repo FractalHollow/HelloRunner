@@ -14,7 +14,8 @@ public class AchievementDef : ScriptableObject
         RunsPlayed,
         LifetimeEmbersEarned,
         SpeedModRuns,
-        HazardsModRuns
+        HazardsModRuns,
+        PrestigeLevel
     }
 
     public ProgressType progressType;

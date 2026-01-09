@@ -78,6 +78,9 @@ public class AchievementManager : MonoBehaviour
             case AchievementDef.ProgressType.HazardsModRuns:
                 return StatsManager.HazardsModRuns;
 
+            case AchievementDef.ProgressType.PrestigeLevel:
+                return PrestigeManager.Level;
+
             default:
                 // If you add new enum values later and forget to update this,
                 // we still compile and just treat as 0 progress until implemented.

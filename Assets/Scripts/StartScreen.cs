@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class StartScreen : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class StartScreen : MonoBehaviour
     [Header("Run Modifiers")]
     [SerializeField] Button runModifiersButton;     // Btn_RunModifiers on StartPanel
     [SerializeField] GameObject runModifiersPanel;  // Panel_RunModifiers to open
+
+    [Header("Prestige")]
+    [SerializeField] TMP_Text prestigeText; // assign in inspector (optional)
 
     CanvasGroup cg;
 
@@ -84,8 +88,24 @@ public class StartScreen : MonoBehaviour
         bool unlocked = PlayerPrefs.GetInt("mods_unlocked", 0) == 1;
         if (runModifiersButton)
             runModifiersButton.gameObject.SetActive(unlocked);
+        
+        RefreshPrestigeUI();
     }
 
+    void RefreshPrestigeUI()
+    {
+        if (!prestigeText) return;
+
+        int lvl = PrestigeManager.Level;
+        if (lvl <= 0)
+        {
+            prestigeText.gameObject.SetActive(false);
+            return;
+        }
+
+        prestigeText.gameObject.SetActive(true);
+        prestigeText.text = $"Prestige {lvl} — ×{PrestigeManager.ScoreMult:0} Score & Embers";
+    }
 
     // Legacy alias if other code calls it
     public void RefreshUI() => RefreshLockUI();

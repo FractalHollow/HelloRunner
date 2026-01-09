@@ -201,6 +201,20 @@ public class GameManager : MonoBehaviour
         int runDistM = (int)(distanceTracker ? distanceTracker.distance : 0f);
         // bestDistance is updated by StopAndRecordBest(), so call that first (you already do)
 
+        // Update "best distance this prestige" gate
+        int cur = PlayerPrefs.GetInt("prestige_best_distance_m", 0);
+        if (runDistM > cur)
+        {
+            PlayerPrefs.SetInt("prestige_best_distance_m", runDistM);
+            PlayerPrefs.Save();
+            Debug.Log($"[PrestigeGate] Updated this-prestige best: {runDistM}m");
+        }
+        else
+        {
+            Debug.Log($"[PrestigeGate] No update. this-prestige best stays {cur}m (run {runDistM}m)");
+        }
+
+        
         if (!playing) return;
         playing = false;
 
@@ -647,6 +661,8 @@ public void RefreshAllCurrencyUI()
             if (ModSpeedOn)   mult += rewardBonusPerMod;
             if (ModHazardsOn) mult += rewardBonusPerMod;
             // later: add prestige/achievements here
+            mult *= PrestigeManager.ScoreMult;
+
             return mult;
         }
 
@@ -655,6 +671,9 @@ public void RefreshAllCurrencyUI()
                 float mult = 1f;
                 if (ModSpeedOn) mult += rewardBonusPerMod;
                 if (ModHazardsOn) mult += rewardBonusPerMod;
+
+                mult *= PrestigeManager.WispMult;
+
                 return mult;
             }
 

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2206ebd28b99714284ac3dcf009fcbb, type: 3}
+  m_Name: SkinDef_Paid
+  m_EditorClassIdentifier: 
+  id: paid_1
+  displayName: Green Fox
+  sprite: {fileID: -513868230436865072, guid: 34467d4708086c544850ef75076bc834, type: 3}
+  unlockType: 2
+  prestigeRequired: 0
+  priceText: $0.99

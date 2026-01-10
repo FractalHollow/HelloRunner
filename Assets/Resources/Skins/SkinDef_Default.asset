@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2206ebd28b99714284ac3dcf009fcbb, type: 3}
+  m_Name: SkinDef_Default
+  m_EditorClassIdentifier: 
+  id: default
+  displayName: Default Fox
+  sprite: {fileID: 8218729489440504007, guid: 322d4b6aa830f414495047b3e5e69b2e, type: 3}
+  unlockType: 0
+  prestigeRequired: 0
+  priceText: $0.99

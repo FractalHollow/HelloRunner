@@ -51,15 +51,22 @@ public class CosmeticRowUI : MonoBehaviour
         // Button state
         if (selectButton)
         {
-            selectButton.interactable = unlocked && !selected;
+            // Allow clicking paid locked skins (to show confirm dialog)
+            if (!unlocked && def.unlockType == SkinDef.UnlockType.Paid)
+                selectButton.interactable = true;
+            else
+                selectButton.interactable = unlocked && !selected;
         }
+
 
         if (buttonText)
         {
             if (selected) buttonText.text = "Selected";
             else if (unlocked) buttonText.text = "Select";
+            else if (def.unlockType == SkinDef.UnlockType.Paid) buttonText.text = "Buy";
             else buttonText.text = "Locked";
         }
+
     }
 
     string GetLockReason(SkinDef def)
@@ -72,17 +79,38 @@ public class CosmeticRowUI : MonoBehaviour
     }
 
     void OnClickSelect()
+{
+
+    if (def == null || CosmeticsManager.I == null) return;
+
+    bool unlocked = CosmeticsManager.I.IsUnlocked(def.id);
+
+    Debug.Log($"[CosmeticsUI] Click: {def.id} unlocked={unlocked} type={def.unlockType}");
+    Debug.Log($"[CosmeticsUI] ConfirmDialog.I is {(ConfirmDialog.I ? "SET" : "NULL")}");
+
+    // Paid + locked → confirm dialog
+    if (!unlocked && def.unlockType == SkinDef.UnlockType.Paid)
     {
-        if (def == null || CosmeticsManager.I == null) return;
+        ConfirmDialog.I?.Show(
+            $"This skin will cost {def.priceText} on release.\nUnlock for testing?",
+            () =>
+            {
+                // TEST unlock (Phase A only)
+                PlayerPrefs.SetInt($"skin_unlocked_{def.id}", 1);
+                PlayerPrefs.Save();
 
-        // Only allow selecting unlocked
-        if (!CosmeticsManager.I.IsUnlocked(def.id))
-        {
-            // Later: show toast "Coming soon" for paid skins, etc.
-            return;
-        }
-
-        CosmeticsManager.I.TrySelect(def.id);
-        owner?.RefreshAll();
+                CosmeticsManager.I.TrySelect(def.id);
+                owner?.RefreshAll();
+            }
+        );
+        return;
     }
+
+    // Normal selection
+    if (!unlocked) return;
+
+    CosmeticsManager.I.TrySelect(def.id);
+    owner?.RefreshAll();
+}
+
 }

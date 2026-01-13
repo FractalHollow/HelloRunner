@@ -81,4 +81,10 @@ public class CosmeticsPanelController : MonoBehaviour
         for (int i = 0; i < rows.Count; i++)
             if (rows[i]) rows[i].Refresh();
     }
+
+        public void RestorePurchasesPlaceholder()
+    {
+        Debug.Log("[Store] Restore purchases will be enabled when billing is live.");
+    }
+
 }

@@ -40,7 +40,20 @@ public class UpgradesPanelController : MonoBehaviour
     public void Close()
     {
         gameObject.SetActive(false);
+
+        // Refresh Den idle text (rate/cap) after upgrades are applied
+        var den = UnityEngine.Object.FindFirstObjectByType<DenMenu>();
+        if (den && den.gameObject.activeInHierarchy)
+            den.RefreshAfterMetaChange();
     }
+
+    void OnDisable()
+    {
+        var den = UnityEngine.Object.FindFirstObjectByType<DenMenu>();
+        if (den && den.gameObject.activeInHierarchy)
+            den.RefreshAfterMetaChange();
+    }
+
 
     void BuildIfNeeded()
     {
@@ -48,7 +61,7 @@ public class UpgradesPanelController : MonoBehaviour
 
         if (!gameManager)
         {
-            gameManager = FindObjectOfType<GameManager>();
+            gameManager = FindFirstObjectByType<GameManager>();
         }
 
         float best = GetBestDistanceMeters();
@@ -81,7 +94,7 @@ public class UpgradesPanelController : MonoBehaviour
     {
         if (!gameManager)
         {
-            gameManager = FindObjectOfType<GameManager>();
+            gameManager = FindFirstObjectByType<GameManager>();
         }
 
         int bank = gameManager ? gameManager.GetWispsBank() : 0;

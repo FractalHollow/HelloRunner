@@ -528,7 +528,7 @@ public void RefreshAllCurrencyUI()
             {
                 PlayerPrefs.SetInt("mods_unlocked", 1);
                 PlayerPrefs.Save();
-                FindObjectOfType<StartScreen>()?.RefreshLockUI();
+                FindFirstObjectByType<StartScreen>()?.RefreshLockUI();
             }
             RefreshUpgradesUI();
             return;
@@ -542,14 +542,14 @@ public void RefreshAllCurrencyUI()
 
             case UpgradeDef.EffectType.SmallerHitbox:
                 {
-                    var tight = FindObjectOfType<ColliderTightener2D>();
+                    var tight = FindFirstObjectByType<ColliderTightener2D>();
                     if (tight) tight.ApplyLevel(level);
                     break;
                 }
 
             case UpgradeDef.EffectType.Magnet:
                 {
-                    var magnet = FindObjectOfType<PlayerMagnet>();
+                    var magnet = FindFirstObjectByType<PlayerMagnet>();
                     if (!magnet && player) magnet = player.GetComponent<PlayerMagnet>();
                     if (!magnet && player) magnet = player.gameObject.AddComponent<PlayerMagnet>();
 

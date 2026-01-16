@@ -13,6 +13,8 @@ public class DenMenu : MonoBehaviour
 
     [SerializeField] PanelFader fader;
 
+    // NOTE: This key name is currently used for your "unlock upgrades" button.
+    // If you ever rename it later, update it here too.
     const string KEY_STORE_UNLOCKED = "store_unlocked";
 
     public UpgradesPanelController upgradesPanel;
@@ -21,12 +23,15 @@ public class DenMenu : MonoBehaviour
 
     void Awake()
     {
-        gm = FindObjectOfType<GameManager>();
+        // Unity 6+ replacement for deprecated FindObjectOfType
+        gm = FindFirstObjectByType<GameManager>();
+
+        // Ensure idle has a timestamp as soon as Den exists
+        IdleSystem.EnsureStartStamp();
     }
 
     void OnEnable()
     {
-        // Subscribe to GameManager bank changes
         GameManager.OnBankChanged += UpdateWispsUI;
 
         // Initial UI sync
@@ -62,7 +67,8 @@ public class DenMenu : MonoBehaviour
     // ---------- Helpers ----------
     int CurrentBank()
     {
-        return gm ? gm.GetWispsBank() : PlayerPrefs.GetInt("wisps_total", 0);
+        if (gm) return gm.GetWispsBank();
+        return PlayerPrefs.GetInt("wisps_total", 0);
     }
 
     // ---------- UI Refresh ----------
@@ -74,8 +80,25 @@ public class DenMenu : MonoBehaviour
 
     void RefreshIdleUI()
     {
+        IdleSystem.EnsureStartStamp();
+
         int claim = IdleSystem.GetClaimableWisps();
-        if (idleText) idleText.text = $"You can claim <b>{claim}</b> Embers (up to 8h stored).";
+
+        // NEW: dynamic cap + rate (includes upgrades + prestige bonus)
+        float capHrs = IdleSystem.GetEffectiveHoursCap();
+        float rate   = IdleSystem.GetEffectiveEmbersPerHour();
+
+        if (idleText)
+        {
+            // Keep it short and readable on your Den layout
+            // Example:
+            // You can claim 520 Embers
+            // (45/hr • up to 11.2h stored)
+            idleText.text =
+                $"You can claim <b>{claim:N0}</b> Embers\n" +
+                $"({rate:0.#}/hr \u2022 up to {capHrs:0.#}h stored)";
+        }
+
         if (wakeUpButton) wakeUpButton.interactable = (claim > 0);
     }
 
@@ -93,15 +116,28 @@ public class DenMenu : MonoBehaviour
         }
     }
 
+        public void RefreshAfterMetaChange()
+        {
+            RefreshIdleUI();
+            UpdateWispsUI(CurrentBank());
+            RefreshStoreUI();
+        }
+
+
     // ---------- Buttons ----------
     public void OnWakeUp()
     {
+        IdleSystem.EnsureStartStamp();
+
         int claim = IdleSystem.GetClaimableWisps();
+
         if (claim > 0 && gm)
         {
-            gm.AddToWispsBank(claim);   // ✅ add to bank via GameManager
-            IdleSystem.Claim();
+            gm.AddToWispsBank(claim); // add to bank via GameManager
+            IdleSystem.Claim();       // reset idle timestamp
         }
+
+        // Refresh everything
         RefreshIdleUI();
         UpdateWispsUI(CurrentBank());
     }
@@ -109,18 +145,22 @@ public class DenMenu : MonoBehaviour
     public void OnUnlockStore()
     {
         const int COST = 25;
-        if (gm && gm.TrySpendWisps(COST)) // ✅ spend via GameManager
+
+        if (gm && gm.TrySpendWisps(COST))
         {
             PlayerPrefs.SetInt(KEY_STORE_UNLOCKED, 1);
             PlayerPrefs.Save();
             RefreshStoreUI();
+
+            // Optional: after unlocking upgrades, refresh idle text as well
+            RefreshIdleUI();
         }
     }
 
     public void OnOpenStore()
     {
         // TODO: open StorePanel when available
-        Debug.Log("Open Upgrades: TODO");
+        Debug.Log("Open Store: TODO");
     }
 
     public void OpenUpgradesPanel()

@@ -611,6 +611,22 @@ public void RefreshAllCurrencyUI()
                 break;
             }
 
+            case UpgradeDef.EffectType.IdleRate:
+                {
+                    // Each tier adds flat wisps/hour
+                    int bonus = Mathf.RoundToInt(def.GetV0(level));
+                    PlayerPrefs.SetInt("idle_rate_bonus", bonus);
+                    break;
+                }
+
+                case UpgradeDef.EffectType.IdleCapacity:
+                {
+                    // Each tier adds hours of storage
+                    float bonusHours = def.GetV0(level);
+                    PlayerPrefs.SetFloat("idle_hours_cap_bonus", bonusHours);
+                    break;
+                }
+
 
         }
 

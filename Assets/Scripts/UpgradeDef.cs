@@ -59,8 +59,8 @@ public class UpgradeDef : ScriptableObject
         RunMod_Projectiles,
         RunMod_EnemyScale,
 
-        // New mechanics:
-        PlayerProjectiles
+        IdleRate,
+        IdleCapacity,
     }
     public EffectType effectType;
 

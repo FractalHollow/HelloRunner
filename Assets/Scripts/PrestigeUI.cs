@@ -89,8 +89,10 @@ public class PrestigeUI : MonoBehaviour
                 $"• Reset ALL upgrades\n" +
                 $"• Re-lock Upgrades + Run Modifiers\n" +
                 $"• Reset Embers to 0\n\n" +
+                $"• Permanent increased difficulty scaling\n" +
                 $"You will gain:\n" +
                 $"• Permanent ×{nextMult:0} Score & Embers\n\n" +
+                $"• Permanent Idle Ember generation bonus\n\n" +
                 $"This cannot be undone.";
         }
 

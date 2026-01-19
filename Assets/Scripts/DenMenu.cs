@@ -83,24 +83,21 @@ public class DenMenu : MonoBehaviour
         IdleSystem.EnsureStartStamp();
 
         int claim = IdleSystem.GetClaimableWisps();
-
-        // NEW: dynamic cap + rate (includes upgrades + prestige bonus)
-        float capHrs = IdleSystem.GetEffectiveHoursCap();
-        float rate   = IdleSystem.GetEffectiveEmbersPerHour();
+        float stored = IdleSystem.GetStoredHours();
+        float capHrs  = IdleSystem.GetEffectiveHoursCap();
+        float rate    = IdleSystem.GetEffectiveEmbersPerHour();
 
         if (idleText)
         {
-            // Keep it short and readable on your Den layout
-            // Example:
-            // You can claim 520 Embers
-            // (45/hr • up to 11.2h stored)
             idleText.text =
                 $"You can claim <b>{claim:N0}</b> Embers\n" +
-                $"({rate:0.#}/hr \u2022 up to {capHrs:0.#}h stored)";
+                $"({rate:0.#}/hr \u2022 {stored:0.0}/{capHrs:0.0}h stored)";
         }
 
         if (wakeUpButton) wakeUpButton.interactable = (claim > 0);
-    }
+}
+
+
 
     void RefreshStoreUI()
     {

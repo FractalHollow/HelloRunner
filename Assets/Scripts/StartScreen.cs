@@ -104,7 +104,7 @@ public class StartScreen : MonoBehaviour
         }
 
         prestigeText.gameObject.SetActive(true);
-        prestigeText.text = $"Prestige {lvl} — ×{PrestigeManager.ScoreMult:0} Score & Embers";
+        prestigeText.text = $"Prestige {lvl} — ×{PrestigeManager.ScoreMult:0.##} Score & Embers";
     }
 
     // Legacy alias if other code calls it

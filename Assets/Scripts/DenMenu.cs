@@ -10,8 +10,8 @@ public class DenMenu : MonoBehaviour
     [SerializeField] Button wakeUpButton;
     [SerializeField] Button unlockUpgradesButton;
     [SerializeField] Button openUpgradesButton;
-
     [SerializeField] PanelFader fader;
+    [SerializeField] UnityEngine.UI.Image denFoxImage;
 
     // NOTE: This key name is currently used for your "unlock upgrades" button.
     // If you ever rename it later, update it here too.
@@ -52,6 +52,7 @@ public class DenMenu : MonoBehaviour
 
         IdleSystem.EnsureStartStamp();
         RefreshIdleUI();
+        ApplyDenFoxSprite(false); // sleeping on open
         UpdateWispsUI(CurrentBank());
         RefreshStoreUI();
 
@@ -60,6 +61,7 @@ public class DenMenu : MonoBehaviour
 
     public void Close()
     {
+        ApplyDenFoxSprite(false); // reset to sleep on close
         if (fader) fader.FadeOut(() => gameObject.SetActive(false));
         else gameObject.SetActive(false);
     }
@@ -70,6 +72,24 @@ public class DenMenu : MonoBehaviour
         if (gm) return gm.GetWispsBank();
         return PlayerPrefs.GetInt("wisps_total", 0);
     }
+
+    void ApplyDenFoxSprite(bool awake)
+    {
+        if (!denFoxImage) return;
+
+        var def = CosmeticsManager.I ? CosmeticsManager.I.GetSelectedDef() : null;
+        if (!def) return;
+
+        var s = awake ? def.denAwakeSprite : def.denSleepSprite;
+        if (s) denFoxImage.sprite = s;
+    }
+
+    public void ForceRefreshDenFox()
+    {
+        // Re-apply the sleeping fox sprite for the currently selected skin
+        ApplyDenFoxSprite(false);
+    }
+
 
     // ---------- UI Refresh ----------
     void UpdateWispsUI(int total)
@@ -132,6 +152,7 @@ public class DenMenu : MonoBehaviour
         {
             gm.AddToWispsBank(claim); // add to bank via GameManager
             IdleSystem.Claim();       // reset idle timestamp
+            ApplyDenFoxSprite(true); // awake after claim
         }
 
         // Refresh everything

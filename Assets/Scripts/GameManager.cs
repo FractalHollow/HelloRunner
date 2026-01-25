@@ -49,6 +49,21 @@ public class GameManager : MonoBehaviour
     public GameObject pausePanel;
     public Button pauseButton;
 
+    [Header("Prestige Difficulty Scaling")]
+    public int prestigeDifficultyStart = 3;     // no scaling until this prestige
+    public float prestigeDifficultyStep = 0.05f; // +5% speed per prestige AFTER start
+    public float prestigeDifficultyMax = 1.6f;   // cap
+
+    int PrestigeLevel => PlayerPrefs.GetInt("prestige_level", 0);
+
+    float DifficultyMultiplier()
+    {
+        int steps = Mathf.Max(0, PrestigeLevel - prestigeDifficultyStart);
+        float mult = 1f + steps * prestigeDifficultyStep;
+        return Mathf.Min(mult, prestigeDifficultyMax);
+    }
+
+
     // spawn reset
     public Vector3 playerStartPos;
     public Quaternion playerStartRot;
@@ -70,8 +85,14 @@ public class GameManager : MonoBehaviour
     public bool ModHazardsOn => PlayerPrefs.GetInt("mod_hazards_on", 0) == 1;
 
     // --- Multipliers other systems can read ---
-    public float RunSpeedMultiplier => ModSpeedOn ? speedMultWhenOn : 1f;
-
+    public float RunSpeedMultiplier
+    {
+        get
+        {
+            float modMult = ModSpeedOn ? speedMultWhenOn : 1f;
+            return modMult * DifficultyMultiplier();
+        }
+    }
 
     static GameManager _inst;
 
@@ -131,7 +152,6 @@ public class GameManager : MonoBehaviour
         if (gameObject.scene.name == "DontDestroyOnLoad")
         {
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
-            Debug.LogWarning("[GM] Moved back to scene in Start().");
         }
     }
 
@@ -147,6 +167,10 @@ public class GameManager : MonoBehaviour
         if (wispSpawner) wispSpawner.StopSpawning();
         ClearWorld();
         ResetPlayerToStart();
+
+        Debug.Log($"[D2] Prestige={PlayerPrefs.GetInt("prestige_level", 0)} | " +
+                $"DifficultyMult={DifficultyMultiplier():0.00} | " +
+                $"ModSpeedOn={ModSpeedOn} | RunSpeedMult={RunSpeedMultiplier:0.00}");
 
         // Record stats at run start (persists across prestiges)
         StatsManager.RecordRunStarted(ModSpeedOn, ModHazardsOn);
@@ -184,7 +208,6 @@ public class GameManager : MonoBehaviour
 
     void BeginGameplay()
     {
-        Debug.Log("[GM] BeginGameplay()");
         Time.timeScale = 1f;
         playing = true;
 
@@ -253,17 +276,9 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.SetInt("HighScore", finalScore);
         }
 
-        // --- Debug snapshot before and after banking ---
-        Debug.Log($"[GM] GameOver START | Run: {wispsRun} | Bank (pre): {GetWispsBank()}");
-
         int bank = GetWispsBank();
         bank += wispsRun;
         SetWispsBank(bank);
-
-        Debug.Log($"[GM] GameOver END | Run: {wispsRun} | Bank (post): {GetWispsBank()}");
-
-
-
         UpdateHighScoreUI();
         UpdateWispHUD();
 
@@ -288,8 +303,6 @@ public class GameManager : MonoBehaviour
 
         // reset run currency so it can't be re-added accidentally
         wispsRun = 0;
-        Debug.Log("[GM] wispsRun reset to 0 after GameOver");
-
     }
 
     public void Restart()
@@ -656,7 +669,6 @@ public void RefreshAllCurrencyUI()
 
     public void OpenSettingsProxy()
     {
-        Debug.Log("[GM] Settings button clicked");
         if (settingsMenu)
         {
             settingsMenu.Open();

@@ -35,8 +35,8 @@ public static class PrestigeManager
         }
     }
 
-    public static float ScoreMult => Mathf.Pow(2f, Level);
-    public static float WispMult  => Mathf.Pow(2f, Level);
+    public static float ScoreMult => Mathf.Pow(1.5f, Level);
+    public static float WispMult  => Mathf.Pow(1.5f, Level);
 
     public static int BestDistanceM
     {

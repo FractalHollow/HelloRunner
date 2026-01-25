@@ -67,7 +67,7 @@ public class PrestigeUI : MonoBehaviour
         if (rewardText)
         {
             // Show what you’ll get AFTER prestiging (next level)
-            float nextMult = Mathf.Pow(2f, lvl + 1);
+            float nextMult = Mathf.Pow(1.5f, lvl + 1);
             rewardText.text = $"Next Prestige Reward: ×{nextMult:0} Score & Embers";
         }
 
@@ -83,7 +83,7 @@ public class PrestigeUI : MonoBehaviour
 
         if (confirmBodyText)
         {
-            float nextMult = Mathf.Pow(2f, PrestigeManager.Level + 1);
+            float nextMult = Mathf.Pow(1.5f, PrestigeManager.Level + 1);
             confirmBodyText.text =
                 $"Prestiging will:\n" +
                 $"• Reset ALL upgrades\n" +
@@ -91,7 +91,7 @@ public class PrestigeUI : MonoBehaviour
                 $"• Reset Embers to 0\n\n" +
                 $"• Permanent increased difficulty scaling\n" +
                 $"You will gain:\n" +
-                $"• Permanent ×{nextMult:0} Score & Embers\n\n" +
+                $"• Permanent ×{nextMult:0.##} Score & Embers\n\n" +
                 $"• Permanent Idle Ember generation bonus\n\n" +
                 $"This cannot be undone.";
         }

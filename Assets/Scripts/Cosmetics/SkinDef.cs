@@ -14,8 +14,12 @@ public class SkinDef : ScriptableObject
     public string id = "skin_default";
     public string displayName = "Default Fox";
 
-    [Header("Visual")]
+    [Header("Visual - Player")]
     public Sprite sprite; // sprite that replaces the fox sprite
+
+    [Header("Visual - Den Fox")]
+    public Sprite denSleepSprite; // sleeping fox shown in Den
+    public Sprite denAwakeSprite; // wake fox shown after claiming idle
 
     [Header("Unlock")]
     public UnlockType unlockType = UnlockType.DefaultUnlocked;

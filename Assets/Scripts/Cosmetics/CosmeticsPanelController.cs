@@ -37,6 +37,7 @@ public class CosmeticsPanelController : MonoBehaviour
 
     public void Close()
     {
+        FindFirstObjectByType<DenMenu>()?.ForceRefreshDenFox();
         if (panelRoot) panelRoot.SetActive(false);
     }
 

@@ -15,6 +15,8 @@ MonoBehaviour:
   id: prestige_1
   displayName: Pink Fox
   sprite: {fileID: 785045079820100054, guid: 6282652b4e58589479dd35b5395b9e5d, type: 3}
+  denSleepSprite: {fileID: 21300000, guid: 2cebcf709556b3a4692330a1d074f725, type: 3}
+  denAwakeSprite: {fileID: 21300000, guid: c19f3ee5ac25f0e46b0d1491ce00b39a, type: 3}
   unlockType: 1
   prestigeRequired: 1
   priceText: $0.99

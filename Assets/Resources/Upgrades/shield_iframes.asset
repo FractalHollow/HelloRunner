@@ -10,22 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8cd9dfb2658fd2549a2ad2c87a0d80e4, type: 3}
-  m_Name: idle_capacity
+  m_Name: shield_iframes
   m_EditorClassIdentifier: 
-  id: idle_capacity
-  displayName: Idle Cap
-  description: Increase Idle Cap
-  descriptionTemplate: Store +{v0} more hours.
-  baseCost: 50
+  id: shield_iframes
+  displayName: Shield Invulnerability
+  description: Longer invulnerable window from shield.
+  descriptionTemplate: 'Gain {v0} sec of invulnerability. '
+  baseCost: 60
   costScale: 1.5
-  maxLevel: 4
-  unlockDistance: 80
+  maxLevel: 5
+  unlockDistance: 160
   dependencies: []
   v0PerTier:
-  - 8
-  - 16
-  - 24
-  - 48
+  - 1.8
+  - 2
+  - 2.2
+  - 2.4
+  - 2.6
   v1PerTier: []
   v2PerTier: []
-  effectType: 0
+  effectType: 5

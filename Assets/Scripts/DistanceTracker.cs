@@ -3,8 +3,10 @@ using UnityEngine;
 public class DistanceTracker : MonoBehaviour
 {
     [Header("Distance")]
-    [Tooltip("Meters gained each second while tracking")]
+    [Tooltip("Base meters gained each second at RunSpeedMultiplier = 1")]
     public float metersPerSecond = 2.5f;
+
+    GameManager gm;
 
     public bool tracking;
     public float distance;          // meters this run
@@ -14,6 +16,7 @@ public class DistanceTracker : MonoBehaviour
 
     void Awake()
     {
+        gm = FindFirstObjectByType<GameManager>();
         bestDistance = PlayerPrefs.GetFloat(KEY_BEST, 0f);
         if (metersPerSecond < 0f) metersPerSecond = 0f;
     }
@@ -33,9 +36,8 @@ public class DistanceTracker : MonoBehaviour
 
     void Update()
     {
-        if (tracking && metersPerSecond > 0f)
-            distance += metersPerSecond * Time.unscaledDeltaTime * (Time.timeScale);
-        // Using scaled time so pause (timeScale=0) halts distance.
+            float speedMult = (gm != null) ? gm.RunSpeedMultiplier : 1f;
+            distance += metersPerSecond * speedMult * Time.unscaledDeltaTime * (Time.timeScale);
     }
     
     

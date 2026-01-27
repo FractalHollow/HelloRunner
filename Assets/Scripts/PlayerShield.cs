@@ -77,6 +77,10 @@ public class PlayerShield : MonoBehaviour
     /// Called by GM at run start
     public void SetCharges(int max)
     {
+        EnableGhostCollisions(false);
+        invulnUntil = 0f;
+        SetAlpha(1f);
+        
         maxCharges = Mathf.Max(0, max);
         charges = maxCharges;
         RefreshVisual();
@@ -336,4 +340,25 @@ public class PlayerShield : MonoBehaviour
         float elapsed01 = Mathf.Clamp01(1f - ((regenEta - Time.time) / regenCooldown));
         regenRing.fillAmount = elapsed01;
     }
+
+            void OnDisable()
+        {
+            // Safety: if we get disabled/destroyed mid-invuln (scene change, prestige, etc.)
+            // ensure we restore collisions globally.
+            EnableGhostCollisions(false);
+
+            // Also stop invuln visuals/behavior in case we re-enable later.
+            invulnUntil = 0f;
+            SetAlpha(1f);
+
+            if (freezeXDuringInvuln && rb)
+                rb.constraints = originalConstraints;
+        }
+
+        void OnDestroy()
+        {
+            // Same safety net for destroy paths.
+            EnableGhostCollisions(false);
+        }
+
 }

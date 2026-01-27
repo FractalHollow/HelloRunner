@@ -116,11 +116,8 @@ public class UpgradesPanelController : MonoBehaviour
 
     float GetBestDistanceMeters()
     {
-        // Prefer live tracker value if present; fall back to PlayerPrefs
-        if (gameManager && gameManager.distanceTracker)
-            return gameManager.distanceTracker.bestDistance;
-
-        return PlayerPrefs.GetFloat("best_distance_m", 0f);
+    // Gate upgrades by best distance THIS prestige (relocks after prestige)
+    return PrestigeManager.BestDistanceThisPrestigeM;
     }
 
     // Optional: Use this if you ever add/remove upgrade defs at runtime.

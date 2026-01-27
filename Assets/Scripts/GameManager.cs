@@ -550,8 +550,14 @@ public void RefreshAllCurrencyUI()
         switch (def.effectType)
         {
             case UpgradeDef.EffectType.ComboBoost:
-                if (scoreSystem) scoreSystem.upgradeMultiplier = 1f + 0.1f * level;
-                break;
+                {
+                    if (!scoreSystem) break;
+
+                    // v0PerTier = literal score multiplier (e.g. 1.5 = x1.5)
+                    float mult = def.GetV0(level);
+                    scoreSystem.upgradeMultiplier = Mathf.Max(1f, mult);
+                    break;
+                }
 
             case UpgradeDef.EffectType.SmallerHitbox:
                 {
@@ -632,11 +638,24 @@ public void RefreshAllCurrencyUI()
                     break;
                 }
 
-                case UpgradeDef.EffectType.IdleCapacity:
+             case UpgradeDef.EffectType.IdleCapacity:
                 {
                     // Each tier adds hours of storage
                     float bonusHours = def.GetV0(level);
                     PlayerPrefs.SetFloat("idle_hours_cap_bonus", bonusHours);
+                    break;
+                }
+
+            case UpgradeDef.EffectType.ShieldIFrames:
+                {
+                    if (!player) break;
+                    var ps = player.GetComponent<PlayerShield>() ?? player.gameObject.AddComponent<PlayerShield>();
+
+                    // v0PerTier = invuln seconds (absolute value per tier) OR bonus seconds — pick one.
+                    // I recommend absolute values per tier for clarity.
+                    float seconds = def.GetV0(level);
+                    if (seconds > 0f) ps.invulnDuration = seconds;
+
                     break;
                 }
 

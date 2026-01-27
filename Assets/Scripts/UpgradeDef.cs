@@ -48,17 +48,7 @@ public class UpgradeDef : ScriptableObject
         Magnet,
         SmallerHitbox,
         ComboBoost,
-
-        // Future/advanced:
-        ShieldRegen,
-        InvulnAfterShield,
-        EmberMultiplier,
-
-        // Run modifiers / toggles:
-        RunMod_Speed,
-        RunMod_Projectiles,
-        RunMod_EnemyScale,
-
+        ShieldIFrames,
         IdleRate,
         IdleCapacity,
     }

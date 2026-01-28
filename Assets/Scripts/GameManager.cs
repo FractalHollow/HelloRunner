@@ -94,7 +94,25 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // --- Run stats for achievements ---
+    int flipsThisRun = 0;
+
+    float noHitSegmentStartDistM = 0f;
+    float longestNoHitDistM = 0f;
+
     static GameManager _inst;
+
+    public int FlipsThisRun => flipsThisRun;
+    public float LongestNoHitDistM => longestNoHitDistM;
+    public float RunDistanceM
+    {
+        get
+        {
+            var dt = FindFirstObjectByType<DistanceTracker>();
+            return dt ? dt.distance : 0f;
+        }
+    }
+
 
     void Awake()
     {
@@ -202,6 +220,11 @@ public class GameManager : MonoBehaviour
             if (ps) ps.SetCharges(ps.maxCharges);
         }
 
+        //Achievement Stats Tracking/Reset
+        flipsThisRun = 0;
+        noHitSegmentStartDistM = 0f;
+        longestNoHitDistM = 0f;
+
         BeginGameplay();
         UpdateUILive();
     }
@@ -237,7 +260,34 @@ public class GameManager : MonoBehaviour
             Debug.Log($"[PrestigeGate] No update. this-prestige best stays {cur}m (run {runDistM}m)");
         }
 
-        
+        var dt = FindFirstObjectByType<DistanceTracker>();
+        float currentDist = dt ? dt.distance : 0f;
+
+        float finalSegment = currentDist - noHitSegmentStartDistM;
+        if (finalSegment > longestNoHitDistM)
+        longestNoHitDistM = finalSegment;
+
+        // --- Best attempt snapshots for run-based achievements ---
+        int flips = FlipsThisRun;
+        int bestFlips = PlayerPrefs.GetInt("best_flips_in_run", 0);
+        if (flips > bestFlips)
+            PlayerPrefs.SetInt("best_flips_in_run", flips);
+
+        int noHitM = Mathf.FloorToInt(LongestNoHitDistM);
+        int bestNoHitM = PlayerPrefs.GetInt("best_nohit_m", 0);
+        if (noHitM > bestNoHitM)
+            PlayerPrefs.SetInt("best_nohit_m", noHitM);
+
+        bool hard = ModSpeedOn && ModHazardsOn;
+        if (hard)
+        {
+            int hardM = Mathf.FloorToInt(RunDistanceM);
+            int bestHardM = PlayerPrefs.GetInt("best_hardmode_m", 0);
+            if (hardM > bestHardM)
+                PlayerPrefs.SetInt("best_hardmode_m", hardM);
+        }
+
+
         if (!playing) return;
         playing = false;
 
@@ -700,6 +750,23 @@ public void RefreshAllCurrencyUI()
     }
 
 
+        public void NotifyFlip()
+        {
+            flipsThisRun++;
+        }
+
+        public void NotifyPlayerHit()
+        {
+            // distance since last hit
+            var dt = FindFirstObjectByType<DistanceTracker>();
+            float currentDist = dt ? dt.distance : 0f;
+
+            float segment = currentDist - noHitSegmentStartDistM;
+            if (segment > longestNoHitDistM)
+                longestNoHitDistM = segment;
+
+            noHitSegmentStartDistM = currentDist;
+        }
 
 
         public float CurrentScoreMultiplier()

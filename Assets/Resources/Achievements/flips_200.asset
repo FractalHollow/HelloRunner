@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ead87ec7bb53c924f9e8e115a6844074, type: 3}
-  m_Name: life_dist_42195
+  m_Name: flips_200
   m_EditorClassIdentifier: 
-  id: life_dist_42195
-  displayName: Marathon Runner
-  description: Run a marathon in lifetime distance (42,195m)
-  progressType: 1
-  targetValue: 42195
-  rewardEmbers: 450
+  id: flips_200
+  displayName: Dodge Master
+  description: Flip 200 times in a single run.
+  progressType: 7
+  targetValue: 200
+  rewardEmbers: 80

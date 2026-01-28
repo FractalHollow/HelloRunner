@@ -139,6 +139,7 @@ public void SetMusicVolume(float v)
 {
     music01 = Mathf.Clamp01(v);
     PlayerPrefs.SetFloat(KEY_MUSIC, music01);
+    PlayerPrefs.Save();
     ApplyMusicVolume();
 }
 
@@ -146,6 +147,7 @@ public void SetSfxVolume(float v)
 {
     sfx01 = Mathf.Clamp01(v);
     PlayerPrefs.SetFloat(KEY_SFX, sfx01);
+    PlayerPrefs.Save();
     ApplySfxVolume();
 }
 
@@ -153,6 +155,7 @@ public void SetMusicMuted(bool muted)
 {
     muteMusic = muted;
     PlayerPrefs.SetInt(KEY_MUTE_MUSIC, muted ? 1 : 0);
+    PlayerPrefs.Save();
     ApplyMusicVolume();
 }
 
@@ -160,31 +163,44 @@ public void SetSfxMuted(bool muted)
 {
     muteSfx = muted;
     PlayerPrefs.SetInt(KEY_MUTE_SFX, muted ? 1 : 0);
+    PlayerPrefs.Save();
     ApplySfxVolume();
 }
 
 
 
- void ApplyMusicVolume()
-{
-    float db = muteMusic ? -80f : ToDecibels(music01);
-    if (mixer) { mixer.SetFloat(musicVolParam, db); }
-    else if (musicSource) { musicSource.mute = muteMusic; musicSource.volume = music01; }
-    Debug.Log($"[AM] ApplyMusicVolume -> {(mixer ? "Mixer" : "Source")} db={db:0.##} vol={music01:0.###} mute={muteMusic}");
-}
-void ApplySfxVolume()
-{
-    float db = muteSfx ? -80f : ToDecibels(sfx01);
-    if (mixer) { mixer.SetFloat(sfxVolParam, db); }
-    else if (sfxSource) { sfxSource.mute = muteSfx; sfxSource.volume = sfx01; }
-    Debug.Log($"[AM] ApplySfxVolume -> {(mixer ? "Mixer" : "Source")} db={db:0.##} vol={sfx01:0.###} mute={muteSfx}");
-}
+        void ApplyMusicVolume()
+        {
+            float db = muteMusic ? -80f : ToDecibels(music01);
+            if (mixer) { mixer.SetFloat(musicVolParam, db); }
+            else if (musicSource) { musicSource.mute = muteMusic; musicSource.volume = music01; }
+            Debug.Log($"[AM] ApplyMusicVolume -> {(mixer ? "Mixer" : "Source")} db={db:0.##} vol={music01:0.###} mute={muteMusic}");
+        }
+        void ApplySfxVolume()
+        {
+            float db = muteSfx ? -80f : ToDecibels(sfx01);
+            if (mixer) { mixer.SetFloat(sfxVolParam, db); }
+            else if (sfxSource) { sfxSource.mute = muteSfx; sfxSource.volume = sfx01; }
+            Debug.Log($"[AM] ApplySfxVolume -> {(mixer ? "Mixer" : "Source")} db={db:0.##} vol={sfx01:0.###} mute={muteSfx}");
+        }
+
+        void OnApplicationPause(bool paused)
+        {
+            if (paused)
+                PlayerPrefs.Save();
+        }
+
+        void OnApplicationQuit()
+        {
+            PlayerPrefs.Save();
+        }
 
 
     // ---------------- playback helpers ----------------
     public void PlayMusic()
     {
         if (!musicSource || !musicLoop) return;
+        ApplyMusicVolume(); // ensure volume/mute is current
         if (musicSource.clip != musicLoop) musicSource.clip = musicLoop;
         if (!musicSource.isPlaying) musicSource.Play();
     }

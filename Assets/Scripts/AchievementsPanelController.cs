@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 
 public class AchievementsPanelController : MonoBehaviour
 {
@@ -26,21 +27,15 @@ public class AchievementsPanelController : MonoBehaviour
     public void Refresh()
     {
         if (!contentRoot || !rowPrefab)
-        {
-            Debug.LogWarning("[AchievementsPanel] Missing contentRoot or rowPrefab.");
             return;
-        }
 
-        // Clear existing
+        // Clear existing rows
         for (int i = contentRoot.childCount - 1; i >= 0; i--)
             Destroy(contentRoot.GetChild(i).gameObject);
 
         var am = AchievementManager.I;
         if (am == null)
-        {
-            Debug.LogWarning("[AchievementsPanel] AchievementManager not found in scene.");
             return;
-        }
 
         int bestDistM = 0;
         if (gm != null && gm.distanceTracker != null)
@@ -48,20 +43,33 @@ public class AchievementsPanelController : MonoBehaviour
         else
             bestDistM = PlayerPrefs.GetInt("best_distance_m", 0); // fallback
 
-
         var defs = am.GetAllDefs();
-        foreach (var def in defs)
+
+        // Group + sort:
+        // 0 = ready to claim, 1 = locked, 2 = claimed
+        var ordered = defs
+            .Where(d => d != null && !string.IsNullOrEmpty(d.id))
+            .Select(d =>
+            {
+                bool unlocked = am.IsUnlocked(d.id);
+                bool claimed = am.IsClaimed(d.id);
+                bool claimable = unlocked && !claimed;
+
+                int group = claimable ? 0 : (!unlocked ? 1 : 2);
+                return (def: d, group: group, unlocked: unlocked, claimed: claimed);
+            })
+            .OrderBy(x => x.group)
+            .ThenBy(x => x.def.sortOrder)
+            .ThenBy(x => x.def.displayName)
+            .ToList();
+
+        foreach (var x in ordered)
         {
-            if (!def || string.IsNullOrEmpty(def.id)) continue;
-
-            bool unlocked = am.IsUnlocked(def.id);
-            bool claimed  = am.IsClaimed(def.id);
-
-            // progress reading uses manager helper (runDistance/runScore/runEmbers irrelevant in Den view)
-            int progress = am.GetProgress(def, bestDistM, 0, 0, 0);
+            int progress = am.GetProgress(x.def, bestDistM, 0, 0, 0);
 
             var row = Instantiate(rowPrefab, contentRoot);
-            row.Bind(def, progress, def.targetValue, unlocked, claimed, gm);
+            row.Bind(x.def, progress, x.def.targetValue, x.unlocked, x.claimed, gm);
         }
     }
+
 }

@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class AchievementManager : MonoBehaviour
 {
     public static AchievementManager I { get; private set; }
+    GameManager gm;
+
 
     [Header("Toast (Game Over)")]
     public AchievementToast toast; // optional: will auto-find if null
@@ -24,6 +27,9 @@ public class AchievementManager : MonoBehaviour
         LoadDefs();
 
         EnsureToast();
+
+        gm = FindFirstObjectByType<GameManager>();
+
     }
 
     void EnsureToast()
@@ -80,6 +86,15 @@ public class AchievementManager : MonoBehaviour
 
             case AchievementDef.ProgressType.PrestigeLevel:
                 return PrestigeManager.Level;
+
+            case AchievementDef.ProgressType.FlipsInRun:
+                return PlayerPrefs.GetInt("best_flips_in_run", 0);
+
+            case AchievementDef.ProgressType.LongestNoHitDistanceM:
+                return PlayerPrefs.GetInt("best_nohit_m", 0);
+
+            case AchievementDef.ProgressType.HardModeDistanceM:
+                return PlayerPrefs.GetInt("best_hardmode_m", 0);
 
             default:
                 // If you add new enum values later and forget to update this,

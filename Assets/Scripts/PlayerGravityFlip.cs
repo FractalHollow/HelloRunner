@@ -124,6 +124,8 @@ void OnCollisionEnter2D(Collision2D collision)
 
     void DoFlip(bool playSfx, bool playFx)
     {
+        gm?.NotifyFlip();
+
         // flip direction
         gravDir *= -1;
         ApplyGravityFromDir();

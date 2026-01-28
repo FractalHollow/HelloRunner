@@ -18,31 +18,42 @@ public class AchievementRowUI : MonoBehaviour
         _gm = gm;
 
         if (titleText) titleText.text = def ? def.displayName : "Achievement";
-        if (progressText) progressText.text = $"{progress}/{target}";
         if (descriptionText) descriptionText.text = def ? def.description : "";
+
+        // Progress text: hide once claimed (and also hide while locked to reduce noise)
+        if (progressText)
+        {
+            bool showProgress = !claimed;
+            progressText.gameObject.SetActive(showProgress);
+
+            if (showProgress)
+                progressText.text = $"{progress}/{target}";
+        }
 
         if (claimButton)
         {
             claimButton.onClick.RemoveAllListeners();
 
             bool canClaim = unlocked && !claimed;
-            claimButton.gameObject.SetActive(unlocked);       // hide until unlocked (clean)
+
+            // Keep your behavior: hide button until unlocked
+            claimButton.gameObject.SetActive(unlocked);
             claimButton.interactable = canClaim;
+
+            var tmp = claimButton.GetComponentInChildren<TMP_Text>();
 
             if (canClaim)
             {
                 claimButton.onClick.AddListener(OnClaim);
-                // Optional: change button text to show reward
-                var tmp = claimButton.GetComponentInChildren<TMP_Text>();
                 if (tmp) tmp.text = $"Claim +{def.rewardEmbers}";
             }
             else
             {
-                var tmp = claimButton.GetComponentInChildren<TMP_Text>();
                 if (tmp) tmp.text = claimed ? "Claimed" : "Locked";
             }
         }
     }
+
 
     void OnClaim()
     {

@@ -95,6 +95,8 @@ public class PlayerShield : MonoBehaviour
     /// Called from collision; returns true if the hit was absorbed.
     public bool TryAbsorbHit()
     {
+        FindFirstObjectByType<GameManager>()?.NotifyPlayerHit();
+        
         // If currently invulnerable, treat as absorbed without consuming a charge
         if (IsInvulnerable) return true;
 
@@ -111,7 +113,8 @@ public class PlayerShield : MonoBehaviour
         }
 
         // SFX
-        if (shieldBreakClip && audioSrc) audioSrc.PlayOneShot(shieldBreakClip);
+        if (shieldBreakClip)
+        AudioManager.I?.Play2D(shieldBreakClip, 1f);
 
         // Burst (single instant emit at player's position)
         if (breakBurst)
@@ -315,8 +318,8 @@ public class PlayerShield : MonoBehaviour
                 RefreshVisual();
 
                 // Regen SFX (only when a charge is actually restored)
-                if (shieldRegenClip && audioSrc)
-                audioSrc.PlayOneShot(shieldRegenClip, shieldRegenVolume);
+                if (shieldRegenClip)
+                AudioManager.I?.Play2D(shieldRegenClip, shieldRegenVolume);
             }
 
             // If still not full, schedule the next one; else clear.

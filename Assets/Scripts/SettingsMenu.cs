@@ -14,11 +14,18 @@ public class SettingsMenu : MonoBehaviour
         aboutMenu?.Open();
     }
 
-
     void OnEnable()
     {
-       // SyncFromAudioManager();
-       // Debug.Log("[SM] OnEnable Sync"); SyncFromAudioManager();
+        StartCoroutine(SyncWhenReady());
+    }
+
+    System.Collections.IEnumerator SyncWhenReady()
+    {
+        // wait a few frames for AudioManager to spawn (scene load order can vary)
+        for (int i = 0; i < 10 && !AudioManager.I; i++)
+            yield return null;
+
+        SyncFromAudioManager();
     }
 
     public void Open()

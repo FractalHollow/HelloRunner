@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ead87ec7bb53c924f9e8e115a6844074, type: 3}
-  m_Name: dist_best_500
+  m_Name: flips_100
   m_EditorClassIdentifier: 
-  id: dist_best_500
-  displayName: Endless Runner
-  description: Reach a best distance of 500m.
-  progressType: 0
-  targetValue: 500
-  rewardEmbers: 100
+  id: flips_100
+  displayName: Get Tappin
+  description: Flip 100 times in a single run.
+  progressType: 7
+  targetValue: 100
+  rewardEmbers: 50

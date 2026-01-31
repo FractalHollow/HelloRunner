@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2206ebd28b99714284ac3dcf009fcbb, type: 3}
-  m_Name: SkinDef_Prestige1
+  m_Name: SkinDef_Prestige15
   m_EditorClassIdentifier: 
-  id: prestige_1
-  displayName: Pink Fox
-  sprite: {fileID: 785045079820100054, guid: 6282652b4e58589479dd35b5395b9e5d, type: 3}
-  denSleepSprite: {fileID: 21300000, guid: 2cebcf709556b3a4692330a1d074f725, type: 3}
-  denAwakeSprite: {fileID: 21300000, guid: c19f3ee5ac25f0e46b0d1491ce00b39a, type: 3}
-  flipFxColor: {r: 1, g: 0.68235296, b: 0.7882353, a: 1}
+  id: Prestige_15
+  displayName: Red Fox
+  sprite: {fileID: -2046581965837439271, guid: bcd1080f237c98a4d83f6c4527087551, type: 3}
+  denSleepSprite: {fileID: 21300000, guid: 667d5eda75da3664bba7cd2c19bfb460, type: 3}
+  denAwakeSprite: {fileID: 21300000, guid: f3df2689792bc87448234761032777b6, type: 3}
+  flipFxColor: {r: 1, g: 0.20784314, b: 0.21960784, a: 1}
   unlockType: 1
-  prestigeRequired: 1
+  prestigeRequired: 15
   priceText: $0.99

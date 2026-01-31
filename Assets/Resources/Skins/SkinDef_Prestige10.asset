@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2206ebd28b99714284ac3dcf009fcbb, type: 3}
+  m_Name: SkinDef_Prestige10
+  m_EditorClassIdentifier: 
+  id: prestige_10
+  displayName: Blue Fox
+  sprite: {fileID: 6863598729684579618, guid: 187a3b48e7364f948b3471c7b89ed798, type: 3}
+  denSleepSprite: {fileID: 21300000, guid: 10a86b9bbe03ad044832462e56d93937, type: 3}
+  denAwakeSprite: {fileID: 21300000, guid: a70fca10690358f4a98ef152726a5be5, type: 3}
+  flipFxColor: {r: 0.6, g: 0.8509804, b: 0.91764706, a: 1}
+  unlockType: 1
+  prestigeRequired: 10
+  priceText: $0.99

@@ -28,6 +28,14 @@ public class CosmeticsManager : MonoBehaviour
         LoadSkins();
         EnsureDefaultSelection();
         RefreshUnlocksFromPrestige();
+
+        // Guard against missing selected skin (removed/renamed defs)
+        if (GetSelectedDef() == null)
+        {
+            EnsureDefaultSelection();
+            PlayerPrefs.Save();
+        }
+
     }
 
     void OnEnable()
@@ -210,9 +218,19 @@ public class CosmeticsManager : MonoBehaviour
         if (!def || !def.sprite) return;
 
         r.sprite = def.sprite;
-        // If you later add animation controllers or full prefabs, this is where we expand.
+
+        // NEW: Apply flip FX color to match the selected skin (player only)
+        var player = FindPlayer();
+        if (player)
+        {
+            var flip = player.GetComponent<PlayerGravityFlip>();
+            if (flip)
+                flip.SetFlipFxColor(def.flipFxColor);
+        }
+
         Debug.Log($"[Cosmetics] Applied skin '{def.id}' to renderer '{r.gameObject.name}'.");
     }
+
 
     GameObject FindPlayer()
     {

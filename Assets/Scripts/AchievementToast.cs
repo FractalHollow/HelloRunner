@@ -11,7 +11,7 @@ public class AchievementToast : MonoBehaviour
     public TMP_Text bodyText;
 
     [Header("Timing")]
-    public float visibleSeconds = 4.5f;
+    public float visibleSeconds = 60f;
 
     Coroutine routine;
 

@@ -17,6 +17,7 @@ MonoBehaviour:
   sprite: {fileID: -513868230436865072, guid: 34467d4708086c544850ef75076bc834, type: 3}
   denSleepSprite: {fileID: 21300000, guid: 1fc3f39d43db4834590d93c87298e54f, type: 3}
   denAwakeSprite: {fileID: 21300000, guid: 15a3984fa56a12a4b8cf8890500e2ae6, type: 3}
+  flipFxColor: {r: 0.13333334, g: 0.69411767, b: 0.29803923, a: 1}
   unlockType: 2
   prestigeRequired: 0
   priceText: $0.99

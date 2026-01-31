@@ -146,6 +146,30 @@ void OnCollisionEnter2D(Collision2D collision)
         }
     }
 
+    public void SetFlipFxColor(Color c)
+    {
+        ApplyColor(flipFXUp, c);
+        ApplyColor(flipFXDown, c);
+    }
+
+    static void ApplyColor(ParticleSystem ps, Color c)
+    {
+        if (!ps) return;
+
+        // Apply to this particle system + any child particle systems (common setup)
+        var systems = ps.GetComponentsInChildren<ParticleSystem>(true);
+        for (int i = 0; i < systems.Length; i++)
+        {
+            var main = systems[i].main;
+
+            // Preserve original alpha if you want (optional)
+            var current = main.startColor.color;
+            c.a = current.a;
+
+            main.startColor = c;
+        }
+    }
+
     public void ForceFlipAndBounce(float bounceSpeed = 7f)
     {
         if (!rb) return;

@@ -21,6 +21,9 @@ public class SkinDef : ScriptableObject
     public Sprite denSleepSprite; // sleeping fox shown in Den
     public Sprite denAwakeSprite; // wake fox shown after claiming idle
 
+    [Header("FX")]
+    public Color flipFxColor = Color.white;
+
     [Header("Unlock")]
     public UnlockType unlockType = UnlockType.DefaultUnlocked;
     public int prestigeRequired = 0;  // used only if PrestigeRequired

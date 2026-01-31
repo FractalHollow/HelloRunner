@@ -116,6 +116,7 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        SaveSanitizer.Run();
         if (_inst != null && _inst != this) { Destroy(gameObject); return; }
         _inst = this;
 

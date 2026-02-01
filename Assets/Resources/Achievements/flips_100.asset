@@ -15,6 +15,7 @@ MonoBehaviour:
   id: flips_100
   displayName: Get Tappin
   description: Flip 100 times in a single run.
+  sortOrder: 7
   progressType: 7
   targetValue: 100
   rewardEmbers: 50

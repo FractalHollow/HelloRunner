@@ -15,6 +15,7 @@ MonoBehaviour:
   id: speed_mod_1
   displayName: Too Fast
   description: Complete a run with Speed Mod enabled.
+  sortOrder: 13
   progressType: 4
   targetValue: 1
   rewardEmbers: 40

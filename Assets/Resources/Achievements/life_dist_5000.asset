@@ -15,6 +15,7 @@ MonoBehaviour:
   id: life_dist_5000
   displayName: 5K Runner
   description: Reach 5000m lifetime distance
+  sortOrder: 10
   progressType: 1
   targetValue: 5000
   rewardEmbers: 150

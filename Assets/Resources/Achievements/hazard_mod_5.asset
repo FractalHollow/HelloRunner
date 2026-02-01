@@ -15,6 +15,7 @@ MonoBehaviour:
   id: hazard_mod_5
   displayName: Live for Danger
   description: Complete 5 runs with enemy projectiles.
+  sortOrder: 14
   progressType: 5
   targetValue: 5
   rewardEmbers: 60

@@ -15,6 +15,7 @@ MonoBehaviour:
   id: life_dist_42195
   displayName: Marathon Runner
   description: Run a marathon in lifetime distance (42,195m)
+  sortOrder: 12
   progressType: 1
   targetValue: 42195
   rewardEmbers: 450

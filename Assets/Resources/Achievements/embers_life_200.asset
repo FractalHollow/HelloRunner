@@ -15,6 +15,7 @@ MonoBehaviour:
   id: embers_life_200
   displayName: Spark Collector
   description: Earn 200 Embers lifetime.
+  sortOrder: 4
   progressType: 3
   targetValue: 200
   rewardEmbers: 30

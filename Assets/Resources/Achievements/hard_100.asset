@@ -15,6 +15,7 @@ MonoBehaviour:
   id: hard_100
   displayName: Give Me a Challenge
   description: Reach 100m with both difficulty modifiers on.
+  sortOrder: 17
   progressType: 9
   targetValue: 100
   rewardEmbers: 100

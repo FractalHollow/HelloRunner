@@ -15,6 +15,7 @@ MonoBehaviour:
   id: nohit_100
   displayName: Quick Feet
   description: No hits over 100m.
+  sortOrder: 19
   progressType: 8
   targetValue: 100
   rewardEmbers: 100

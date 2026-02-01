@@ -15,6 +15,7 @@ MonoBehaviour:
   id: runs_20
   displayName: Regular Visitor
   description: Play 20 runs.
+  sortOrder: 16
   progressType: 2
   targetValue: 20
   rewardEmbers: 75

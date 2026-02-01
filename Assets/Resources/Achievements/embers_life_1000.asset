@@ -15,6 +15,7 @@ MonoBehaviour:
   id: embers_life_1000
   displayName: Ember Hoarder
   description: Earn 1000 Embers lifetime.
+  sortOrder: 5
   progressType: 3
   targetValue: 1000
   rewardEmbers: 120

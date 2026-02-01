@@ -15,6 +15,7 @@ MonoBehaviour:
   id: dist_best_200
   displayName: Getting Moving
   description: Reach a best distance of 200m.
+  sortOrder: 2
   progressType: 0
   targetValue: 200
   rewardEmbers: 50

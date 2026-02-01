@@ -15,6 +15,7 @@ MonoBehaviour:
   id: nothit_200
   displayName: Second Nature
   description: No hits over 200m.
+  sortOrder: 20
   progressType: 8
   targetValue: 200
   rewardEmbers: 200

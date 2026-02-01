@@ -33,3 +33,9 @@ MonoBehaviour:
   - 7
   v2PerTier: []
   effectType: 1
+  descriptionPerTier:
+  - Gain a shield.
+  - Gain a second shield.
+  - Shields regenerate.
+  - 'Regen cooldown: {v1_i}s'
+  - 'Regen cooldown: {v1_i}s'

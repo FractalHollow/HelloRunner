@@ -15,6 +15,7 @@ MonoBehaviour:
   id: prestige_5
   displayName: Ramping Up
   description: Run in prestige level 5
+  sortOrder: 22
   progressType: 6
   targetValue: 5
   rewardEmbers: 100

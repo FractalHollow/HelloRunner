@@ -15,6 +15,7 @@ MonoBehaviour:
   id: hard_200
   displayName: Legend
   description: Reach 200m with both difficulty modifiers on.
+  sortOrder: 18
   progressType: 9
   targetValue: 200
   rewardEmbers: 200

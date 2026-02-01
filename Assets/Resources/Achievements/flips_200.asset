@@ -15,6 +15,7 @@ MonoBehaviour:
   id: flips_200
   displayName: Dodge Master
   description: Flip 200 times in a single run.
+  sortOrder: 8
   progressType: 7
   targetValue: 200
   rewardEmbers: 80

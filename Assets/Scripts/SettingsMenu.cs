@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
+
 
 public class SettingsMenu : MonoBehaviour
 {
@@ -8,6 +10,13 @@ public class SettingsMenu : MonoBehaviour
     public Slider sfxSlider;
     public PanelFader fader;
     public AboutMenu aboutMenu;  // drag your AboutPanel here in Inspector
+
+    [Header("Reset Save Data")]
+    public UnityEngine.UI.Button resetSaveButton;
+    public TMPro.TMP_Text resetSaveButtonText;
+
+bool resetConfirmArmed = false;
+
 
     public void OpenAbout()
     {
@@ -17,7 +26,70 @@ public class SettingsMenu : MonoBehaviour
     void OnEnable()
     {
         StartCoroutine(SyncWhenReady());
+
+        if (resetSaveButton)
+            {
+                resetSaveButton.onClick.RemoveAllListeners();
+                resetSaveButton.onClick.AddListener(OnResetSaveClicked);
+            }
+
+        resetConfirmArmed = false;
+        if (resetSaveButtonText)
+            resetSaveButtonText.text = "Reset Save Data";
+
     }
+
+    void OnResetSaveClicked()
+    {
+        if (!resetConfirmArmed)
+        {
+            resetConfirmArmed = true;
+            if (resetSaveButtonText)
+                resetSaveButtonText.text = "Confirm Reset";
+            return;
+        }
+
+        PerformFullReset();
+    }
+
+    void PerformFullReset()
+    {
+        // 1. Cache paid skin unlocks
+        var paidSkinUnlocks = new System.Collections.Generic.Dictionary<string, int>();
+
+        if (CosmeticsManager.I != null)
+        {
+            var skins = CosmeticsManager.I.GetAllSkins();
+            for (int i = 0; i < skins.Count; i++)
+            {
+                var def = skins[i];
+                if (!def) continue;
+
+                if (def.unlockType == SkinDef.UnlockType.Paid)
+                {
+                    string key = $"skin_unlocked_{def.id}";
+                    int unlocked = PlayerPrefs.GetInt(key, 0);
+                    paidSkinUnlocks[key] = unlocked;
+                }
+            }
+        }
+
+        // 2. Nuclear wipe
+        PlayerPrefs.DeleteAll();
+
+        // 3. Restore paid skin unlocks
+        foreach (var kv in paidSkinUnlocks)
+        {
+            if (kv.Value == 1)
+                PlayerPrefs.SetInt(kv.Key, 1);
+        }
+
+        PlayerPrefs.Save();
+
+        // 4. Reload scene
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
 
     System.Collections.IEnumerator SyncWhenReady()
     {

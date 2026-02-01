@@ -15,6 +15,7 @@ MonoBehaviour:
   id: dist_best_300
   displayName: Endless Runner
   description: Reach a best distance of 300m.
+  sortOrder: 3
   progressType: 0
   targetValue: 300
   rewardEmbers: 100

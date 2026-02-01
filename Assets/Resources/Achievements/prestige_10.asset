@@ -15,6 +15,7 @@ MonoBehaviour:
   id: prestige_10
   displayName: Exponential Growth
   description: Run in prestige level 10
+  sortOrder: 23
   progressType: 6
   targetValue: 10
   rewardEmbers: 300

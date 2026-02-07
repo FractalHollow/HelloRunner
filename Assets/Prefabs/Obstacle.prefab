@@ -266,12 +266,13 @@ MonoBehaviour:
   projectilePrefab: {fileID: 5829948557324511889, guid: a0f7bcd7635c3804d91bac9fae8e0c72, type: 3}
   intervalMin: 1.2
   intervalMax: 2
-  projectileSpeed: 8
+  projectileSpeed: 9
   aimAtPlayerY: 1
   debugLogs: 1
   gizmoColor: {r: 1, g: 0, b: 0, a: 1}
   launchClip: {fileID: 8300000, guid: c626a22003cc27e4694e143a14ad8ebe, type: 3}
   launchVol: 0.68
+  projectileAngleOffset: -180
 --- !u!1 &6778813871091706985
 GameObject:
   m_ObjectHideFlags: 0

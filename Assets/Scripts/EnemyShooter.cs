@@ -23,14 +23,17 @@ public class EnemyShooter : MonoBehaviour
     public AudioClip launchClip;
     [Range(0f,1f)] public float launchVol = 0.8f;
 
+    [Header("Projectile Rotation")]
+    public float projectileAngleOffset = 0f; // try 0, 90, -90, 180
+
     GameManager gm;
     Transform player;
     Coroutine loop;
 
     void Awake()
     {
-        gm = FindObjectOfType<GameManager>();
-        var p = FindObjectOfType<PlayerGravityFlip>();
+        gm = FindFirstObjectByType<GameManager>();
+        var p = FindFirstObjectByType<PlayerGravityFlip>();
         player = p ? p.transform : null;
 
         // Auto-create a firePoint if none assigned
@@ -91,6 +94,17 @@ public class EnemyShooter : MonoBehaviour
             proj.dir = dir;
             proj.speed = projectileSpeed;
         }
+
+        var s = go.transform.localScale;
+        go.transform.localScale = new Vector3(Mathf.Abs(s.x), Mathf.Abs(s.y), s.z);
+
+        // Rotate to face travel direction
+        if (dir.sqrMagnitude > 0.0001f)
+        {
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            go.transform.rotation = Quaternion.Euler(0f, 0f, angle + projectileAngleOffset);
+        }
+
 
         if (launchClip)
             {

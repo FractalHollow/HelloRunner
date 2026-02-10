@@ -53,6 +53,18 @@ public class StartScreen : MonoBehaviour
         }
     }
 
+    public static void SetVisibleInLayout(GameObject go, bool visible)
+    {
+        if (!go) return;
+
+        var cg = go.GetComponent<CanvasGroup>();
+        if (!cg) cg = go.AddComponent<CanvasGroup>();
+
+        cg.alpha = visible ? 1f : 0f;
+        cg.interactable = visible;
+        cg.blocksRaycasts = visible;
+    }
+
     void OpenRunModifiers()
     {
         if (!runModifiersPanel)
@@ -86,9 +98,13 @@ public class StartScreen : MonoBehaviour
     public void RefreshLockUI()
     {
         bool unlocked = PlayerPrefs.GetInt("mods_unlocked", 0) == 1;
+
         if (runModifiersButton)
-            runModifiersButton.gameObject.SetActive(unlocked);
-        
+        {
+            // Keep it in the layout even when "hidden"
+            SetVisibleInLayout(runModifiersButton.gameObject, unlocked);
+        }
+
         RefreshPrestigeUI();
     }
 

@@ -111,7 +111,7 @@ public class DenMenu : MonoBehaviour
         {
             idleText.text =
                 $"You can claim <b>{claim:N0}</b> Embers\n" +
-                $"({rate:0.#}/hr \u2022 {stored:0.0}/{capHrs:0.0}h stored)";
+                $"({rate:0.#}/hr \u2022 {stored:0}/{capHrs:0}h stored)";
         }
 
         if (wakeUpButton) wakeUpButton.interactable = (claim > 0);

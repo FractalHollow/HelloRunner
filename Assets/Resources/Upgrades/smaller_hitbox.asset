@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: smaller_hitbox
   m_EditorClassIdentifier: 
   id: smaller_hitbox
-  displayName: Tiny Hitbox
-  description: Reduce collision size.
+  displayName: Agility
+  description: Reduce hitbox.
   descriptionTemplate: Reduce collision size to {v0_pct}%.
   baseCost: 35
   costScale: 1.45
@@ -30,3 +30,4 @@ MonoBehaviour:
   v1PerTier: []
   v2PerTier: []
   effectType: 0
+  descriptionPerTier: []

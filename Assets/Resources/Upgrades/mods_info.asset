@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: mods_info
   displayName: Run Modifiers
-  description: Higher risk, higher rewards.
+  description: High risk, high reward.
   descriptionTemplate: 
   baseCost: 40
   costScale: 1
@@ -25,3 +25,4 @@ MonoBehaviour:
   v1PerTier: []
   v2PerTier: []
   effectType: 0
+  descriptionPerTier: []

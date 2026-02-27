@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: shield_iframes
   m_EditorClassIdentifier: 
   id: shield_iframes
-  displayName: Shield Invulnerability
+  displayName: Enhance Shield
   description: Longer invulnerable window from shield.
-  descriptionTemplate: 'Gain {v0} sec of invulnerability. '
+  descriptionTemplate: Gain {v0} sec invulnerability
   baseCost: 60
   costScale: 1.5
   maxLevel: 5
@@ -30,3 +30,4 @@ MonoBehaviour:
   v1PerTier: []
   v2PerTier: []
   effectType: 5
+  descriptionPerTier: []

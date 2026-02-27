@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: idle_rate
   m_EditorClassIdentifier: 
   id: idle_rate
-  displayName: Rest Efficiency
+  displayName: Rest Well
   description: Increase Embers/hour from rest.
   descriptionTemplate: +{v0} Embers/hour.
   baseCost: 30
@@ -30,3 +30,4 @@ MonoBehaviour:
   v1PerTier: []
   v2PerTier: []
   effectType: 0
+  descriptionPerTier: []

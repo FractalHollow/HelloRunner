@@ -30,4 +30,7 @@ public class SkinDef : ScriptableObject
 
     [Header("Paid (stub)")]
     public string priceText = "$0.99"; // UI only for now
+
+    [Header("UI")]
+    public int sortOrder = 0;
 }

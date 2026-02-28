@@ -21,3 +21,4 @@ MonoBehaviour:
   unlockType: 0
   prestigeRequired: 0
   priceText: $0.99
+  sortOrder: 1

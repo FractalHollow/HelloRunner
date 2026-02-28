@@ -21,3 +21,4 @@ MonoBehaviour:
   unlockType: 1
   prestigeRequired: 15
   priceText: $0.99
+  sortOrder: 5

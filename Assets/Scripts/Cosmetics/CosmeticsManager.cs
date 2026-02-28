@@ -61,7 +61,18 @@ public class CosmeticsManager : MonoBehaviour
     {
         skins.Clear();
         skins.AddRange(Resources.LoadAll<SkinDef>("Skins"));
-        skins.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
+        skins.Sort((a, b) =>
+            {
+                if (!a && !b) return 0;
+                if (!a) return 1;
+                if (!b) return -1;
+
+                int so = a.sortOrder.CompareTo(b.sortOrder);
+                if (so != 0) return so;
+
+                // tie-breaker so stable ordering if same sortOrder
+                return string.CompareOrdinal(a.id, b.id);
+            });
         Debug.Log($"[Cosmetics] Loaded {skins.Count} skins.");
     }
 

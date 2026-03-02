@@ -13,16 +13,19 @@ public class AudioManager : MonoBehaviour
     [Header("Audio Sources")]
     public AudioSource musicSource;          // route to Mixer Music group
     public AudioSource sfxSource;            // route to Mixer SFX group
+    public AudioSource flipSource; // dedicated source so pitch jitter doesn't affect other SFX
 
     [Header("Clips")]
     public AudioClip musicLoop;
     public AudioClip flipClip;
     public AudioClip crashClip;
     public AudioClip sfxPurchase;
-    [SerializeField] private AudioClip pickupSFX;  // wisp pickup
-    public AudioClip sfxShootDefault;          // optional default if caller passes null
-    [Range(0f,1f)] public float shootVolume = 0.8f;
+    [SerializeField] private AudioClip pickupSFX;      // wisp pickup
+    public AudioClip sfxShootDefault;                  // optional default if caller passes null
+    [Range(0f, 1f)] public float shootVolume = 0.8f;
 
+    [Header("Flip SFX Pitch Variation")]
+    [Range(0f, 0.2f)] public float flipPitchJitter = 0.04f; // ~±4% subtle
 
     [Header("Volumes")]
     [Range(0f, 1f)] public float sfxPurchaseVolume = 0.9f;
@@ -31,43 +34,23 @@ public class AudioManager : MonoBehaviour
     // PlayerPrefs keys
     const string KEY_MUSIC      = "vol_music";
     const string KEY_SFX        = "vol_sfx";
-    const string KEY_MUTE_MUSIC = "mute_music";
-    const string KEY_MUTE_SFX   = "mute_sfx";
+    const string KEY_MUTE_MUSIC = "mute_music"; // legacy (kept for backward safety)
+    const string KEY_MUTE_SFX   = "mute_sfx";   // legacy (kept for backward safety)
+
+    // Default values for a *fresh install / wiped prefs*
+    const float DEFAULT_MUSIC = 0.6f;
+    const float DEFAULT_SFX   = 0.8f;
 
     // cached state
     float music01;
     float sfx01;
-    bool muteMusic;
-    bool muteSfx;
+    bool muteMusic;   // legacy
+    bool muteSfx;     // legacy
 
-    const float MIN_AUDIBLE = 0.001f;  // floor to avoid -80 dB unless explicitly muted
+    // ---------------- volume mapping ----------------
+    float ToDecibels(float v) => (v <= 0.0001f) ? -80f : Mathf.Log10(Mathf.Clamp01(v)) * 20f;
 
-    // Slider floor so a tiny move can't drive the mixer to -80dB.
-    // 0.1 ≈ -20 dB (quiet but still audible). Adjust later if you like.
-    public const float SLIDER_FLOOR = 0.1f;
-
-
-    [ContextMenu("Audio: Reset to Defaults")]
-public void ResetToDefaults()
-{
-    // Defaults
-    music01 = 0.8f;
-    sfx01   = 1.0f;
-    muteMusic = false;
-    muteSfx   = false;
-
-    PlayerPrefs.SetFloat("vol_music", music01);
-    PlayerPrefs.SetFloat("vol_sfx",   sfx01);
-    PlayerPrefs.SetInt("mute_music",  0);
-    PlayerPrefs.SetInt("mute_sfx",    0);
-    PlayerPrefs.Save();
-
-    ApplyMusicVolume();
-    ApplySfxVolume();
-
-    Debug.Log("[Audio] Reset to defaults.");
-}
-
+    // ---------------- Unity lifecycle ----------------
     void Awake()
     {
         if (I != null && I != this) { Destroy(gameObject); return; }
@@ -76,15 +59,40 @@ public void ResetToDefaults()
 
         EnsureSources();
 
+        EnsureDefaultAudioPrefsIfMissing();
+        LoadPrefs();
+        ApplyMusicVolume();
+        ApplySfxVolume();
+    }
+
+    void EnsureDefaultAudioPrefsIfMissing()
+    {
+        bool changed = false;
+
+        // If keys don't exist, it's a fresh install (or prefs wiped)
+        if (!PlayerPrefs.HasKey(KEY_MUSIC)) { PlayerPrefs.SetFloat(KEY_MUSIC, DEFAULT_MUSIC); changed = true; }
+        if (!PlayerPrefs.HasKey(KEY_SFX))   { PlayerPrefs.SetFloat(KEY_SFX,   DEFAULT_SFX);   changed = true; }
+
+        // Legacy mute keys — keep them sane, but your UI uses sliders now
+        if (!PlayerPrefs.HasKey(KEY_MUTE_MUSIC)) { PlayerPrefs.SetInt(KEY_MUTE_MUSIC, 0); changed = true; }
+        if (!PlayerPrefs.HasKey(KEY_MUTE_SFX))   { PlayerPrefs.SetInt(KEY_MUTE_SFX,   0); changed = true; }
+
+        if (changed) PlayerPrefs.Save();
+    }
+
+    void LoadPrefs()
+    {
         // Load saved
-        music01   = PlayerPrefs.GetFloat(KEY_MUSIC, 0.8f);
-        sfx01     = PlayerPrefs.GetFloat(KEY_SFX,   1.0f);
+        music01   = Mathf.Clamp01(PlayerPrefs.GetFloat(KEY_MUSIC, DEFAULT_MUSIC));
+        sfx01     = Mathf.Clamp01(PlayerPrefs.GetFloat(KEY_SFX,   DEFAULT_SFX));
+
+        // Legacy mute state (kept to avoid breaking older flows)
         muteMusic = PlayerPrefs.GetInt(KEY_MUTE_MUSIC, 0) == 1;
         muteSfx   = PlayerPrefs.GetInt(KEY_MUTE_SFX,   0) == 1;
 
-        // Apply immediately
-        ApplyMusicVolume();
-        ApplySfxVolume();
+        // IMPORTANT: your current game uses sliders; treat "0" as mute regardless of legacy flags
+        if (music01 <= 0.0001f) muteMusic = true;
+        if (sfx01   <= 0.0001f) muteSfx   = true;
     }
 
     // Ensure we have two distinct sources; never reuse the same component for both
@@ -109,142 +117,202 @@ public void ResetToDefaults()
             sfxSource.loop = false;
             sfxSource.playOnAwake = false;
         }
-
-        // Make sure SFX plays as 2D (no distance falloff)
         sfxSource.spatialBlend = 0f;
 
+        // FLIP (dedicated)
+        if (!flipSource || flipSource == musicSource || flipSource == sfxSource)
+        {
+            var go = new GameObject("FlipSource");
+            go.transform.SetParent(transform);
+            flipSource = go.AddComponent<AudioSource>();
+            flipSource.loop = false;
+            flipSource.playOnAwake = false;
+            flipSource.spatialBlend = 0f;
+        }
     }
 
-        public void Play2D(AudioClip clip, float vol01 = 1f)
-        {
-            if (!clip || !sfxSource) return;
-            // honor SFX volume and (optional) mixer routing
-            sfxSource.PlayOneShot(clip, Mathf.Clamp01(vol01) * sfx01);
-        }
+    void OnApplicationPause(bool paused)
+    {
+        if (paused) PlayerPrefs.Save();
+    }
 
-        public void PlayShoot(AudioClip clipOverride = null, float vol01 = -1f)
-        {
-            var clip = clipOverride ? clipOverride : sfxShootDefault;
-            if (!clip) return;
-            float v = (vol01 >= 0f) ? vol01 : shootVolume;
-            Play2D(clip, v);
-        }
-
-    // ---------------- volume mapping ----------------
-    float ToDecibels(float v) => (v <= 0.0001f) ? -80f : Mathf.Log10(Mathf.Clamp01(v)) * 20f;
-    float FromDecibels(float db) => (db <= -80f) ? 0f : Mathf.Clamp01(Mathf.Pow(10f, db / 20f));
+    void OnApplicationQuit()
+    {
+        PlayerPrefs.Save();
+    }
 
     // ---------------- public API used by UI ----------------
-public void SetMusicVolume(float v)
-{
-    music01 = Mathf.Clamp01(v);
-    PlayerPrefs.SetFloat(KEY_MUSIC, music01);
-    PlayerPrefs.Save();
-    ApplyMusicVolume();
-}
+    public void SetMusicVolume(float v)
+    {
+        music01 = Mathf.Clamp01(v);
 
-public void SetSfxVolume(float v)
-{
-    sfx01 = Mathf.Clamp01(v);
-    PlayerPrefs.SetFloat(KEY_SFX, sfx01);
-    PlayerPrefs.Save();
-    ApplySfxVolume();
-}
+        // Slider-driven "mute"
+        muteMusic = (music01 <= 0.0001f);
 
-public void SetMusicMuted(bool muted)
-{
-    muteMusic = muted;
-    PlayerPrefs.SetInt(KEY_MUTE_MUSIC, muted ? 1 : 0);
-    PlayerPrefs.Save();
-    ApplyMusicVolume();
-}
+        PlayerPrefs.SetFloat(KEY_MUSIC, music01);
+        PlayerPrefs.SetInt(KEY_MUTE_MUSIC, muteMusic ? 1 : 0); // keep legacy in sync
+        PlayerPrefs.Save();
 
-public void SetSfxMuted(bool muted)
-{
-    muteSfx = muted;
-    PlayerPrefs.SetInt(KEY_MUTE_SFX, muted ? 1 : 0);
-    PlayerPrefs.Save();
-    ApplySfxVolume();
-}
+        ApplyMusicVolume();
+    }
 
+    public void SetSfxVolume(float v)
+    {
+        sfx01 = Mathf.Clamp01(v);
 
+        // Slider-driven "mute"
+        muteSfx = (sfx01 <= 0.0001f);
 
-        void ApplyMusicVolume()
-        {
-            float db = muteMusic ? -80f : ToDecibels(music01);
-            if (mixer) { mixer.SetFloat(musicVolParam, db); }
-            else if (musicSource) { musicSource.mute = muteMusic; musicSource.volume = music01; }
-            Debug.Log($"[AM] ApplyMusicVolume -> {(mixer ? "Mixer" : "Source")} db={db:0.##} vol={music01:0.###} mute={muteMusic}");
-        }
-        void ApplySfxVolume()
-        {
-            float db = muteSfx ? -80f : ToDecibels(sfx01);
-            if (mixer) { mixer.SetFloat(sfxVolParam, db); }
-            else if (sfxSource) { sfxSource.mute = muteSfx; sfxSource.volume = sfx01; }
-            Debug.Log($"[AM] ApplySfxVolume -> {(mixer ? "Mixer" : "Source")} db={db:0.##} vol={sfx01:0.###} mute={muteSfx}");
-        }
+        PlayerPrefs.SetFloat(KEY_SFX, sfx01);
+        PlayerPrefs.SetInt(KEY_MUTE_SFX, muteSfx ? 1 : 0); // keep legacy in sync
+        PlayerPrefs.Save();
 
-        void OnApplicationPause(bool paused)
-        {
-            if (paused)
-                PlayerPrefs.Save();
-        }
+        ApplySfxVolume();
+    }
 
-        void OnApplicationQuit()
-        {
-            PlayerPrefs.Save();
-        }
+    // Legacy mute API (kept so any old callers won't break)
+    public void SetMusicMuted(bool muted)
+    {
+        muteMusic = muted;
+        PlayerPrefs.SetInt(KEY_MUTE_MUSIC, muted ? 1 : 0);
+        PlayerPrefs.Save();
+        ApplyMusicVolume();
+    }
 
+    public void SetSfxMuted(bool muted)
+    {
+        muteSfx = muted;
+        PlayerPrefs.SetInt(KEY_MUTE_SFX, muted ? 1 : 0);
+        PlayerPrefs.Save();
+        ApplySfxVolume();
+    }
+
+    void ApplyMusicVolume()
+    {
+        // If slider is at 0, treat as mute no matter what
+        bool effectiveMute = muteMusic || (music01 <= 0.0001f);
+        float db = effectiveMute ? -80f : ToDecibels(music01);
+
+        if (mixer) { mixer.SetFloat(musicVolParam, db); }
+        else if (musicSource) { musicSource.mute = effectiveMute; musicSource.volume = music01; }
+    }
+
+    void ApplySfxVolume()
+    {
+        bool effectiveMute = muteSfx || (sfx01 <= 0.0001f);
+        float db = effectiveMute ? -80f : ToDecibels(sfx01);
+
+        if (mixer) { mixer.SetFloat(sfxVolParam, db); }
+        else if (sfxSource) { sfxSource.mute = effectiveMute; sfxSource.volume = sfx01; }
+    }
 
     // ---------------- playback helpers ----------------
     public void PlayMusic()
     {
         if (!musicSource || !musicLoop) return;
+
         ApplyMusicVolume(); // ensure volume/mute is current
+
         if (musicSource.clip != musicLoop) musicSource.clip = musicLoop;
         if (!musicSource.isPlaying) musicSource.Play();
     }
 
+    public void Play2D(AudioClip clip, float vol01 = 1f)
+    {
+        if (!clip || !sfxSource) return;
+        if (muteSfx || sfx01 <= 0.0001f) return;
+        sfxSource.PlayOneShot(clip, Mathf.Clamp01(vol01) * sfx01);
+    }
+
+    public void PlayShoot(AudioClip clipOverride = null, float vol01 = -1f)
+    {
+        var clip = clipOverride ? clipOverride : sfxShootDefault;
+        if (!clip) return;
+        float v = (vol01 >= 0f) ? vol01 : shootVolume;
+        Play2D(clip, v);
+    }
+
     public void PlayFlip()
     {
-        if (flipClip && sfxSource && !muteSfx) sfxSource.PlayOneShot(flipClip, sfx01);
+        EnsureSources();
+
+        if (!flipClip || !flipSource) return;
+        if (muteSfx || sfx01 <= 0.0001f) return;
+
+        float jitter = Mathf.Clamp(flipPitchJitter, 0f, 0.5f);
+        float newPitch = 1f + Random.Range(-jitter, jitter);
+
+        flipSource.pitch = newPitch;
+        flipSource.PlayOneShot(flipClip, sfx01);
+
+        Debug.Log($"[Audio] Flip pitch = {newPitch:0.000}");
     }
 
     public void PlayCrash()
     {
-        if (crashClip && sfxSource && !muteSfx) sfxSource.PlayOneShot(crashClip, sfx01);
+        if (!crashClip || !sfxSource) return;
+        if (muteSfx || sfx01 <= 0.0001f) return;
+
+        sfxSource.PlayOneShot(crashClip, sfx01);
     }
 
     public void PlayPurchase()
     {
-        if (sfxPurchase && sfxSource && !muteSfx)
-            sfxSource.PlayOneShot(sfxPurchase, sfxPurchaseVolume * sfx01);
+        if (!sfxPurchase || !sfxSource) return;
+        if (muteSfx || sfx01 <= 0.0001f) return;
+
+        sfxSource.PlayOneShot(sfxPurchase, sfxPurchaseVolume * sfx01);
     }
 
     public void PlayPickup()
     {
-        if (pickupSFX && sfxSource && !muteSfx)
-            sfxSource.PlayOneShot(pickupSFX, pickupVolume * sfx01);
+        if (!pickupSFX || !sfxSource) return;
+        if (muteSfx || sfx01 <= 0.0001f) return;
+
+        sfxSource.PlayOneShot(pickupSFX, pickupVolume * sfx01);
     }
 
     // --- Test helpers for the settings menu ---
     public void TestMusic()
     {
-        SetMusicMuted(false);
+        // In slider-only world, "unmute" just means volume > 0
+        if (music01 <= 0.0001f) SetMusicVolume(DEFAULT_MUSIC);
         PlayMusic();
         if (musicSource) musicSource.time = 0f;
     }
 
     public void TestSfx()
     {
-        SetSfxMuted(false);
-        var clip = flipClip ? flipClip : crashClip;
-        if (clip && sfxSource) sfxSource.PlayOneShot(clip, sfx01);
+        if (sfx01 <= 0.0001f) SetSfxVolume(DEFAULT_SFX);
+
+        // Use the same path as gameplay so pitch jitter is tested too
+        PlayFlip();
+    }
+
+    [ContextMenu("Audio: Reset to Defaults")]
+    public void ResetToDefaults()
+    {
+        music01 = DEFAULT_MUSIC;
+        sfx01   = DEFAULT_SFX;
+
+        muteMusic = false;
+        muteSfx   = false;
+
+        PlayerPrefs.SetFloat(KEY_MUSIC, music01);
+        PlayerPrefs.SetFloat(KEY_SFX,   sfx01);
+        PlayerPrefs.SetInt(KEY_MUTE_MUSIC, 0);
+        PlayerPrefs.SetInt(KEY_MUTE_SFX,   0);
+        PlayerPrefs.Save();
+
+        ApplyMusicVolume();
+        ApplySfxVolume();
     }
 
     // Expose current states so SettingsMenu can sync UI
     public float CurrentMusic01 => music01;
     public float CurrentSfx01   => sfx01;
+
+    // Legacy (kept)
     public bool  MusicMuted     => muteMusic;
     public bool  SfxMuted       => muteSfx;
 }

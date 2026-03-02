@@ -56,16 +56,18 @@ public class AchievementRowUI : MonoBehaviour
 
 
     void OnClaim()
-    {
-        if (_def == null || _gm == null) return;
-
-        bool ok = AchievementManager.I != null && AchievementManager.I.TryClaim(_def, _gm);
-        if (ok)
         {
-            // Refresh panel (the controller will handle this)
-            // We find parent controller in a safe way:
-            var controller = GetComponentInParent<AchievementsPanelController>();
-            if (controller) controller.Refresh();
+            if (_def == null || _gm == null) return;
+
+            bool ok = AchievementManager.I != null && AchievementManager.I.TryClaim(_def, _gm);
+            if (ok)
+            {
+                // SFX (uses AudioManager's SFX volume scaling + mute)
+                if (AudioManager.I) AudioManager.I.PlayPurchase();
+
+                // Refresh panel
+                var controller = GetComponentInParent<AchievementsPanelController>();
+                if (controller) controller.Refresh();
+            }
         }
-    }
 }

@@ -12350,6 +12350,7 @@ MonoBehaviour:
   sfxVolParam: SFXVol
   musicSource: {fileID: 1194164683}
   sfxSource: {fileID: 1194164682}
+  flipSource: {fileID: 0}
   musicLoop: {fileID: 8300000, guid: 10d540e756052cc4bb26e10e1977672b, type: 3}
   flipClip: {fileID: 8300000, guid: 30933eba5ec3fea498ac7495dbdca379, type: 3}
   crashClip: {fileID: 8300000, guid: 70f130ec37ecc54449172822fc627683, type: 3}
@@ -12357,6 +12358,7 @@ MonoBehaviour:
   pickupSFX: {fileID: 8300000, guid: c48904584937af34b92ff87d53212b55, type: 3}
   sfxShootDefault: {fileID: 0}
   shootVolume: 0.8
+  flipPitchJitter: 0.1
   sfxPurchaseVolume: 0.9
   pickupVolume: 0.8
 --- !u!4 &1194164681

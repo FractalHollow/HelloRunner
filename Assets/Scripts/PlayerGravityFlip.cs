@@ -135,7 +135,7 @@ void OnCollisionEnter2D(Collision2D collision)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
 
         if (playSfx)
-            AudioManager.I?.PlayFlip();
+            if (AudioManager.I) AudioManager.I.PlayFlip();
 
         if (playFx)
         {

@@ -187,6 +187,13 @@ public class GameManager : MonoBehaviour
         ClearWorld();
         ResetPlayerToStart();
 
+        // Enable control in case it was left disabled after a previous run (bug adjustment)
+        if (player)
+        {
+            var flip = player.GetComponent<PlayerGravityFlip>();
+            if (flip) flip.EnableControl(true);
+        }
+
         Debug.Log($"[D2] Prestige={PlayerPrefs.GetInt("prestige_level", 0)} | " +
                 $"DifficultyMult={DifficultyMultiplier():0.00} | " +
                 $"ModSpeedOn={ModSpeedOn} | RunSpeedMult={RunSpeedMultiplier:0.00}");

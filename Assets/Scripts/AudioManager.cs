@@ -25,7 +25,8 @@ public class AudioManager : MonoBehaviour
     [Range(0f, 1f)] public float shootVolume = 0.8f;
 
     [Header("Flip SFX Pitch Variation")]
-    [Range(0f, 0.2f)] public float flipPitchJitter = 0.04f; // ~±4% subtle
+    [Range(0f, 0.2f)] public float flipPitchJitter = 0.04f; // ~+/-4% subtle
+    [Range(0f, 0.2f)] public float shootPitchJitter = 0.03f; // +-3% subtle
 
     [Header("Volumes")]
     [Range(0f, 1f)] public float sfxPurchaseVolume = 0.9f;
@@ -78,6 +79,15 @@ public class AudioManager : MonoBehaviour
         if (!PlayerPrefs.HasKey(KEY_MUTE_SFX))   { PlayerPrefs.SetInt(KEY_MUTE_SFX,   0); changed = true; }
 
         if (changed) PlayerPrefs.Save();
+    }
+
+    // Use after PlayerPrefs.DeleteAll() while this singleton is still alive.
+    public void ReinitializeAfterPrefsWipe()
+    {
+        EnsureDefaultAudioPrefsIfMissing();
+        LoadPrefs();
+        ApplyMusicVolume();
+        ApplySfxVolume();
     }
 
     void LoadPrefs()
@@ -226,10 +236,19 @@ public class AudioManager : MonoBehaviour
 
     public void PlayShoot(AudioClip clipOverride = null, float vol01 = -1f)
     {
+        EnsureSources();
+
         var clip = clipOverride ? clipOverride : sfxShootDefault;
         if (!clip) return;
+        if (!sfxSource) return;
+        if (muteSfx || sfx01 <= 0.0001f) return;
+
         float v = (vol01 >= 0f) ? vol01 : shootVolume;
-        Play2D(clip, v);
+        float jitter = Mathf.Clamp(shootPitchJitter, 0f, 0.5f);
+        float newPitch = 1f + Random.Range(-jitter, jitter);
+
+        sfxSource.pitch = newPitch;
+        sfxSource.PlayOneShot(clip, Mathf.Clamp01(v) * sfx01);
     }
 
     public void PlayFlip()
@@ -275,16 +294,12 @@ public class AudioManager : MonoBehaviour
     // --- Test helpers for the settings menu ---
     public void TestMusic()
     {
-        // In slider-only world, "unmute" just means volume > 0
-        if (music01 <= 0.0001f) SetMusicVolume(DEFAULT_MUSIC);
         PlayMusic();
         if (musicSource) musicSource.time = 0f;
     }
 
     public void TestSfx()
     {
-        if (sfx01 <= 0.0001f) SetSfxVolume(DEFAULT_SFX);
-
         // Use the same path as gameplay so pitch jitter is tested too
         PlayFlip();
     }

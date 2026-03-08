@@ -86,6 +86,10 @@ bool resetConfirmArmed = false;
 
         PlayerPrefs.Save();
 
+        // AudioManager is DontDestroyOnLoad, so force it to seed sane default
+        // audio prefs after the wipe before reloading the scene.
+        AudioManager.I?.ReinitializeAfterPrefsWipe();
+
         // 4. Reload scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }

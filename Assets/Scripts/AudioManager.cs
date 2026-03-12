@@ -20,6 +20,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip flipClip;
     public AudioClip crashClip;
     public AudioClip sfxPurchase;
+    public AudioClip sfxWakeUp;
     [SerializeField] private AudioClip pickupSFX;      // wisp pickup
     public AudioClip sfxShootDefault;                  // optional default if caller passes null
     [Range(0f, 1f)] public float shootVolume = 0.8f;
@@ -30,6 +31,7 @@ public class AudioManager : MonoBehaviour
 
     [Header("Volumes")]
     [Range(0f, 1f)] public float sfxPurchaseVolume = 0.9f;
+    [Range(0f, 1f)] public float sfxWakeUpVolume = 1f;
     [Range(0f, 1f)] [SerializeField] private float pickupVolume = 0.8f;
 
     // PlayerPrefs keys
@@ -281,6 +283,14 @@ public class AudioManager : MonoBehaviour
         if (muteSfx || sfx01 <= 0.0001f) return;
 
         sfxSource.PlayOneShot(sfxPurchase, sfxPurchaseVolume * sfx01);
+    }
+
+    public void PlayWakeUp()
+    {
+        if (!sfxWakeUp || !sfxSource) return;
+        if (muteSfx || sfx01 <= 0.0001f) return;
+
+        sfxSource.PlayOneShot(sfxWakeUp, sfxWakeUpVolume * sfx01);
     }
 
     public void PlayPickup()

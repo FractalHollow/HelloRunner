@@ -204,6 +204,7 @@ public class GameManager : MonoBehaviour
 
         // Reset currency for this run
         wispsRun = 0;
+        wispsRunExact = 0f;
         UpdateWispHUD();
 
         // Reset run scoring
@@ -361,6 +362,7 @@ public class GameManager : MonoBehaviour
 
         // reset run currency so it can't be re-added accidentally
         wispsRun = 0;
+        wispsRunExact = 0f;
     }
 
     public void Restart()
@@ -450,7 +452,8 @@ public class GameManager : MonoBehaviour
 // -------------------- CURRENCY --------------------
 
 // ====== In-Memory Totals ======
-int wispsRun = 0;     // earned this run
+int wispsRun = 0;     // whole embers earned this run
+float wispsRunExact = 0f; // fractional total so prestige scaling stays accurate
 int wispsTotal = 0;   // total bank (mirrors PlayerPrefs)
 
 // ====== Core Accessors ======
@@ -505,13 +508,16 @@ public void AddWisps(int baseAmount)
     if (!playing) return;           // ✅ prevents post-death pickups
     if (baseAmount <= 0) return;
 
-    int finalAmount = Mathf.Max(1, Mathf.RoundToInt(baseAmount * CurrentWispMultiplier()));
-    wispsRun += finalAmount;
+    int previousWhole = wispsRun;
+    wispsRunExact += baseAmount * CurrentWispMultiplier();
+    wispsRun = Mathf.Max(0, Mathf.FloorToInt(wispsRunExact + 0.0001f));
+    int awardedNow = wispsRun - previousWhole;
 
     UpdateWispHUD();               // live HUD update (run only)
     AudioManager.I?.PlayPickup();  // pickup sound
 
-    StatsManager.AddLifetimeEmbersEarned(finalAmount);
+    if (awardedNow > 0)
+        StatsManager.AddLifetimeEmbersEarned(awardedNow);
 
 }
 

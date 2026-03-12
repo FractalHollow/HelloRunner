@@ -150,6 +150,7 @@ public class DenMenu : MonoBehaviour
 
         if (claim > 0 && gm)
         {
+            AudioManager.I?.PlayWakeUp();
             gm.AddToWispsBank(claim); // add to bank via GameManager
             IdleSystem.Claim();       // reset idle timestamp
             ApplyDenFoxSprite(true); // awake after claim

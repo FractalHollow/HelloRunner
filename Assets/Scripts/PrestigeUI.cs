@@ -55,10 +55,9 @@ public class PrestigeUI : MonoBehaviour
 
         if (levelText)
         {
-            // Hide at 0, show at 1+
             levelText.gameObject.SetActive(lvl > 0);
             if (lvl > 0)
-                levelText.text = $"Prestige {lvl}  (×{PrestigeManager.ScoreMult:0} Score / ×{PrestigeManager.WispMult:0} Embers)";
+                levelText.text = $"Prestige {lvl}  (x{PrestigeManager.ScoreMult:0.#} Score & Embers)";
         }
 
         if (requirementText)
@@ -66,9 +65,8 @@ public class PrestigeUI : MonoBehaviour
 
         if (rewardText)
         {
-            // Show what you’ll get AFTER prestiging (next level)
             float nextMult = Mathf.Pow(1.5f, lvl + 1);
-            rewardText.text = $"Next Prestige Reward: ×{nextMult:0} Score & Embers";
+            rewardText.text = $"Next Prestige Reward: x{nextMult:0.#} Score & Embers";
         }
 
         if (prestigeButton)
@@ -88,12 +86,14 @@ public class PrestigeUI : MonoBehaviour
                 $"Prestiging will:\n" +
                 $"• Reset ALL upgrades\n" +
                 $"• Re-lock Upgrades + Run Modifiers\n" +
-                $"• Reset Embers to 0\n\n" +
-                $"• Permanent increased difficulty scaling\n" +
+                $"• Reset Embers to 0\n" +
+                $"• Permanent increased difficulty scaling\n\n" +
                 $"You will gain:\n" +
-                $"• Permanent ×{nextMult:0.#} Score & Embers\n\n" +
+                $"• Permanent x{nextMult:0.#} Score & Embers\n" +
                 $"• Permanent Idle Ember generation bonus\n\n" +
-                $"This cannot be undone.";
+                $"Achievements will be preserved.\n" +
+                $"This cannot be undone.\n\n" +
+                $"Are you sure you want to Prestige?";
         }
 
         confirmPanel.SetActive(true);
@@ -109,8 +109,6 @@ public class PrestigeUI : MonoBehaviour
         if (!PrestigeManager.CanPrestige()) { Refresh(); return; }
 
         PrestigeManager.DoPrestige();
-
-        // Return to Start state (cleanest: reload scene)
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

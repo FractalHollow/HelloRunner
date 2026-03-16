@@ -15,6 +15,16 @@ MonoBehaviour:
   id: prestige_1
   displayName: Pink Fox
   sprite: {fileID: 785045079820100054, guid: 6282652b4e58589479dd35b5395b9e5d, type: 3}
+  idleFrames:
+  - {fileID: 6035074357738075129, guid: b3eb2ad6fb115834a889f444d7d8edb0, type: 3}
+  - {fileID: 1621749639, guid: b3eb2ad6fb115834a889f444d7d8edb0, type: 3}
+  jumpFrames:
+  - {fileID: 6703551896611383604, guid: 830ab96719dabd74c87d07eea673a65f, type: 3}
+  - {fileID: 1802764968, guid: 830ab96719dabd74c87d07eea673a65f, type: 3}
+  - {fileID: 1497071022, guid: 830ab96719dabd74c87d07eea673a65f, type: 3}
+  - {fileID: 2066054301, guid: 830ab96719dabd74c87d07eea673a65f, type: 3}
+  idleFrameDuration: 0.2
+  jumpFrameDuration: 0.08
   denSleepSprite: {fileID: 21300000, guid: 2cebcf709556b3a4692330a1d074f725, type: 3}
   denAwakeSprite: {fileID: 21300000, guid: c19f3ee5ac25f0e46b0d1491ce00b39a, type: 3}
   flipFxColor: {r: 1, g: 0.68235296, b: 0.7882353, a: 1}

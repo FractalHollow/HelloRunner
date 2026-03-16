@@ -15,6 +15,16 @@ MonoBehaviour:
   id: Prestige_15
   displayName: Red Fox
   sprite: {fileID: -2046581965837439271, guid: bcd1080f237c98a4d83f6c4527087551, type: 3}
+  idleFrames:
+  - {fileID: -2848734346493858680, guid: b2d0a277af7c38c4688db43154a9b891, type: 3}
+  - {fileID: -441562511, guid: b2d0a277af7c38c4688db43154a9b891, type: 3}
+  jumpFrames:
+  - {fileID: 3761012006072796686, guid: c70132c2c7e6d264697fd2a9decb2291, type: 3}
+  - {fileID: -1449700298, guid: c70132c2c7e6d264697fd2a9decb2291, type: 3}
+  - {fileID: 814894873, guid: c70132c2c7e6d264697fd2a9decb2291, type: 3}
+  - {fileID: 1655033126, guid: c70132c2c7e6d264697fd2a9decb2291, type: 3}
+  idleFrameDuration: 0.2
+  jumpFrameDuration: 0.08
   denSleepSprite: {fileID: 21300000, guid: 667d5eda75da3664bba7cd2c19bfb460, type: 3}
   denAwakeSprite: {fileID: 21300000, guid: f3df2689792bc87448234761032777b6, type: 3}
   flipFxColor: {r: 1, g: 0.20784314, b: 0.21960784, a: 1}

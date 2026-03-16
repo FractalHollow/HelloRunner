@@ -15,6 +15,16 @@ MonoBehaviour:
   id: paid_1
   displayName: Green Fox
   sprite: {fileID: -513868230436865072, guid: 34467d4708086c544850ef75076bc834, type: 3}
+  idleFrames:
+  - {fileID: 6388662261211881675, guid: 1c849282e361adc42ad2d595f96a401b, type: 3}
+  - {fileID: -298283714, guid: 1c849282e361adc42ad2d595f96a401b, type: 3}
+  jumpFrames:
+  - {fileID: -6207892925668387084, guid: 2f6e5077ceab92548b7c01e153353c2d, type: 3}
+  - {fileID: 1801234688, guid: 2f6e5077ceab92548b7c01e153353c2d, type: 3}
+  - {fileID: -1266757162, guid: 2f6e5077ceab92548b7c01e153353c2d, type: 3}
+  - {fileID: 1274824945, guid: 2f6e5077ceab92548b7c01e153353c2d, type: 3}
+  idleFrameDuration: 0.2
+  jumpFrameDuration: 0.08
   denSleepSprite: {fileID: 21300000, guid: 1fc3f39d43db4834590d93c87298e54f, type: 3}
   denAwakeSprite: {fileID: 21300000, guid: 15a3984fa56a12a4b8cf8890500e2ae6, type: 3}
   flipFxColor: {r: 0.13333334, g: 0.69411767, b: 0.29803923, a: 1}

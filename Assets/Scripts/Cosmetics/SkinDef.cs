@@ -15,7 +15,11 @@ public class SkinDef : ScriptableObject
     public string displayName = "Default Fox";
 
     [Header("Visual - Player")]
-    public Sprite sprite; // sprite that replaces the fox sprite
+    public Sprite sprite; // legacy fallback if animated frames are not assigned
+    public Sprite[] idleFrames;
+    public Sprite[] jumpFrames;
+    [Min(0.01f)] public float idleFrameDuration = 0.2f;
+    [Min(0.01f)] public float jumpFrameDuration = 0.08f;
 
     [Header("Visual - Den Fox")]
     public Sprite denSleepSprite; // sleeping fox shown in Den

@@ -226,9 +226,23 @@ public class CosmeticsManager : MonoBehaviour
     void ApplyToRenderer(SpriteRenderer r)
     {
         var def = GetSelectedDef();
-        if (!def || !def.sprite) return;
+        if (!def) return;
 
-        r.sprite = def.sprite;
+        var animator = r.GetComponent<PlayerSpriteAnimator>();
+        if (animator)
+        {
+            animator.targetRenderer = r;
+            animator.SetAnimationSet(
+                def.idleFrames,
+                def.jumpFrames,
+                def.idleFrameDuration,
+                def.jumpFrameDuration,
+                def.sprite);
+        }
+        else if (def.sprite)
+        {
+            r.sprite = def.sprite;
+        }
 
         // NEW: Apply flip FX color to match the selected skin (player only)
         var player = FindPlayer();

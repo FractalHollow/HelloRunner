@@ -15,6 +15,7 @@ public class PlayerGravityFlip : MonoBehaviour
     Rigidbody2D rb;
     GameManager gm;
     PlayerShield shield;
+    PlayerSpriteAnimator spriteAnimator;
 
     bool isAlive = true;
     bool canControl = true;
@@ -27,6 +28,7 @@ public class PlayerGravityFlip : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         shield = GetComponent<PlayerShield>();
         gm = FindObjectOfType<GameManager>();
+        spriteAnimator = GetComponentInChildren<PlayerSpriteAnimator>(true);
 
         ApplyGravityFromDir();
 
@@ -147,6 +149,7 @@ void OnCollisionEnter2D(Collision2D collision)
     void DoFlip(bool playSfx, bool playFx)
     {
         gm?.NotifyFlip();
+        spriteAnimator?.PlayJump();
 
         // flip direction
         gravDir *= -1;
@@ -219,6 +222,7 @@ void OnCollisionEnter2D(Collision2D collision)
         isAlive = true;
         canControl = false; // StartGame will enable control
         Debug.Log("[Flip] ResetState() -> canControl = false");
+        spriteAnimator?.ShowIdleImmediate();
 
         if (rb)
         {

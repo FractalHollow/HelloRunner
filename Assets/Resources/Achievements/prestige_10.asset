@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: prestige_10
   m_EditorClassIdentifier: 
   id: prestige_10
-  displayName: Exponential Growth
+  displayName: Taking Off
   description: Run in prestige level 10
   sortOrder: 23
   progressType: 6

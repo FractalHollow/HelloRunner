@@ -19,7 +19,7 @@ public static class PrestigeManager
     const string K_PrestigeBestDistanceM = "prestige_best_distance_m";
 
     // Tunable gate
-    public const int PrestigeDistanceRequirementM = 200;
+    public const int PrestigeDistanceRequirementM = 250;
 
 
     public static int BestDistanceThisPrestigeM =>

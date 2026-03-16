@@ -15,6 +15,16 @@ MonoBehaviour:
   id: prestige_5
   displayName: Gray Fox
   sprite: {fileID: 1455485043342257342, guid: 3694b70cde164134db238003a4cd74cf, type: 3}
+  idleFrames:
+  - {fileID: -1916693706312580472, guid: b7739ab0e42899e48b505d0b0ee3b471, type: 3}
+  - {fileID: 1866413907, guid: b7739ab0e42899e48b505d0b0ee3b471, type: 3}
+  jumpFrames:
+  - {fileID: -7731691857216941648, guid: 7ef8be4d5092130439952e0526350661, type: 3}
+  - {fileID: -1310771615, guid: 7ef8be4d5092130439952e0526350661, type: 3}
+  - {fileID: 585430423, guid: 7ef8be4d5092130439952e0526350661, type: 3}
+  - {fileID: 1930944534, guid: 7ef8be4d5092130439952e0526350661, type: 3}
+  idleFrameDuration: 0.2
+  jumpFrameDuration: 0.08
   denSleepSprite: {fileID: 21300000, guid: c54f89eb1b0a0f8459fd7e5d1107f8f9, type: 3}
   denAwakeSprite: {fileID: 21300000, guid: 5f1eef3d57135fd46be1b846cdd2ac7e, type: 3}
   flipFxColor: {r: 0.49803922, g: 0.49803922, b: 0.49803922, a: 1}

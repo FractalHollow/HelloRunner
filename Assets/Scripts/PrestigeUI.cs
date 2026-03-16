@@ -84,15 +84,14 @@ public class PrestigeUI : MonoBehaviour
             float nextMult = Mathf.Pow(1.5f, PrestigeManager.Level + 1);
             confirmBodyText.text =
                 $"Prestiging will:\n" +
-                $"• Reset ALL upgrades\n" +
-                $"• Re-lock Upgrades + Run Modifiers\n" +
+                $"• Reset Upgrades\n" +
+                $"• Re-lock Run Modifiers\n" +
                 $"• Reset Embers to 0\n" +
-                $"• Permanent increased difficulty scaling\n\n" +
+                $"• Permanently increase difficulty scaling\n\n" +
                 $"You will gain:\n" +
                 $"• Permanent x{nextMult:0.#} Score & Embers\n" +
                 $"• Permanent Idle Ember generation bonus\n\n" +
-                $"Achievements will be preserved.\n" +
-                $"This cannot be undone.\n\n" +
+                $"Achievements & Skins will be preserved.\n\n" +
                 $"Are you sure you want to Prestige?";
         }
 

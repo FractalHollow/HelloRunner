@@ -32,6 +32,7 @@ public class CosmeticsPanelController : MonoBehaviour
     public void Open()
     {
         if (panelRoot) panelRoot.SetActive(true);
+        CosmeticsManager.I?.MarkUnlockedSkinsAsSeen();
         RebuildList();
     }
 

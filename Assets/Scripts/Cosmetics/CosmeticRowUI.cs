@@ -96,9 +96,7 @@ public class CosmeticRowUI : MonoBehaviour
             () =>
             {
                 // TEST unlock (Phase A only)
-                PlayerPrefs.SetInt($"skin_unlocked_{def.id}", 1);
-                PlayerPrefs.Save();
-
+                CosmeticsManager.I.UnlockPaidSkinForTesting(def.id);
                 CosmeticsManager.I.TrySelect(def.id);
                 owner?.RefreshAll();
             }

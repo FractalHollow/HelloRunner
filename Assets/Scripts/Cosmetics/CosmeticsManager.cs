@@ -6,9 +6,11 @@ using UnityEngine.SceneManagement;
 public class CosmeticsManager : MonoBehaviour
 {
     public static CosmeticsManager I { get; private set; }
+    public static event System.Action<bool> NewSkinIndicatorChanged;
 
     const string K_SelectedSkinId = "skin_selected_id";
     string K_Unlocked(string id) => $"skin_unlocked_{id}";
+    string K_Seen(string id) => $"skin_seen_{id}";
 
     [Header("Auto-Apply Target")]
     [Tooltip("Optional. If set, this renderer will be used. If null, the manager will try to find one on the Player.")]
@@ -18,6 +20,7 @@ public class CosmeticsManager : MonoBehaviour
     public string preferredRendererName = "";
 
     List<SkinDef> skins = new List<SkinDef>();
+    bool hasUnseenUnlockedSkin;
 
     void Awake()
     {
@@ -28,6 +31,7 @@ public class CosmeticsManager : MonoBehaviour
         LoadSkins();
         EnsureDefaultSelection();
         RefreshUnlocksFromPrestige();
+        RefreshNewUnlockIndicatorState();
 
         // Guard against missing selected skin (removed/renamed defs)
         if (GetSelectedDef() == null)
@@ -134,6 +138,82 @@ public class CosmeticsManager : MonoBehaviour
         PlayerPrefs.SetInt(K_Unlocked(id), 1);
     }
 
+    void SetSeen(string id, bool seen)
+    {
+        PlayerPrefs.SetInt(K_Seen(id), seen ? 1 : 0);
+    }
+
+    bool IsSeen(string id)
+    {
+        return PlayerPrefs.GetInt(K_Seen(id), 0) == 1;
+    }
+
+    public bool HasUnseenUnlockedSkin => hasUnseenUnlockedSkin;
+
+    void RefreshNewUnlockIndicatorState(bool notify = true)
+    {
+        bool next = false;
+
+        for (int i = 0; i < skins.Count; i++)
+        {
+            var def = skins[i];
+            if (!def || string.IsNullOrEmpty(def.id)) continue;
+            if (!IsUnlocked(def.id)) continue;
+            if (def.unlockType == SkinDef.UnlockType.DefaultUnlocked) continue;
+            if (IsSeen(def.id)) continue;
+
+            next = true;
+            break;
+        }
+
+        if (hasUnseenUnlockedSkin == next) return;
+
+        hasUnseenUnlockedSkin = next;
+        if (notify) NewSkinIndicatorChanged?.Invoke(hasUnseenUnlockedSkin);
+    }
+
+    void UnlockSkinInternal(string id, bool markAsNew)
+    {
+        var def = GetDef(id);
+        if (def == null || string.IsNullOrEmpty(def.id)) return;
+        if (IsUnlocked(def.id)) return;
+
+        SetUnlocked(def.id);
+        SetSeen(def.id, !markAsNew);
+    }
+
+    public bool UnlockPaidSkinForTesting(string id)
+    {
+        var def = GetDef(id);
+        if (def == null || def.unlockType != SkinDef.UnlockType.Paid) return false;
+        if (IsUnlocked(id)) return false;
+
+        UnlockSkinInternal(id, true);
+        PlayerPrefs.Save();
+        RefreshNewUnlockIndicatorState();
+        return true;
+    }
+
+    public void MarkUnlockedSkinsAsSeen()
+    {
+        bool anyChanged = false;
+
+        for (int i = 0; i < skins.Count; i++)
+        {
+            var def = skins[i];
+            if (!def || string.IsNullOrEmpty(def.id)) continue;
+            if (!IsUnlocked(def.id)) continue;
+            if (def.unlockType == SkinDef.UnlockType.DefaultUnlocked) continue;
+            if (IsSeen(def.id)) continue;
+
+            SetSeen(def.id, true);
+            anyChanged = true;
+        }
+
+        if (anyChanged) PlayerPrefs.Save();
+        RefreshNewUnlockIndicatorState();
+    }
+
     public void RefreshUnlocksFromPrestige()
     {
         int p = PrestigeManager.Level;
@@ -150,9 +230,9 @@ public class CosmeticsManager : MonoBehaviour
 
             if (def.unlockType == SkinDef.UnlockType.PrestigeRequired && p >= def.prestigeRequired)
             {
-                if (PlayerPrefs.GetInt(K_Unlocked(def.id), 0) == 0)
+                if (!IsUnlocked(def.id))
                 {
-                    SetUnlocked(def.id);
+                    UnlockSkinInternal(def.id, true);
                     anyChanged = true;
                     Debug.Log($"[Cosmetics] Unlocked skin '{def.id}' via Prestige {p}.");
                 }
@@ -160,6 +240,7 @@ public class CosmeticsManager : MonoBehaviour
         }
 
         if (anyChanged) PlayerPrefs.Save();
+        RefreshNewUnlockIndicatorState();
     }
 
     public bool TrySelect(string id)

@@ -3,6 +3,7 @@ using UnityEngine;
 public static class PrestigeManager
 {
     const string K_PrestigeLevel = "prestige_level";
+    const string K_RunAttemptsThisPrestige = "run_attempts_this_prestige";
 
     // Existing keys in your project
     const string K_StoreUnlocked = "store_unlocked";
@@ -37,6 +38,7 @@ public static class PrestigeManager
 
     public static float ScoreMult => Mathf.Pow(1.5f, Level);
     public static float WispMult  => Mathf.Pow(1.5f, Level);
+    public static int RunAttemptsThisPrestige => PlayerPrefs.GetInt(K_RunAttemptsThisPrestige, 0);
 
     public static int BestDistanceM
     {
@@ -46,6 +48,12 @@ public static class PrestigeManager
     public static bool CanPrestige()
     {
         return BestDistanceThisPrestigeM >= PrestigeDistanceRequirementM;
+    }
+
+    public static void RecordRunAttempt()
+    {
+        PlayerPrefs.SetInt(K_RunAttemptsThisPrestige, RunAttemptsThisPrestige + 1);
+        PlayerPrefs.Save();
     }
 
 
@@ -75,7 +83,10 @@ public static class PrestigeManager
         }
 
         // 6) Reset best distance this prestige
-         PlayerPrefs.SetInt(K_PrestigeBestDistanceM, 0);
+        PlayerPrefs.SetInt(K_PrestigeBestDistanceM, 0);
+
+        // 7) Reset run attempts for this prestige
+        PlayerPrefs.SetInt(K_RunAttemptsThisPrestige, 0);
 
         // Do NOT touch:
         // - HighScore

@@ -55,12 +55,19 @@ public class GameManager : MonoBehaviour
     public float prestigeDifficultyMax = 1.6f;   // cap
 
     int PrestigeLevel => PlayerPrefs.GetInt("prestige_level", 0);
+    bool HasPersistenceAssist => PlayerPrefs.GetInt("upgrade_persistence_assist", 0) > 0;
 
     float DifficultyMultiplier()
     {
         int steps = Mathf.Max(0, PrestigeLevel - prestigeDifficultyStart);
         float mult = 1f + steps * prestigeDifficultyStep;
-        return Mathf.Min(mult, prestigeDifficultyMax);
+        mult = Mathf.Min(mult, prestigeDifficultyMax);
+
+        if (!HasPersistenceAssist)
+            return mult;
+
+        float reduced = mult - (PrestigeManager.RunAttemptsThisPrestige * 0.02f);
+        return Mathf.Max(1f, reduced);
     }
 
 
@@ -178,6 +185,8 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        PrestigeManager.RecordRunAttempt();
+
         Time.timeScale = 1f;
         paused = false;
         HideGameOverPanel();
@@ -720,6 +729,12 @@ public void RefreshAllCurrencyUI()
                     float seconds = def.GetV0(level);
                     if (seconds > 0f) ps.invulnDuration = seconds;
 
+                    break;
+                }
+
+            case UpgradeDef.EffectType.PersistenceAssist:
+                {
+                    // Difficulty scaling is computed dynamically from the purchased state.
                     break;
                 }
 

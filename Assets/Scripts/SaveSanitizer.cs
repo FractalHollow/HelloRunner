@@ -8,6 +8,7 @@ public static class SaveSanitizer
 
     // Align to your actual PlayerPrefs keys
     const string KEY_PRESTIGE_LEVEL = "prestige_level";
+    const string KEY_RUN_ATTEMPTS_THIS_PRESTIGE = "run_attempts_this_prestige";
     const string KEY_WISPS_TOTAL = "wisps_total";
 
     // Safety caps to prevent absurd values from breaking UI/economy
@@ -34,6 +35,7 @@ public static class SaveSanitizer
 
         // --- Prestige clamp ---
         changed |= ClampIntKey(KEY_PRESTIGE_LEVEL, 0, MAX_PRESTIGE);
+        changed |= ClampIntKey(KEY_RUN_ATTEMPTS_THIS_PRESTIGE, 0, int.MaxValue);
 
         // --- Currency clamp ---
         changed |= ClampIntKey(KEY_WISPS_TOTAL, 0, MAX_CURRENCY);

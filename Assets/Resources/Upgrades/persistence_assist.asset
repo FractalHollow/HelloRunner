@@ -10,24 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8cd9dfb2658fd2549a2ad2c87a0d80e4, type: 3}
-  m_Name: idle_capacity
+  m_Name: persistence_assist
   m_EditorClassIdentifier: 
-  id: idle_capacity
-  displayName: Idle Cap
-  description: Increase Idle Cap
-  descriptionTemplate: Store +{v0} more hours.
-  baseCost: 70
-  costScale: 1.5
-  maxLevel: 4
-  unlockDistance: 120
-  sortOrder: 6
+  id: persistence_assist
+  displayName: Persistence
+  description: Every run this prestige reduces difficulty scaling.
+  descriptionTemplate: 
+  baseCost: 1000
+  costScale: 1
+  maxLevel: 1
+  unlockDistance: 60
+  sortOrder: 9
   dependencies: []
-  v0PerTier:
-  - 8
-  - 16
-  - 24
-  - 48
+  v0PerTier: []
   v1PerTier: []
   v2PerTier: []
-  effectType: 0
+  effectType: 8
   descriptionPerTier: []

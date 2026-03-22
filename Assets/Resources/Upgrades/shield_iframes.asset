@@ -16,10 +16,11 @@ MonoBehaviour:
   displayName: Enhance Shield
   description: Longer invulnerable window from shield.
   descriptionTemplate: Gain {v0} sec invulnerability
-  baseCost: 60
+  baseCost: 80
   costScale: 1.5
   maxLevel: 5
-  unlockDistance: 160
+  unlockDistance: 140
+  sortOrder: 7
   dependencies: []
   v0PerTier:
   - 1.8

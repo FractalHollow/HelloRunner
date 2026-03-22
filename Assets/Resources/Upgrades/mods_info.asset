@@ -16,10 +16,11 @@ MonoBehaviour:
   displayName: Run Modifiers
   description: High risk, high reward.
   descriptionTemplate: 
-  baseCost: 40
+  baseCost: 60
   costScale: 1
   maxLevel: 1
-  unlockDistance: 150
+  unlockDistance: 80
+  sortOrder: 5
   dependencies: []
   v0PerTier: []
   v1PerTier: []

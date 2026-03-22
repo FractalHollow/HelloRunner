@@ -10718,7 +10718,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 476.6057}
+  m_AnchoredPosition: {x: 0, y: 500}
   m_SizeDelta: {x: 750, y: 303.211}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &972541504
@@ -12759,7 +12759,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -200}
+  m_AnchoredPosition: {x: 0, y: -180}
   m_SizeDelta: {x: 700, y: 50}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1202535991
@@ -13730,8 +13730,8 @@ MonoBehaviour:
   pausePanel: {fileID: 830305323}
   pauseButton: {fileID: 558485786}
   prestigeDifficultyStart: 3
-  prestigeDifficultyStep: 0.1
-  prestigeDifficultyMax: 2
+  prestigeDifficultyStep: 0.13
+  prestigeDifficultyMax: 20
   playerStartPos: {x: 0, y: 0, z: 0}
   playerStartRot: {x: 0, y: 0, z: 0, w: 0}
   upgradesPanel: {fileID: 7709592574260189304}

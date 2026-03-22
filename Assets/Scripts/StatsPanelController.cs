@@ -47,6 +47,7 @@ public class StatsPanelController : MonoBehaviour
         int runsPlayed = StatsManager.RunsPlayed;
         int speedModRuns = StatsManager.SpeedModRuns;
         int hazardsModRuns = StatsManager.HazardsModRuns;
+        int runsThisPrestige = PrestigeManager.RunAttemptsThisPrestige;
 
         int totalAchievements = 0;
         int unlockedAchievements = 0;
@@ -77,8 +78,9 @@ public class StatsPanelController : MonoBehaviour
             $"Runs Played: {runsPlayed:N0}\n" +
             $"Speed Mod Runs: {speedModRuns:N0}\n" +
             $"Hazards Mod Runs: {hazardsModRuns:N0}\n" +
+            $"Runs This Prestige: {runsThisPrestige:N0}\n" +
             $"\n" +
-            $"Achievements Unlocked: {unlockedAchievements:N0} / {totalAchievements:N0}\n";
+            $"Achievements: {unlockedAchievements:N0} / {totalAchievements:N0}\n";
     }
 
 }

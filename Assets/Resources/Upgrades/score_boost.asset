@@ -16,10 +16,11 @@ MonoBehaviour:
   displayName: Score Boost
   description: Multiply your score.
   descriptionTemplate: Score Multiplier x{v0}
-  baseCost: 80
+  baseCost: 90
   costScale: 1.5
   maxLevel: 5
-  unlockDistance: 180
+  unlockDistance: 160
+  sortOrder: 8
   dependencies: []
   v0PerTier:
   - 1
@@ -30,3 +31,4 @@ MonoBehaviour:
   v1PerTier: []
   v2PerTier: []
   effectType: 4
+  descriptionPerTier: []

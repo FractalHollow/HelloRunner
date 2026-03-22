@@ -16,10 +16,11 @@ MonoBehaviour:
   displayName: Agility
   description: Reduce hitbox.
   descriptionTemplate: Reduce collision size to {v0_pct}%.
-  baseCost: 35
+  baseCost: 40
   costScale: 1.45
   maxLevel: 5
-  unlockDistance: 120
+  unlockDistance: 60
+  sortOrder: 3
   dependencies: []
   v0PerTier:
   - 90

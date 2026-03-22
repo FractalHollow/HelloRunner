@@ -17,9 +17,10 @@ public class UpgradesPanelController : MonoBehaviour
 
     void Awake()
     {
-        // Load and sort so the list feels progressive
+        // Load and sort using explicit asset order first, then stable fallbacks.
         allDefs = Resources.LoadAll<UpgradeDef>("Upgrades")
-            .OrderBy(d => d.unlockDistance)
+            .OrderBy(d => d.sortOrder)
+            .ThenBy(d => d.unlockDistance)
             .ThenBy(d => d.displayName)
             .ToArray();
     }

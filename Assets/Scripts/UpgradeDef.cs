@@ -22,6 +22,10 @@ public class UpgradeDef : ScriptableObject
     [Tooltip("Minimum best distance needed for this upgrade to appear in the shop.")]
     public int unlockDistance = 0;
 
+    [Header("UI Ordering")]
+    [Tooltip("Lower values appear earlier in the upgrades panel.")]
+    public int sortOrder = 0;
+
     [Header("Dependencies (optional)")]
     [Tooltip("Require other upgrades to be at certain tiers before this one is purchasable.")]
     public Dependency[] dependencies;
@@ -51,6 +55,7 @@ public class UpgradeDef : ScriptableObject
         ShieldIFrames,
         IdleRate,
         IdleCapacity,
+        PersistenceAssist,
     }
     public EffectType effectType;
 

@@ -56,6 +56,18 @@ bool resetConfirmArmed = false;
     {
         // 1. Cache paid skin unlocks
         var paidSkinUnlocks = new System.Collections.Generic.Dictionary<string, int>();
+        float? musicVolume = null;
+        float? sfxVolume = null;
+        bool? musicMuted = null;
+        bool? sfxMuted = null;
+
+        if (AudioManager.I != null)
+        {
+            musicVolume = AudioManager.I.CurrentMusic01;
+            sfxVolume = AudioManager.I.CurrentSfx01;
+            musicMuted = AudioManager.I.MusicMuted;
+            sfxMuted = AudioManager.I.SfxMuted;
+        }
 
         if (CosmeticsManager.I != null)
         {
@@ -82,6 +94,18 @@ bool resetConfirmArmed = false;
         {
             if (kv.Value == 1)
                 PlayerPrefs.SetInt(kv.Key, 1);
+        }
+
+        if (AudioManager.I != null && musicVolume.HasValue && sfxVolume.HasValue)
+        {
+            AudioManager.I.SetMusicVolume(musicVolume.Value);
+            AudioManager.I.SetSfxVolume(sfxVolume.Value);
+
+            if (musicMuted.HasValue)
+                AudioManager.I.SetMusicMuted(musicMuted.Value);
+
+            if (sfxMuted.HasValue)
+                AudioManager.I.SetSfxMuted(sfxMuted.Value);
         }
 
         PlayerPrefs.Save();

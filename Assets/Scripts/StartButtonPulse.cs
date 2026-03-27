@@ -6,7 +6,7 @@ public class TapPromptPulse : MonoBehaviour
 {
     public TMP_Text text;
     public CanvasGroup group;       // optional: assign if you prefer fading the whole object
-    public float minAlpha = 0.25f;
+    public float minAlpha = 0.8f;
     public float maxAlpha = 1f;
     public float pulsesPerSecond = 1.5f;
     public float scaleBobAmount = 0.02f;   // 0 = disable scale bob

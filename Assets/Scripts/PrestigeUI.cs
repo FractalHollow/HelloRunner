@@ -61,7 +61,7 @@ public class PrestigeUI : MonoBehaviour
         }
 
         if (requirementText)
-            requirementText.text = $"Requirement: Reach {req}m (This Prestige Best: {best}m)";
+            requirementText.text = $"Prestige Requirement: Reach {req}m (This Prestige Best: {best}m)";
 
         if (rewardText)
         {

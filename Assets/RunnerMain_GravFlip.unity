@@ -2306,6 +2306,7 @@ MonoBehaviour:
   gravityMagnitude: 4
   maxYSpeed: 16
   flipCooldown: 0.1
+  flipInputBuffer: 0.12
   flipFXUp: {fileID: 1892314596}
   flipFXDown: {fileID: 1570754928}
 --- !u!61 &201007796
@@ -2906,6 +2907,7 @@ GameObject:
   - component: {fileID: 237842543}
   - component: {fileID: 237842542}
   - component: {fileID: 237842541}
+  - component: {fileID: 237842544}
   m_Layer: 5
   m_Name: ResumeButton
   m_TagString: Untagged
@@ -3027,6 +3029,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 237842539}
   m_CullTransparentMesh: 1
+--- !u!114 &237842544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 237842539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1abb685138144704eb51f6f3bd60287b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &274818448
 GameObject:
   m_ObjectHideFlags: 0
@@ -3941,6 +3955,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetGraphic: {fileID: 371246035}
+  indicatorSource: 0
   glowColor: {r: 1, g: 0.78, b: 0.26, a: 1}
   pulsesPerSecond: 1.35
   scaleBoost: 0.06
@@ -5814,6 +5829,7 @@ GameObject:
   - component: {fileID: 558485788}
   - component: {fileID: 558485787}
   - component: {fileID: 558485786}
+  - component: {fileID: 558485789}
   m_Layer: 5
   m_Name: PauseButton
   m_TagString: Untagged
@@ -5935,6 +5951,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 558485784}
   m_CullTransparentMesh: 1
+--- !u!114 &558485789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558485784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1abb685138144704eb51f6f3bd60287b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &570338174
 GameObject:
   m_ObjectHideFlags: 0
@@ -6486,7 +6514,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -9886,7 +9914,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -12372,6 +12400,7 @@ MonoBehaviour:
   crashClip: {fileID: 8300000, guid: 70f130ec37ecc54449172822fc627683, type: 3}
   sfxPurchase: {fileID: 8300000, guid: c3b166abcd8b9664cb878d3155c6ab81, type: 3}
   sfxWakeUp: {fileID: 8300000, guid: 63e29b0615c889c4fa5a70c4a0716117, type: 3}
+  sfxUiClick: {fileID: 8300000, guid: 33f343a2399e1324fb87361af1be4a61, type: 3}
   pickupSFX: {fileID: 8300000, guid: c48904584937af34b92ff87d53212b55, type: 3}
   sfxShootDefault: {fileID: 0}
   shootVolume: 0.8
@@ -12379,6 +12408,7 @@ MonoBehaviour:
   shootPitchJitter: 0.1
   sfxPurchaseVolume: 0.9
   sfxWakeUpVolume: 1
+  uiClickVolume: 1
   pickupVolume: 0.8
 --- !u!4 &1194164681
 Transform:
@@ -20539,7 +20569,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -22143,6 +22173,7 @@ GameObject:
   - component: {fileID: 1728894613}
   - component: {fileID: 1728894612}
   - component: {fileID: 1728894611}
+  - component: {fileID: 1728894614}
   m_Layer: 5
   m_Name: AcheivementsButton
   m_TagString: Untagged
@@ -22264,6 +22295,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1728894609}
   m_CullTransparentMesh: 1
+--- !u!114 &1728894614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728894609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d7c3df9051a43809a38cbeb2fe3ab71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetGraphic: {fileID: 1728894612}
+  indicatorSource: 1
+  glowColor: {r: 1, g: 0.78, b: 0.26, a: 1}
+  pulsesPerSecond: 1.35
+  scaleBoost: 0.06
 --- !u!1 &1729651882
 GameObject:
   m_ObjectHideFlags: 0
@@ -33676,6 +33724,7 @@ GameObject:
   - component: {fileID: 1994977707}
   - component: {fileID: 1994977706}
   - component: {fileID: 1994977705}
+  - component: {fileID: 1994977708}
   m_Layer: 5
   m_Name: RestartButton
   m_TagString: Untagged
@@ -33797,6 +33846,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1994977703}
   m_CullTransparentMesh: 1
+--- !u!114 &1994977708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1994977703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1abb685138144704eb51f6f3bd60287b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2002614009
 GameObject:
   m_ObjectHideFlags: 0

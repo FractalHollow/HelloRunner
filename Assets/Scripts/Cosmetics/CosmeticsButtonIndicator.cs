@@ -4,8 +4,15 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class CosmeticsButtonIndicator : MonoBehaviour
 {
+    enum IndicatorSource
+    {
+        Cosmetics = 0,
+        Achievements = 1
+    }
+
     [Header("Targets")]
     [SerializeField] Graphic targetGraphic;
+    [SerializeField] IndicatorSource indicatorSource = IndicatorSource.Cosmetics;
 
     [Header("Pulse")]
     [SerializeField] Color glowColor = new Color(1f, 0.78f, 0.26f, 1f);
@@ -34,13 +41,13 @@ public class CosmeticsButtonIndicator : MonoBehaviour
 
     void OnEnable()
     {
-        CosmeticsManager.NewSkinIndicatorChanged += HandleIndicatorChanged;
+        Subscribe();
         RefreshFromManager();
     }
 
     void OnDisable()
     {
-        CosmeticsManager.NewSkinIndicatorChanged -= HandleIndicatorChanged;
+        Unsubscribe();
         ApplyRestingState();
     }
 
@@ -64,7 +71,48 @@ public class CosmeticsButtonIndicator : MonoBehaviour
 
     void RefreshFromManager()
     {
-        HandleIndicatorChanged(CosmeticsManager.I != null && CosmeticsManager.I.HasUnseenUnlockedSkin);
+        bool shouldPulse = false;
+
+        switch (indicatorSource)
+        {
+            case IndicatorSource.Achievements:
+                shouldPulse = AchievementManager.I != null && AchievementManager.I.HasUnseenUnlockedAchievement;
+                break;
+
+            default:
+                shouldPulse = CosmeticsManager.I != null && CosmeticsManager.I.HasUnseenUnlockedSkin;
+                break;
+        }
+
+        HandleIndicatorChanged(shouldPulse);
+    }
+
+    void Subscribe()
+    {
+        switch (indicatorSource)
+        {
+            case IndicatorSource.Achievements:
+                AchievementManager.NewAchievementIndicatorChanged += HandleIndicatorChanged;
+                break;
+
+            default:
+                CosmeticsManager.NewSkinIndicatorChanged += HandleIndicatorChanged;
+                break;
+        }
+    }
+
+    void Unsubscribe()
+    {
+        switch (indicatorSource)
+        {
+            case IndicatorSource.Achievements:
+                AchievementManager.NewAchievementIndicatorChanged -= HandleIndicatorChanged;
+                break;
+
+            default:
+                CosmeticsManager.NewSkinIndicatorChanged -= HandleIndicatorChanged;
+                break;
+        }
     }
 
     void ApplyRestingState()

@@ -21,6 +21,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip crashClip;
     public AudioClip sfxPurchase;
     public AudioClip sfxWakeUp;
+    public AudioClip sfxUiClick;
     [SerializeField] private AudioClip pickupSFX;      // wisp pickup
     public AudioClip sfxShootDefault;                  // optional default if caller passes null
     [Range(0f, 1f)] public float shootVolume = 0.8f;
@@ -32,6 +33,7 @@ public class AudioManager : MonoBehaviour
     [Header("Volumes")]
     [Range(0f, 1f)] public float sfxPurchaseVolume = 0.9f;
     [Range(0f, 1f)] public float sfxWakeUpVolume = 1f;
+    [Range(0f, 1f)] public float uiClickVolume = 1f;
     [Range(0f, 1f)] [SerializeField] private float pickupVolume = 0.8f;
 
     // PlayerPrefs keys
@@ -61,6 +63,7 @@ public class AudioManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         EnsureSources();
+        EnsureUiButtonClickInstaller();
 
         EnsureDefaultAudioPrefsIfMissing();
         LoadPrefs();
@@ -143,6 +146,12 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    void EnsureUiButtonClickInstaller()
+    {
+        if (!GetComponent<UIButtonClickSfxInstaller>())
+            gameObject.AddComponent<UIButtonClickSfxInstaller>();
+    }
+
     void OnApplicationPause(bool paused)
     {
         if (paused) PlayerPrefs.Save();
@@ -214,8 +223,31 @@ public class AudioManager : MonoBehaviour
         bool effectiveMute = muteSfx || (sfx01 <= 0.0001f);
         float db = effectiveMute ? -80f : ToDecibels(sfx01);
 
+        if (sfxSource)
+        {
+            sfxSource.mute = effectiveMute;
+            sfxSource.volume = 1f;
+        }
+
+        if (flipSource)
+        {
+            flipSource.mute = effectiveMute;
+            flipSource.volume = 1f;
+        }
+
         if (mixer) { mixer.SetFloat(sfxVolParam, db); }
-        else if (sfxSource) { sfxSource.mute = effectiveMute; sfxSource.volume = sfx01; }
+        else if (sfxSource) { sfxSource.mute = effectiveMute; sfxSource.volume = 1f; }
+    }
+
+    bool CanPlaySfx(AudioClip clip, AudioSource source)
+    {
+        return clip && source && !muteSfx && sfx01 > 0.0001f;
+    }
+
+    float GetOneShotSfxVolume(float vol01 = 1f)
+    {
+        float shotVolume = Mathf.Clamp01(vol01);
+        return mixer ? shotVolume : shotVolume * sfx01;
     }
 
     // ---------------- playback helpers ----------------
@@ -231,9 +263,8 @@ public class AudioManager : MonoBehaviour
 
     public void Play2D(AudioClip clip, float vol01 = 1f)
     {
-        if (!clip || !sfxSource) return;
-        if (muteSfx || sfx01 <= 0.0001f) return;
-        sfxSource.PlayOneShot(clip, Mathf.Clamp01(vol01) * sfx01);
+        if (!CanPlaySfx(clip, sfxSource)) return;
+        sfxSource.PlayOneShot(clip, GetOneShotSfxVolume(vol01));
     }
 
     public void PlayShoot(AudioClip clipOverride = null, float vol01 = -1f)
@@ -241,64 +272,59 @@ public class AudioManager : MonoBehaviour
         EnsureSources();
 
         var clip = clipOverride ? clipOverride : sfxShootDefault;
-        if (!clip) return;
-        if (!sfxSource) return;
-        if (muteSfx || sfx01 <= 0.0001f) return;
+        if (!CanPlaySfx(clip, sfxSource)) return;
 
         float v = (vol01 >= 0f) ? vol01 : shootVolume;
         float jitter = Mathf.Clamp(shootPitchJitter, 0f, 0.5f);
         float newPitch = 1f + Random.Range(-jitter, jitter);
 
         sfxSource.pitch = newPitch;
-        sfxSource.PlayOneShot(clip, Mathf.Clamp01(v) * sfx01);
+        sfxSource.PlayOneShot(clip, GetOneShotSfxVolume(v));
     }
 
     public void PlayFlip()
     {
         EnsureSources();
 
-        if (!flipClip || !flipSource) return;
-        if (muteSfx || sfx01 <= 0.0001f) return;
+        if (!CanPlaySfx(flipClip, flipSource)) return;
 
         float jitter = Mathf.Clamp(flipPitchJitter, 0f, 0.5f);
         float newPitch = 1f + Random.Range(-jitter, jitter);
 
         flipSource.pitch = newPitch;
-        flipSource.PlayOneShot(flipClip, sfx01);
+        flipSource.PlayOneShot(flipClip, GetOneShotSfxVolume());
 
         Debug.Log($"[Audio] Flip pitch = {newPitch:0.000}");
     }
 
     public void PlayCrash()
     {
-        if (!crashClip || !sfxSource) return;
-        if (muteSfx || sfx01 <= 0.0001f) return;
-
-        sfxSource.PlayOneShot(crashClip, sfx01);
+        if (!CanPlaySfx(crashClip, sfxSource)) return;
+        sfxSource.PlayOneShot(crashClip, GetOneShotSfxVolume());
     }
 
     public void PlayPurchase()
     {
-        if (!sfxPurchase || !sfxSource) return;
-        if (muteSfx || sfx01 <= 0.0001f) return;
-
-        sfxSource.PlayOneShot(sfxPurchase, sfxPurchaseVolume * sfx01);
+        if (!CanPlaySfx(sfxPurchase, sfxSource)) return;
+        sfxSource.PlayOneShot(sfxPurchase, GetOneShotSfxVolume(sfxPurchaseVolume));
     }
 
     public void PlayWakeUp()
     {
-        if (!sfxWakeUp || !sfxSource) return;
-        if (muteSfx || sfx01 <= 0.0001f) return;
+        if (!CanPlaySfx(sfxWakeUp, sfxSource)) return;
+        sfxSource.PlayOneShot(sfxWakeUp, GetOneShotSfxVolume(sfxWakeUpVolume));
+    }
 
-        sfxSource.PlayOneShot(sfxWakeUp, sfxWakeUpVolume * sfx01);
+    public void PlayUiClick()
+    {
+        if (!CanPlaySfx(sfxUiClick, sfxSource)) return;
+        sfxSource.PlayOneShot(sfxUiClick, GetOneShotSfxVolume(uiClickVolume));
     }
 
     public void PlayPickup()
     {
-        if (!pickupSFX || !sfxSource) return;
-        if (muteSfx || sfx01 <= 0.0001f) return;
-
-        sfxSource.PlayOneShot(pickupSFX, pickupVolume * sfx01);
+        if (!CanPlaySfx(pickupSFX, sfxSource)) return;
+        sfxSource.PlayOneShot(pickupSFX, GetOneShotSfxVolume(pickupVolume));
     }
 
     // --- Test helpers for the settings menu ---

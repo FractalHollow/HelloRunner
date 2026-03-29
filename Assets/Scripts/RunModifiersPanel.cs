@@ -14,7 +14,7 @@ public class RunModifiersPanel : MonoBehaviour
 
     void OnEnable()
     {
-        gm = FindObjectOfType<GameManager>();
+        gm = FindFirstObjectByType<GameManager>();
         bool unlocked = PlayerPrefs.GetInt("mods_unlocked", 0) == 1;
 
         if (lockedGroup) lockedGroup.SetActive(!unlocked);

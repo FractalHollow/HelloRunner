@@ -6,10 +6,11 @@ public class PlayerGravityFlip : MonoBehaviour
     [Header("Feel")]
     public float gravityMagnitude = 7f;   // how strong gravity feels in either direction
     public float maxYSpeed = 18f;         // clamp vertical speed so it stays readable
-    public float flipCooldown = 0.08f;    // small debounce so taps don’t spam
+    public float flipCooldown = 0.08f;    // small debounce so taps do not spam
+    public float flipInputBuffer = 0.12f; // keep short taps alive through brief cooldown/impact windows
 
     [Header("FX")]
-    public ParticleSystem flipFXUp;      // Optional: particle effects for flipping
+    public ParticleSystem flipFXUp;       // Optional: particle effects for flipping
     public ParticleSystem flipFXDown;
 
     Rigidbody2D rb;
@@ -20,14 +21,15 @@ public class PlayerGravityFlip : MonoBehaviour
     bool isAlive = true;
     bool canControl = true;
 
-    int gravDir = 1;          // +1 = normal (down), -1 = inverted (up)
+    int gravDir = 1; // +1 = normal (down), -1 = inverted (up)
     float nextFlipAllowed = 0f;
+    float bufferedFlipUntil = -1f;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         shield = GetComponent<PlayerShield>();
-        gm = FindObjectOfType<GameManager>();
+        gm = FindFirstObjectByType<GameManager>();
         spriteAnimator = GetComponentInChildren<PlayerSpriteAnimator>(true);
 
         ApplyGravityFromDir();
@@ -45,38 +47,25 @@ public class PlayerGravityFlip : MonoBehaviour
     void Update()
     {
         if (!isAlive || !canControl)
-            {
-            if (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+        {
+            if (Input.GetMouseButtonDown(0) || HasAnyTouchBegan())
                 Debug.Log($"[Flip] Input ignored. isAlive={isAlive}, canControl={canControl}");
             return;
-            }
+        }
 
-            bool tapDown = false;
+        TryQueueFlipInput(out bool tapBlockedByUi);
+        if (tapBlockedByUi)
+            Debug.Log($"[Flip] tap blocked by UI | touchCount={Input.touchCount}");
 
-                if (Input.touchCount > 0)
-                {
-                    tapDown = Input.GetTouch(0).phase == TouchPhase.Began;
-                }
-                else
-                {
-                    tapDown = Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space);
-                }
+        bool flipBuffered = bufferedFlipUntil >= Time.time;
+        bool cooldownReady = Time.time >= nextFlipAllowed;
 
-        if (tapDown)
+        if (flipBuffered && cooldownReady)
         {
-            bool overUI = IsPointerOverUI();
-            bool cooldownReady = Time.time >= nextFlipAllowed;
-
-            if (!overUI && cooldownReady)
-            {
-                DoFlip(playSfx: true, playFx: true);
-                nextFlipAllowed = Time.time + flipCooldown;
-            }
-            else
-            {
-                Debug.Log($"[Flip] tap blocked | overUI={overUI} cooldownReady={cooldownReady} touchCount={Input.touchCount}");
-            }
-}
+            DoFlip(playSfx: true, playFx: true);
+            nextFlipAllowed = Time.time + flipCooldown;
+            bufferedFlipUntil = -1f;
+        }
 
         // Clamp vertical speed so it never becomes unreadable
         if (rb)
@@ -88,62 +77,113 @@ public class PlayerGravityFlip : MonoBehaviour
     }
 
     public void EnableControl(bool value)
+    {
+        canControl = value;
+        Debug.Log($"[Flip] EnableControl({value})");
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!isAlive) return;
+
+        bool isBoundary =
+            collision.collider.CompareTag("Ground") ||
+            collision.collider.CompareTag("Ceiling");
+
+        // Always bounce/flip off boundaries
+        if (isBoundary)
         {
-            canControl = value;
-            Debug.Log($"[Flip] EnableControl({value})");
+            ForceFlipAndBounce(collision, 6f); // tweak bounce speed if needed
+
+            // But still treat it as a HIT (unless invulnerable)
+            if (shield && shield.IsInvulnerable)
+                return;
+
+            if (shield && shield.TryAbsorbHit())
+                return;
+
+            // No shield to absorb -> death
+            isAlive = false;
+            gm?.GameOver();
+            return;
         }
 
-void OnCollisionEnter2D(Collision2D collision)
-{
-    if (!isAlive) return;
-
-    bool isBoundary =
-        collision.collider.CompareTag("Ground") ||
-        collision.collider.CompareTag("Ceiling");
-
-    // Always bounce/flip off boundaries
-    if (isBoundary)
-    {
-        ForceFlipAndBounce(collision,6f); // tweak bounce speed if needed
-
-        // But still treat it as a HIT (unless invulnerable)
+        // Non-boundary hits:
         if (shield && shield.IsInvulnerable)
             return;
 
         if (shield && shield.TryAbsorbHit())
             return;
 
-        // No shield to absorb -> death
         isAlive = false;
-        gm?.GameOver(); 
-        return;
+        gm?.GameOver();
     }
 
-    // Non-boundary hits:
-    if (shield && shield.IsInvulnerable)
-        return;
-
-    if (shield && shield.TryAbsorbHit())
-        return;
-
-    isAlive = false;
-    gm?.GameOver();
-}
-
-
-    bool IsPointerOverUI()
+    bool TryQueueFlipInput(out bool blockedByUi)
     {
-        if (EventSystem.current == null) return false;
+        blockedByUi = false;
 
-        // Mouse / editor
-        if (EventSystem.current.IsPointerOverGameObject()) return true;
-
-        // Touch (any finger)
         for (int i = 0; i < Input.touchCount; i++)
-            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
-                return true;
+        {
+            Touch touch = Input.GetTouch(i);
+            if (touch.phase != TouchPhase.Began)
+                continue;
+
+            if (IsTouchOverUi(touch.fingerId))
+            {
+                blockedByUi = true;
+                continue;
+            }
+
+            QueueBufferedFlip();
+            return true;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (IsMousePointerOverUi())
+            {
+                blockedByUi = true;
+                return false;
+            }
+
+            QueueBufferedFlip();
+            return true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            QueueBufferedFlip();
+            return true;
+        }
 
         return false;
+    }
+
+    void QueueBufferedFlip()
+    {
+        bufferedFlipUntil = Mathf.Max(bufferedFlipUntil, Time.time + Mathf.Max(0f, flipInputBuffer));
+    }
+
+    bool HasAnyTouchBegan()
+    {
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            if (Input.GetTouch(i).phase == TouchPhase.Began)
+                return true;
+        }
+
+        return false;
+    }
+
+    bool IsMousePointerOverUi()
+    {
+        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+    }
+
+    bool IsTouchOverUi(int fingerId)
+    {
+        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(fingerId);
     }
 
     void DoFlip(bool playSfx, bool playFx)
@@ -159,15 +199,19 @@ void OnCollisionEnter2D(Collision2D collision)
         if (rb)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
 
-        if (playSfx)
-            if (AudioManager.I) AudioManager.I.PlayFlip();
+        if (playSfx && AudioManager.I)
+            AudioManager.I.PlayFlip();
 
         if (playFx)
         {
             if (gravDir > 0)
-            { if (flipFXDown) flipFXDown.Play(); } // now gravity down
+            {
+                if (flipFXDown) flipFXDown.Play(); // now gravity down
+            }
             else
-            { if (flipFXUp) flipFXUp.Play(); }     // now gravity up
+            {
+                if (flipFXUp) flipFXUp.Play(); // now gravity up
+            }
         }
     }
 
@@ -196,31 +240,33 @@ void OnCollisionEnter2D(Collision2D collision)
     }
 
     public void ForceFlipAndBounce(Collision2D collision, float bounceSpeed = 7f)
-        {
-            if (!rb) return;
+    {
+        if (!rb) return;
 
-            // Use contact normal so bounce is deterministic (no accidental double-flip)
-            Vector2 n = collision.GetContact(0).normal; // floor ~ up, ceiling ~ down
+        // Use contact normal so bounce is deterministic (no accidental double-flip)
+        Vector2 n = collision.GetContact(0).normal; // floor ~ up, ceiling ~ down
 
-            // If we hit floor (normal.y > 0), gravity should become UP (-1).
-            // If we hit ceiling (normal.y < 0), gravity should become DOWN (+1).
-            gravDir = (n.y > 0f) ? -1 : 1;
-            ApplyGravityFromDir();
+        // If we hit floor (normal.y > 0), gravity should become UP (-1).
+        // If we hit ceiling (normal.y < 0), gravity should become DOWN (+1).
+        gravDir = (n.y > 0f) ? -1 : 1;
+        ApplyGravityFromDir();
 
-            gm?.NotifyFlip();
+        gm?.NotifyFlip();
 
-            // Bounce away from the surface
-            float y = (n.y > 0f) ? Mathf.Abs(bounceSpeed) : -Mathf.Abs(bounceSpeed);
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, y);
+        // Bounce away from the surface
+        float y = (n.y > 0f) ? Mathf.Abs(bounceSpeed) : -Mathf.Abs(bounceSpeed);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, y);
 
-            // Optional: block instant tap re-flip on the same impact frame
-            nextFlipAllowed = Time.time + flipCooldown;
-        }
+        // Optional: block instant tap re-flip on the same impact frame
+        nextFlipAllowed = Time.time + flipCooldown;
+    }
 
     public void ResetState()
     {
         isAlive = true;
         canControl = false; // StartGame will enable control
+        bufferedFlipUntil = -1f;
+        nextFlipAllowed = 0f;
         Debug.Log("[Flip] ResetState() -> canControl = false");
         spriteAnimator?.ShowIdleImmediate();
 

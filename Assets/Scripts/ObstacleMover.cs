@@ -9,7 +9,7 @@ public class ObstacleMover : MonoBehaviour
 
     void Awake()
     {
-        gm = FindObjectOfType<GameManager>();
+        gm = FindFirstObjectByType<GameManager>();
     }
 
     void Update()

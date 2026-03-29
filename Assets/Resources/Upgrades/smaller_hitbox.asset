@@ -17,7 +17,7 @@ MonoBehaviour:
   description: Reduce hitbox.
   descriptionTemplate: Reduce collision size to {v0_pct}%.
   baseCost: 40
-  costScale: 1.45
+  costScale: 1.4
   maxLevel: 5
   unlockDistance: 60
   sortOrder: 3

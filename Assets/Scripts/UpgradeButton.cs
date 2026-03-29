@@ -166,4 +166,16 @@ public class UpgradeButton : MonoBehaviour
         gm.ApplyUpgrade(def);
         gm.RefreshUpgradesUI();
     }
+
+    void Awake()
+    {
+        EnsureGenericClickSuppressed(buyButton);
+    }
+
+    void EnsureGenericClickSuppressed(Button button)
+    {
+        if (!button) return;
+        if (!button.GetComponent<UIButtonClickSfxSuppressor>())
+            button.gameObject.AddComponent<UIButtonClickSfxSuppressor>();
+    }
 }

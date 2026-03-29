@@ -26,7 +26,7 @@ public class Spawner : MonoBehaviour
     void Awake()
     {
         currentBaseInterval = startInterval;
-        gm = FindObjectOfType<GameManager>();
+        gm = FindFirstObjectByType<GameManager>();
     }
 
     public void Begin()

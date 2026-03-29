@@ -26,6 +26,9 @@ public class DenMenu : MonoBehaviour
         // Unity 6+ replacement for deprecated FindObjectOfType
         gm = FindFirstObjectByType<GameManager>();
 
+        EnsureGenericClickSuppressed(wakeUpButton);
+        EnsureGenericClickSuppressed(unlockUpgradesButton);
+
         // Ensure idle has a timestamp as soon as Den exists
         IdleSystem.EnsureStartStamp();
     }
@@ -189,4 +192,11 @@ public class DenMenu : MonoBehaviour
 
     public void OnOpenAchievements() { Debug.Log("Open Achievements: TODO"); }
     public void OnOpenPrestige()     { Debug.Log("Open Prestige: TODO"); }
+
+    void EnsureGenericClickSuppressed(Button button)
+    {
+        if (!button) return;
+        if (!button.GetComponent<UIButtonClickSfxSuppressor>())
+            button.gameObject.AddComponent<UIButtonClickSfxSuppressor>();
+    }
 }

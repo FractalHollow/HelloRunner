@@ -21,7 +21,7 @@ public class WispSpawner : MonoBehaviour
 
     void Awake()
     {
-        gm = FindObjectOfType<GameManager>();
+        gm = FindFirstObjectByType<GameManager>();
     }
 
     public void StartSpawning()

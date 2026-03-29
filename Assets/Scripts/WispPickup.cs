@@ -25,7 +25,7 @@ public class WispPickup : MonoBehaviour
         // Currency.I?.Add(amount);  <-- REMOVE this line
 
         // Add to this-run total only (banked at GameOver)
-        var gm = FindObjectOfType<GameManager>();
+        var gm = FindFirstObjectByType<GameManager>();
         if (gm) gm.AddWisps(amount);
 
         // Play burst

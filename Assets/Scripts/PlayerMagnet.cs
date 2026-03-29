@@ -28,13 +28,12 @@ public class PlayerMagnet : MonoBehaviour
 
     void Update()
     {
-        int count;
+        ContactFilter2D filter = default;
+        filter.NoFilter();
+        if (layerMask != ~0)
+            filter.SetLayerMask(layerMask);
 
-        // If a specific layer is NOT set, just scan everything and filter by component.
-        if (layerMask == ~0)
-            count = Physics2D.OverlapCircleNonAlloc(self.position, radius, hits);
-        else
-            count = Physics2D.OverlapCircleNonAlloc(self.position, radius, hits, layerMask);
+        int count = Physics2D.OverlapCircle(self.position, radius, filter, hits);
 
         for (int i = 0; i < count; i++)
         {

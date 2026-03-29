@@ -15,6 +15,7 @@ public class AchievementsPanelController : MonoBehaviour
 
     public void Open()
     {
+        AchievementManager.I?.MarkUnlockedAchievementsAsSeen();
         gameObject.SetActive(true);
         Refresh();
     }

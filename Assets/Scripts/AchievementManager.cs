@@ -5,6 +5,7 @@ using UnityEngine;
 public class AchievementManager : MonoBehaviour
 {
     public static AchievementManager I { get; private set; }
+    public static event System.Action<bool> NewAchievementIndicatorChanged;
     GameManager gm;
 
 
@@ -12,6 +13,7 @@ public class AchievementManager : MonoBehaviour
     public AchievementToast toast; // optional: will auto-find if null
 
     private readonly List<AchievementDef> defs = new List<AchievementDef>();
+    bool hasUnseenUnlockedAchievement;
 
     void Awake()
     {
@@ -25,6 +27,7 @@ public class AchievementManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         LoadDefs();
+        RefreshNewUnlockIndicatorState(false);
 
         EnsureToast();
 
@@ -52,12 +55,36 @@ public class AchievementManager : MonoBehaviour
     // --- Persistence helpers ---
     string KUnlocked(string id) => $"ach_unlocked_{id}";
     string KClaimed(string id) => $"ach_claimed_{id}";
+    string KSeen(string id) => $"ach_seen_{id}";
 
     public bool IsUnlocked(string id) => PlayerPrefs.GetInt(KUnlocked(id), 0) == 1;
     public bool IsClaimed(string id) => PlayerPrefs.GetInt(KClaimed(id), 0) == 1;
+    bool IsSeen(string id) => PlayerPrefs.GetInt(KSeen(id), 0) == 1;
+    public bool HasUnseenUnlockedAchievement => hasUnseenUnlockedAchievement;
 
     void SetUnlocked(string id) => PlayerPrefs.SetInt(KUnlocked(id), 1);
     void SetClaimed(string id) => PlayerPrefs.SetInt(KClaimed(id), 1);
+    void SetSeen(string id, bool seen) => PlayerPrefs.SetInt(KSeen(id), seen ? 1 : 0);
+
+    void RefreshNewUnlockIndicatorState(bool notify = true)
+    {
+        bool next = false;
+
+        foreach (var def in defs)
+        {
+            if (!def || string.IsNullOrEmpty(def.id)) continue;
+            if (!IsUnlocked(def.id)) continue;
+            if (IsSeen(def.id)) continue;
+
+            next = true;
+            break;
+        }
+
+        if (hasUnseenUnlockedAchievement == next) return;
+
+        hasUnseenUnlockedAchievement = next;
+        if (notify) NewAchievementIndicatorChanged?.Invoke(hasUnseenUnlockedAchievement);
+    }
 
     // --- Progress reading ---
     public int GetProgress(AchievementDef def, int bestDistanceM, int runDistanceM, int runScore, int runEmbersEarned)
@@ -124,6 +151,7 @@ public class AchievementManager : MonoBehaviour
             if (IsComplete(def, bestDistanceM, runDistanceM, runScore, runEmbersEarned))
             {
                 SetUnlocked(def.id);
+                SetSeen(def.id, false);
                 newlyUnlocked.Add(def);
                 Debug.Log($"[Achievements] UNLOCKED: {def.id} ({def.displayName})");
             }
@@ -134,6 +162,7 @@ public class AchievementManager : MonoBehaviour
         if (newlyUnlocked.Count > 0)
         {
             PlayerPrefs.Save();
+            RefreshNewUnlockIndicatorState();
 
             EnsureToast();
 
@@ -150,6 +179,24 @@ public class AchievementManager : MonoBehaviour
         }
 
         return newlyUnlocked;
+    }
+
+    public void MarkUnlockedAchievementsAsSeen()
+    {
+        bool anyChanged = false;
+
+        foreach (var def in defs)
+        {
+            if (!def || string.IsNullOrEmpty(def.id)) continue;
+            if (!IsUnlocked(def.id)) continue;
+            if (IsSeen(def.id)) continue;
+
+            SetSeen(def.id, true);
+            anyChanged = true;
+        }
+
+        if (anyChanged) PlayerPrefs.Save();
+        RefreshNewUnlockIndicatorState();
     }
 
     // Claim flow

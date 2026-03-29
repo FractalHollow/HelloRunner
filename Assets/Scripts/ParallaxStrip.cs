@@ -14,7 +14,7 @@ public class ParallaxStrip : MonoBehaviour
 
    void Awake()
     {
-        gm = FindObjectOfType<GameManager>();   // ⬅ cache once
+        gm = FindFirstObjectByType<GameManager>();   // cache once
 
         if (tileA == null || tileB == null)
         {

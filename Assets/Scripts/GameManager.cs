@@ -28,7 +28,6 @@ public class GameManager : MonoBehaviour
     public TMP_Text distanceText;     // "123 m"
     public TMP_Text scoreText;        // "Score: 456"
     public TMP_Text wispTotalHUD;     // "Wisps: 1234" (total bank)
-    float _hudProbeTimer = 0f;
     public bool hudProbeEnabled = true; // toggle off when done
 
     [Header("UI - Text (Game Over)")]
@@ -570,7 +569,7 @@ public void RefreshAllCurrencyUI()
         var obstacles = GameObject.FindGameObjectsWithTag("Obstacle");
         foreach (var o in obstacles) Destroy(o);
 
-        var wisps = FindObjectsOfType<WispPickup>();
+        var wisps = FindObjectsByType<WispPickup>(FindObjectsSortMode.None);
         foreach (var w in wisps) Destroy(w.gameObject);
     }
 

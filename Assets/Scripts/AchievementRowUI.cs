@@ -32,6 +32,7 @@ public class AchievementRowUI : MonoBehaviour
 
         if (claimButton)
         {
+            EnsureGenericClickSuppressed(claimButton);
             claimButton.onClick.RemoveAllListeners();
 
             bool canClaim = unlocked && !claimed;
@@ -52,6 +53,13 @@ public class AchievementRowUI : MonoBehaviour
                 if (tmp) tmp.text = claimed ? "Claimed" : "Locked";
             }
         }
+    }
+
+    void EnsureGenericClickSuppressed(Button button)
+    {
+        if (!button) return;
+        if (!button.GetComponent<UIButtonClickSfxSuppressor>())
+            button.gameObject.AddComponent<UIButtonClickSfxSuppressor>();
     }
 
 

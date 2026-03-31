@@ -69,16 +69,16 @@ public class StatsPanelController : MonoBehaviour
             $"Best Distance: {bestDistanceM:N0} m\n" +
             $"Best Score: {bestScore:N0}\n" +
             $"\n" +
-            $"Best Flips (Single Run): {bestFlipsInRun:N0}\n" +
-            $"Best No-Hit Distance (Single Run): {bestNoHitM:N0} m\n" +
-            $"Best Hard Mode Distance (Single Run): {bestHardModeM:N0} m\n" +
+            $"Most Flips (Single Run): {bestFlipsInRun:N0}\n" +
+            $"Best No-Hit Distance: {bestNoHitM:N0} m\n" +
+            $"Best Hard Mode Distance: {bestHardModeM:N0} m\n" +
             $"\n" +
             $"Lifetime Distance: {lifetimeDistanceM:N0} m\n" +
             $"Lifetime Embers Earned: {lifetimeEmbersEarned:N0}\n" +
             $"Runs Played: {runsPlayed:N0}\n" +
+            $"Runs This Prestige: {runsThisPrestige:N0}\n" +
             $"Speed Mod Runs: {speedModRuns:N0}\n" +
             $"Hazards Mod Runs: {hazardsModRuns:N0}\n" +
-            $"Runs This Prestige: {runsThisPrestige:N0}\n" +
             $"\n" +
             $"Achievements: {unlockedAchievements:N0} / {totalAchievements:N0}\n";
     }

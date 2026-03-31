@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: life_dist_42195
   displayName: Marathon Runner
-  description: Run a marathon in lifetime distance (42,195m)
+  description: Run a marathon in lifetime distance.
   sortOrder: 12
   progressType: 1
   targetValue: 42195

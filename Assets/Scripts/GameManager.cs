@@ -352,9 +352,9 @@ public class GameManager : MonoBehaviour
         // Fill final UI
         if (finalScoreText) finalScoreText.text = $"Score: {finalScore:N0}";
         if (finalDistanceText) finalDistanceText.text = $"Distance: {(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
-        if (bestDistanceText) bestDistanceText.text = $"Best Distance: {(int)(distanceTracker ? distanceTracker.bestDistance : 0f)} m";
-        if (wispsRunText) wispsRunText.text = $"+{wispsRun} Embers";
-        if (wispTotalFinal) wispTotalFinal.text = $"Total Embers: {bank:N0}";
+        if (bestDistanceText) bestDistanceText.text = $"Best: {(int)(distanceTracker ? distanceTracker.bestDistance : 0f)} m";
+        if (wispsRunText) wispsRunText.text = $"Earned: {wispsRun} Embers";
+        if (wispTotalFinal) wispTotalFinal.text = $"Ember Bank: {bank:N0}";
         if (scoreText) scoreText.text = $"Score: {finalScore:N0}";
         if (distanceText) distanceText.text = $"{(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
 

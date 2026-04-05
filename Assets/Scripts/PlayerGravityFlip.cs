@@ -190,6 +190,7 @@ public class PlayerGravityFlip : MonoBehaviour
     {
         gm?.NotifyFlip();
         spriteAnimator?.PlayJump();
+        shield?.PlayTapBounce();
 
         // flip direction
         gravDir *= -1;

@@ -46,6 +46,19 @@ public class PlayerShield : MonoBehaviour
     [Header("Regen UI")]
     public UnityEngine.UI.Image regenRing;  // drag a UI Image here (type = Filled → Radial)
 
+    [Header("Tap Bounce")]
+    public bool tapBounceEnabled = true;
+    [Range(0.05f, 0.3f)] public float tapBounceDuration = 0.12f;
+    [Range(0.85f, 1f)] public float tapBounceCompressY = 0.97f;
+    [Range(1f, 1.25f)] public float tapBounceStretchY = 1.1f;
+    [Range(0f, 0.08f)] public float tapBounceXCompensation = 0.02f;
+    [Range(0.1f, 1f)] public float regenRingBounceMultiplier = 0.7f;
+
+    Coroutine shieldBounceCo;
+    Coroutine regenRingBounceCo;
+    Vector3 shieldBaseScale = Vector3.one;
+    Vector3 regenRingBaseScale = Vector3.one;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -72,6 +85,8 @@ public class PlayerShield : MonoBehaviour
             emission.rateOverTime = 0f;
             emission.SetBursts(System.Array.Empty<ParticleSystem.Burst>());
         }
+
+        CacheBounceBaseScales();
     }
 
     /// Called by GM at run start
@@ -158,6 +173,38 @@ public class PlayerShield : MonoBehaviour
         if (shieldSR)
         {
             shieldSR.color = (charges >= 2) ? colorTwo : colorOne;
+        }
+    }
+
+    public void PlayTapBounce()
+    {
+        if (!tapBounceEnabled)
+            return;
+
+        CacheBounceBaseScales();
+
+        if (shieldVisual)
+        {
+            if (shieldBounceCo != null)
+                StopCoroutine(shieldBounceCo);
+
+            shieldVisual.transform.localScale = shieldBaseScale;
+            shieldBounceCo = StartCoroutine(BounceScaleCo(
+                shieldVisual.transform,
+                shieldBaseScale,
+                1f));
+        }
+
+        if (regenRing)
+        {
+            if (regenRingBounceCo != null)
+                StopCoroutine(regenRingBounceCo);
+
+            regenRing.rectTransform.localScale = regenRingBaseScale;
+            regenRingBounceCo = StartCoroutine(BounceScaleCo(
+                regenRing.rectTransform,
+                regenRingBaseScale,
+                Mathf.Clamp01(regenRingBounceMultiplier)));
         }
     }
 
@@ -285,10 +332,15 @@ public class PlayerShield : MonoBehaviour
             {
                 regenRing.enabled = false;
                 regenRing.fillAmount = 0f;
+                regenRing.rectTransform.localScale = regenRingBaseScale;
             }
+
+            if (shieldVisual)
+                shieldVisual.transform.localScale = shieldBaseScale;
+
+            shieldBounceCo = null;
+            regenRingBounceCo = null;
         }
-
-
 
     IEnumerator RegenLoop()
     {
@@ -327,6 +379,79 @@ public class PlayerShield : MonoBehaviour
         }
     }
 
+    IEnumerator BounceScaleCo(Transform target, Vector3 baseScale, float intensity)
+    {
+        if (!target)
+            yield break;
+
+        float duration = Mathf.Max(0.01f, tapBounceDuration);
+        float phaseDuration = duration / 3f;
+
+        float compressY = Mathf.Lerp(1f, tapBounceCompressY, intensity);
+        float stretchY = Mathf.Lerp(1f, tapBounceStretchY, intensity);
+        float xComp = tapBounceXCompensation * intensity;
+        float compressX = 1f + xComp;
+        float stretchX = Mathf.Max(0.01f, 1f - xComp);
+
+        float t = 0f;
+        while (t < phaseDuration)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.Clamp01(t / phaseDuration);
+            target.localScale = ScaleFrom(baseScale,
+                Mathf.Lerp(1f, compressX, k),
+                Mathf.Lerp(1f, compressY, k));
+            yield return null;
+        }
+
+        t = 0f;
+        while (t < phaseDuration)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.Clamp01(t / phaseDuration);
+            target.localScale = ScaleFrom(baseScale,
+                Mathf.Lerp(compressX, stretchX, k),
+                Mathf.Lerp(compressY, stretchY, k));
+            yield return null;
+        }
+
+        t = 0f;
+        while (t < phaseDuration)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.Clamp01(t / phaseDuration);
+            target.localScale = ScaleFrom(baseScale,
+                Mathf.Lerp(stretchX, 1f, k),
+                Mathf.Lerp(stretchY, 1f, k));
+            yield return null;
+        }
+
+        if (target)
+            target.localScale = baseScale;
+
+        if (shieldVisual && target == shieldVisual.transform)
+            shieldBounceCo = null;
+        else if (regenRing && target == regenRing.rectTransform)
+            regenRingBounceCo = null;
+    }
+
+    Vector3 ScaleFrom(Vector3 baseScale, float xMultiplier, float yMultiplier)
+    {
+        return new Vector3(
+            baseScale.x * xMultiplier,
+            baseScale.y * yMultiplier,
+            baseScale.z);
+    }
+
+    void CacheBounceBaseScales()
+    {
+        if (shieldVisual)
+            shieldBaseScale = shieldVisual.transform.localScale;
+
+        if (regenRing)
+            regenRingBaseScale = regenRing.rectTransform.localScale;
+    }
+
     void LateUpdate()
     {
         if (!regenRing) return;
@@ -344,24 +469,33 @@ public class PlayerShield : MonoBehaviour
         regenRing.fillAmount = elapsed01;
     }
 
-            void OnDisable()
-        {
-            // Safety: if we get disabled/destroyed mid-invuln (scene change, prestige, etc.)
-            // ensure we restore collisions globally.
-            EnableGhostCollisions(false);
+    void OnDisable()
+    {
+        if (shieldVisual)
+            shieldVisual.transform.localScale = shieldBaseScale;
 
-            // Also stop invuln visuals/behavior in case we re-enable later.
-            invulnUntil = 0f;
-            SetAlpha(1f);
+        if (regenRing)
+            regenRing.rectTransform.localScale = regenRingBaseScale;
 
-            if (freezeXDuringInvuln && rb)
-                rb.constraints = originalConstraints;
-        }
+        shieldBounceCo = null;
+        regenRingBounceCo = null;
 
-        void OnDestroy()
-        {
-            // Same safety net for destroy paths.
-            EnableGhostCollisions(false);
-        }
+        // Safety: if we get disabled/destroyed mid-invuln (scene change, prestige, etc.)
+        // ensure we restore collisions globally.
+        EnableGhostCollisions(false);
+
+        // Also stop invuln visuals/behavior in case we re-enable later.
+        invulnUntil = 0f;
+        SetAlpha(1f);
+
+        if (freezeXDuringInvuln && rb)
+            rb.constraints = originalConstraints;
+    }
+
+    void OnDestroy()
+    {
+        // Same safety net for destroy paths.
+        EnableGhostCollisions(false);
+    }
 
 }

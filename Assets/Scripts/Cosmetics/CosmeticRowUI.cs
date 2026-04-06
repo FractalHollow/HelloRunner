@@ -91,16 +91,31 @@ public class CosmeticRowUI : MonoBehaviour
     // Paid + locked → confirm dialog
     if (!unlocked && def.unlockType == SkinDef.UnlockType.Paid)
     {
-        ConfirmDialog.I?.Show(
-            $"This skin will cost {def.priceText} on release.\nUnlock for testing?",
-            () =>
-            {
-                // TEST unlock (Phase A only)
-                CosmeticsManager.I.UnlockPaidSkinForTesting(def.id);
-                CosmeticsManager.I.TrySelect(def.id);
-                owner?.RefreshAll();
-            }
-        );
+        if (!ConfirmDialog.I)
+        {
+            Debug.LogError($"[CosmeticsUI] Paid skin '{def.id}' could not open confirm dialog because ConfirmDialog.I is null.");
+            return;
+        }
+
+        Debug.Log($"[CosmeticsUI] Opening confirm dialog for paid skin '{def.id}'.");
+
+        try
+        {
+            ConfirmDialog.I.Show(
+                $"This skin will cost {def.priceText} on release.\nUnlock for testing?",
+                () =>
+                {
+                    Debug.Log($"[CosmeticsUI] Confirm accepted for paid skin '{def.id}'. Unlocking test skin.");
+                    CosmeticsManager.I.UnlockPaidSkinForTesting(def.id);
+                    CosmeticsManager.I.TrySelect(def.id);
+                    owner?.RefreshAll();
+                }
+            );
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[CosmeticsUI] Exception while showing confirm dialog for paid skin '{def.id}': {ex}");
+        }
         return;
     }
 

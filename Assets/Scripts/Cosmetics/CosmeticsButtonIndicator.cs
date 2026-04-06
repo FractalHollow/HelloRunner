@@ -7,7 +7,8 @@ public class CosmeticsButtonIndicator : MonoBehaviour
     enum IndicatorSource
     {
         Cosmetics = 0,
-        Achievements = 1
+        Achievements = 1,
+        Always = 2
     }
 
     [Header("Targets")]
@@ -75,6 +76,10 @@ public class CosmeticsButtonIndicator : MonoBehaviour
 
         switch (indicatorSource)
         {
+            case IndicatorSource.Always:
+                shouldPulse = true;
+                break;
+
             case IndicatorSource.Achievements:
                 shouldPulse = AchievementManager.I != null && AchievementManager.I.HasUnseenUnlockedAchievement;
                 break;
@@ -91,6 +96,9 @@ public class CosmeticsButtonIndicator : MonoBehaviour
     {
         switch (indicatorSource)
         {
+            case IndicatorSource.Always:
+                break;
+
             case IndicatorSource.Achievements:
                 AchievementManager.NewAchievementIndicatorChanged += HandleIndicatorChanged;
                 break;
@@ -105,6 +113,9 @@ public class CosmeticsButtonIndicator : MonoBehaviour
     {
         switch (indicatorSource)
         {
+            case IndicatorSource.Always:
+                break;
+
             case IndicatorSource.Achievements:
                 AchievementManager.NewAchievementIndicatorChanged -= HandleIndicatorChanged;
                 break;

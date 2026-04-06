@@ -160,6 +160,7 @@ public class CosmeticsManager : MonoBehaviour
             if (!def || string.IsNullOrEmpty(def.id)) continue;
             if (!IsUnlocked(def.id)) continue;
             if (def.unlockType == SkinDef.UnlockType.DefaultUnlocked) continue;
+            if (def.unlockType == SkinDef.UnlockType.Paid) continue;
             if (IsSeen(def.id)) continue;
 
             next = true;

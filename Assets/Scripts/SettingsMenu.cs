@@ -13,9 +13,9 @@ public class SettingsMenu : MonoBehaviour
 
     [Header("Reset Save Data")]
     public UnityEngine.UI.Button resetSaveButton;
-    public TMPro.TMP_Text resetSaveButtonText;
-
-bool resetConfirmArmed = false;
+    public GameObject confirmResetPanel;
+    public UnityEngine.UI.Button confirmResetButton;
+    public UnityEngine.UI.Button confirmResetCloseButton;
 
 
     public void OpenAbout()
@@ -28,28 +28,47 @@ bool resetConfirmArmed = false;
         StartCoroutine(SyncWhenReady());
 
         if (resetSaveButton)
-            {
-                resetSaveButton.onClick.RemoveAllListeners();
-                resetSaveButton.onClick.AddListener(OnResetSaveClicked);
-            }
-
-        resetConfirmArmed = false;
-        if (resetSaveButtonText)
-            resetSaveButtonText.text = "Reset Save Data";
-
-    }
-
-    void OnResetSaveClicked()
-    {
-        if (!resetConfirmArmed)
         {
-            resetConfirmArmed = true;
-            if (resetSaveButtonText)
-                resetSaveButtonText.text = "Confirm Reset";
-            return;
+            resetSaveButton.onClick.RemoveAllListeners();
+            resetSaveButton.onClick.AddListener(OpenResetConfirmPanel);
         }
 
-        PerformFullReset();
+        if (confirmResetButton)
+        {
+            confirmResetButton.onClick.RemoveAllListeners();
+            confirmResetButton.onClick.AddListener(PerformFullReset);
+        }
+
+        if (confirmResetCloseButton)
+        {
+            confirmResetCloseButton.onClick.RemoveAllListeners();
+            confirmResetCloseButton.onClick.AddListener(CloseResetConfirmPanel);
+        }
+
+        HideResetConfirmPanelInstant();
+    }
+
+    void OnDisable()
+    {
+        HideResetConfirmPanelInstant();
+    }
+
+    void OpenResetConfirmPanel()
+    {
+        if (confirmResetPanel)
+            confirmResetPanel.SetActive(true);
+    }
+
+    void CloseResetConfirmPanel()
+    {
+        if (confirmResetPanel)
+            confirmResetPanel.SetActive(false);
+    }
+
+    void HideResetConfirmPanelInstant()
+    {
+        if (confirmResetPanel && confirmResetPanel.activeSelf)
+            confirmResetPanel.SetActive(false);
     }
 
     void PerformFullReset()
@@ -131,12 +150,14 @@ bool resetConfirmArmed = false;
     public void Open()
     {
         gameObject.SetActive(true);
+        HideResetConfirmPanelInstant();
         SyncFromAudioManager();   // set sliders to saved values once
         if (fader) fader.FadeIn();
     }
 
     public void Close()
     {
+        HideResetConfirmPanelInstant();
         if (fader) fader.FadeOut(() => gameObject.SetActive(false));
         else gameObject.SetActive(false);
     }

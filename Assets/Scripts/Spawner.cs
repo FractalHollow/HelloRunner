@@ -71,6 +71,10 @@ public class Spawner : MonoBehaviour
                 }
             }
 
+            var bob = enemy.GetComponent<EnemyVerticalBob2D>();
+            if (bob)
+                bob.enabled = gm && gm.ModVerticalOn;
+
             // Wait for next spawn; scale by speed so density feels similar
             float effective = EffectiveInterval(currentBaseInterval);
             yield return new WaitForSeconds(effective);

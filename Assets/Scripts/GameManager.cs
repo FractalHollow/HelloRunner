@@ -89,6 +89,9 @@ public class GameManager : MonoBehaviour
     // --- Convenience flags pulled from PlayerPrefs ---
     public bool ModSpeedOn   => PlayerPrefs.GetInt("mod_speed_on", 0) == 1;
     public bool ModHazardsOn => PlayerPrefs.GetInt("mod_hazards_on", 0) == 1;
+    public bool ModVerticalOn => PlayerPrefs.GetInt("mod_vertical_on", 0) == 1;
+    public int ActiveModifierCount => (ModSpeedOn ? 1 : 0) + (ModHazardsOn ? 1 : 0) + (ModVerticalOn ? 1 : 0);
+    public bool IsHardModeRun => ModSpeedOn && ModHazardsOn && ModVerticalOn;
 
     // --- Multipliers other systems can read ---
     public float RunSpeedMultiplier
@@ -207,7 +210,7 @@ public class GameManager : MonoBehaviour
                 $"ModSpeedOn={ModSpeedOn} | RunSpeedMult={RunSpeedMultiplier:0.00}");
 
         // Record stats at run start (persists across prestiges)
-        StatsManager.RecordRunStarted(ModSpeedOn, ModHazardsOn);
+        StatsManager.RecordRunStarted(ModSpeedOn, ModHazardsOn, ModVerticalOn);
         StatsManager.Save();
 
         // Reset currency for this run
@@ -295,8 +298,7 @@ public class GameManager : MonoBehaviour
         if (noHitM > bestNoHitM)
             PlayerPrefs.SetInt("best_nohit_m", noHitM);
 
-        bool hard = ModSpeedOn && ModHazardsOn;
-        if (hard)
+        if (IsHardModeRun)
         {
             int hardM = Mathf.FloorToInt(RunDistanceM);
             int bestHardM = PlayerPrefs.GetInt("best_hardmode_m", 0);
@@ -799,10 +801,7 @@ public void RefreshAllCurrencyUI()
 
         public float CurrentScoreMultiplier()
         {
-            float mult = 1f;
-            if (ModSpeedOn)   mult += rewardBonusPerMod;
-            if (ModHazardsOn) mult += rewardBonusPerMod;
-            // later: add prestige/achievements here
+            float mult = 1f + rewardBonusPerMod * ActiveModifierCount;
             mult *= PrestigeManager.ScoreMult;
 
             return mult;
@@ -810,10 +809,7 @@ public void RefreshAllCurrencyUI()
 
             public float CurrentWispMultiplier()
             {
-                float mult = 1f;
-                if (ModSpeedOn) mult += rewardBonusPerMod;
-                if (ModHazardsOn) mult += rewardBonusPerMod;
-
+                float mult = 1f + rewardBonusPerMod * ActiveModifierCount;
                 mult *= PrestigeManager.WispMult;
 
                 return mult;

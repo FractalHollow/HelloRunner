@@ -165,12 +165,12 @@ public class SettingsMenu : MonoBehaviour
     // ---- UI events ----
     public void OnMusicChanged(float v)
     {
-        if (AudioManager.I) AudioManager.I.SetMusicVolume(v);
+        if (AudioManager.I) AudioManager.I.SetMusicVolumeFromSlider(v);
     }
 
     public void OnSfxChanged(float v)
     {
-        if (AudioManager.I) AudioManager.I.SetSfxVolume(v);
+        if (AudioManager.I) AudioManager.I.SetSfxVolumeFromSlider(v);
     }
     public void OnTestMusic()
     {
@@ -190,8 +190,8 @@ public class SettingsMenu : MonoBehaviour
     {
         if (!AudioManager.I) return;
 
-        if (musicSlider) musicSlider.SetValueWithoutNotify(AudioManager.I.CurrentMusic01);
-        if (sfxSlider) sfxSlider.SetValueWithoutNotify(AudioManager.I.CurrentSfx01);
+        if (musicSlider) musicSlider.SetValueWithoutNotify(AudioManager.I.CurrentMusicSlider01);
+        if (sfxSlider) sfxSlider.SetValueWithoutNotify(AudioManager.I.CurrentSfxSlider01);
     }
 
     public void SetMusicSliderWithoutNotify(float v)

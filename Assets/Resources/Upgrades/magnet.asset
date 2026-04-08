@@ -23,11 +23,11 @@ MonoBehaviour:
   sortOrder: 1
   dependencies: []
   v0PerTier:
+  - 3
   - 3.5
-  - 4.5
-  - 5.5
-  - 6.5
-  - 15
+  - 4
+  - 6
+  - 10
   v1PerTier: []
   v2PerTier: []
   effectType: 2

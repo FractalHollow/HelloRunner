@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: hard_200
   displayName: Legend
-  description: Reach 200m with both difficulty modifiers on.
+  description: Reach 200m with all three difficulty modifiers on.
   sortOrder: 18
   progressType: 9
   targetValue: 200

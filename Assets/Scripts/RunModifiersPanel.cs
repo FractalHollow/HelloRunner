@@ -7,6 +7,7 @@ public class RunModifiersPanel : MonoBehaviour
     [Header("Wiring")]
     public Toggle toggleSpeed;
     public Toggle toggleHazards;
+    public Toggle toggleVertical;
     public TMP_Text headerNote;
     public GameObject lockedGroup;
 
@@ -23,6 +24,7 @@ public class RunModifiersPanel : MonoBehaviour
         {
             if (toggleSpeed)   toggleSpeed.interactable = false;
             if (toggleHazards) toggleHazards.interactable = false;
+            if (toggleVertical) toggleVertical.interactable = false;
             return;
         }
 
@@ -44,6 +46,17 @@ public class RunModifiersPanel : MonoBehaviour
             toggleHazards.onValueChanged.RemoveAllListeners();
             toggleHazards.onValueChanged.AddListener(v => {
                 PlayerPrefs.SetInt("mod_hazards_on", v ? 1 : 0);
+                PlayerPrefs.Save();
+            });
+        }
+
+        if (toggleVertical)
+        {
+            toggleVertical.interactable = true;
+            toggleVertical.isOn = PlayerPrefs.GetInt("mod_vertical_on", 0) == 1;
+            toggleVertical.onValueChanged.RemoveAllListeners();
+            toggleVertical.onValueChanged.AddListener(v => {
+                PlayerPrefs.SetInt("mod_vertical_on", v ? 1 : 0);
                 PlayerPrefs.Save();
             });
         }

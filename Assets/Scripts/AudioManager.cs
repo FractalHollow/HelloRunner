@@ -35,6 +35,8 @@ public class AudioManager : MonoBehaviour
     [Range(0f, 1f)] public float sfxWakeUpVolume = 1f;
     [Range(0f, 1f)] public float uiClickVolume = 1f;
     [Range(0f, 1f)] [SerializeField] private float pickupVolume = 0.8f;
+    [Header("Volume Slider Response")]
+    [Min(1f)] [SerializeField] private float volumeSliderExponent = 2.2f;
 
     // PlayerPrefs keys
     const string KEY_MUSIC      = "vol_music";
@@ -54,6 +56,18 @@ public class AudioManager : MonoBehaviour
 
     // ---------------- volume mapping ----------------
     float ToDecibels(float v) => (v <= 0.0001f) ? -80f : Mathf.Log10(Mathf.Clamp01(v)) * 20f;
+
+    float SliderToVolume01(float slider01)
+    {
+        slider01 = Mathf.Clamp01(slider01);
+        return Mathf.Pow(slider01, Mathf.Max(1f, volumeSliderExponent));
+    }
+
+    float VolumeToSlider01(float volume01)
+    {
+        volume01 = Mathf.Clamp01(volume01);
+        return (volume01 <= 0.0001f) ? 0f : Mathf.Pow(volume01, 1f / Mathf.Max(1f, volumeSliderExponent));
+    }
 
     // ---------------- Unity lifecycle ----------------
     void Awake()
@@ -122,6 +136,7 @@ public class AudioManager : MonoBehaviour
             musicSource.loop = true;
             musicSource.playOnAwake = false;
         }
+        AssignMusicMixerGroup(musicSource);
 
         // SFX
         if (!sfxSource || sfxSource == musicSource)
@@ -133,6 +148,7 @@ public class AudioManager : MonoBehaviour
             sfxSource.playOnAwake = false;
         }
         sfxSource.spatialBlend = 0f;
+        AssignSfxMixerGroup(sfxSource);
 
         // FLIP (dedicated)
         if (!flipSource || flipSource == musicSource || flipSource == sfxSource)
@@ -144,6 +160,7 @@ public class AudioManager : MonoBehaviour
             flipSource.playOnAwake = false;
             flipSource.spatialBlend = 0f;
         }
+        AssignSfxMixerGroup(flipSource);
     }
 
     void EnsureUiButtonClickInstaller()
@@ -177,6 +194,11 @@ public class AudioManager : MonoBehaviour
         ApplyMusicVolume();
     }
 
+    public void SetMusicVolumeFromSlider(float slider01)
+    {
+        SetMusicVolume(SliderToVolume01(slider01));
+    }
+
     public void SetSfxVolume(float v)
     {
         sfx01 = Mathf.Clamp01(v);
@@ -189,6 +211,11 @@ public class AudioManager : MonoBehaviour
         PlayerPrefs.Save();
 
         ApplySfxVolume();
+    }
+
+    public void SetSfxVolumeFromSlider(float slider01)
+    {
+        SetSfxVolume(SliderToVolume01(slider01));
     }
 
     // Legacy mute API (kept so any old callers won't break)
@@ -214,8 +241,13 @@ public class AudioManager : MonoBehaviour
         bool effectiveMute = muteMusic || (music01 <= 0.0001f);
         float db = effectiveMute ? -80f : ToDecibels(music01);
 
+        if (musicSource)
+        {
+            musicSource.mute = effectiveMute;
+            musicSource.volume = IsSourceRoutedToMixer(musicSource) ? 1f : music01;
+        }
+
         if (mixer) { mixer.SetFloat(musicVolParam, db); }
-        else if (musicSource) { musicSource.mute = effectiveMute; musicSource.volume = music01; }
     }
 
     void ApplySfxVolume()
@@ -226,17 +258,16 @@ public class AudioManager : MonoBehaviour
         if (sfxSource)
         {
             sfxSource.mute = effectiveMute;
-            sfxSource.volume = 1f;
+            sfxSource.volume = IsSourceRoutedToMixer(sfxSource) ? 1f : sfx01;
         }
 
         if (flipSource)
         {
             flipSource.mute = effectiveMute;
-            flipSource.volume = 1f;
+            flipSource.volume = IsSourceRoutedToMixer(flipSource) ? 1f : sfx01;
         }
 
         if (mixer) { mixer.SetFloat(sfxVolParam, db); }
-        else if (sfxSource) { sfxSource.mute = effectiveMute; sfxSource.volume = 1f; }
     }
 
     bool CanPlaySfx(AudioClip clip, AudioSource source)
@@ -244,10 +275,10 @@ public class AudioManager : MonoBehaviour
         return clip && source && !muteSfx && sfx01 > 0.0001f;
     }
 
-    float GetOneShotSfxVolume(float vol01 = 1f)
+    float GetOneShotSfxVolume(AudioSource source, float vol01 = 1f)
     {
         float shotVolume = Mathf.Clamp01(vol01);
-        return mixer ? shotVolume : shotVolume * sfx01;
+        return IsSourceRoutedToMixer(source) ? shotVolume : shotVolume * sfx01;
     }
 
     // ---------------- playback helpers ----------------
@@ -264,7 +295,7 @@ public class AudioManager : MonoBehaviour
     public void Play2D(AudioClip clip, float vol01 = 1f)
     {
         if (!CanPlaySfx(clip, sfxSource)) return;
-        sfxSource.PlayOneShot(clip, GetOneShotSfxVolume(vol01));
+        sfxSource.PlayOneShot(clip, GetOneShotSfxVolume(sfxSource, vol01));
     }
 
     public void PlayShoot(AudioClip clipOverride = null, float vol01 = -1f)
@@ -279,7 +310,7 @@ public class AudioManager : MonoBehaviour
         float newPitch = 1f + Random.Range(-jitter, jitter);
 
         sfxSource.pitch = newPitch;
-        sfxSource.PlayOneShot(clip, GetOneShotSfxVolume(v));
+        sfxSource.PlayOneShot(clip, GetOneShotSfxVolume(sfxSource, v));
     }
 
     public void PlayFlip()
@@ -292,7 +323,7 @@ public class AudioManager : MonoBehaviour
         float newPitch = 1f + Random.Range(-jitter, jitter);
 
         flipSource.pitch = newPitch;
-        flipSource.PlayOneShot(flipClip, GetOneShotSfxVolume());
+        flipSource.PlayOneShot(flipClip, GetOneShotSfxVolume(flipSource));
 
         Debug.Log($"[Audio] Flip pitch = {newPitch:0.000}");
     }
@@ -300,31 +331,59 @@ public class AudioManager : MonoBehaviour
     public void PlayCrash()
     {
         if (!CanPlaySfx(crashClip, sfxSource)) return;
-        sfxSource.PlayOneShot(crashClip, GetOneShotSfxVolume());
+        sfxSource.PlayOneShot(crashClip, GetOneShotSfxVolume(sfxSource));
     }
 
     public void PlayPurchase()
     {
         if (!CanPlaySfx(sfxPurchase, sfxSource)) return;
-        sfxSource.PlayOneShot(sfxPurchase, GetOneShotSfxVolume(sfxPurchaseVolume));
+        sfxSource.PlayOneShot(sfxPurchase, GetOneShotSfxVolume(sfxSource, sfxPurchaseVolume));
     }
 
     public void PlayWakeUp()
     {
         if (!CanPlaySfx(sfxWakeUp, sfxSource)) return;
-        sfxSource.PlayOneShot(sfxWakeUp, GetOneShotSfxVolume(sfxWakeUpVolume));
+        sfxSource.PlayOneShot(sfxWakeUp, GetOneShotSfxVolume(sfxSource, sfxWakeUpVolume));
     }
 
     public void PlayUiClick()
     {
         if (!CanPlaySfx(sfxUiClick, sfxSource)) return;
-        sfxSource.PlayOneShot(sfxUiClick, GetOneShotSfxVolume(uiClickVolume));
+        sfxSource.PlayOneShot(sfxUiClick, GetOneShotSfxVolume(sfxSource, uiClickVolume));
     }
 
     public void PlayPickup()
     {
         if (!CanPlaySfx(pickupSFX, sfxSource)) return;
-        sfxSource.PlayOneShot(pickupSFX, GetOneShotSfxVolume(pickupVolume));
+        sfxSource.PlayOneShot(pickupSFX, GetOneShotSfxVolume(sfxSource, pickupVolume));
+    }
+
+    bool IsSourceRoutedToMixer(AudioSource source)
+    {
+        if (!mixer || !source || source.outputAudioMixerGroup == null)
+            return false;
+
+        return source.outputAudioMixerGroup.audioMixer == mixer;
+    }
+
+    void AssignSfxMixerGroup(AudioSource source)
+    {
+        if (!source || !mixer || source.outputAudioMixerGroup != null)
+            return;
+
+        var groups = mixer.FindMatchingGroups("SFX");
+        if (groups != null && groups.Length > 0)
+            source.outputAudioMixerGroup = groups[0];
+    }
+
+    void AssignMusicMixerGroup(AudioSource source)
+    {
+        if (!source || !mixer || source.outputAudioMixerGroup != null)
+            return;
+
+        var groups = mixer.FindMatchingGroups("Music");
+        if (groups != null && groups.Length > 0)
+            source.outputAudioMixerGroup = groups[0];
     }
 
     // --- Test helpers for the settings menu ---
@@ -362,6 +421,8 @@ public class AudioManager : MonoBehaviour
     // Expose current states so SettingsMenu can sync UI
     public float CurrentMusic01 => music01;
     public float CurrentSfx01   => sfx01;
+    public float CurrentMusicSlider01 => VolumeToSlider01(music01);
+    public float CurrentSfxSlider01   => VolumeToSlider01(sfx01);
 
     // Legacy (kept)
     public bool  MusicMuted     => muteMusic;

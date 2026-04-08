@@ -89,6 +89,11 @@ public class PlayerShield : MonoBehaviour
         CacheBounceBaseScales();
     }
 
+    void OnEnable()
+    {
+        CacheBounceBaseScales();
+    }
+
     /// Called by GM at run start
     public void SetCharges(int max)
     {
@@ -180,8 +185,6 @@ public class PlayerShield : MonoBehaviour
     {
         if (!tapBounceEnabled)
             return;
-
-        CacheBounceBaseScales();
 
         if (shieldVisual)
         {

@@ -8,12 +8,14 @@ public static class StatsManager
     const string K_RunsPlayed = "stat_runs_played";
     const string K_SpeedModRuns = "stat_speed_mod_runs";
     const string K_HazardsModRuns = "stat_hazards_mod_runs";
+    const string K_VerticalModRuns = "stat_vertical_mod_runs";
 
     public static int LifetimeDistanceM => PlayerPrefs.GetInt(K_LifetimeDistanceM, 0);
     public static int LifetimeEmbersEarned => PlayerPrefs.GetInt(K_LifetimeEmbersEarned, 0);
     public static int RunsPlayed => PlayerPrefs.GetInt(K_RunsPlayed, 0);
     public static int SpeedModRuns => PlayerPrefs.GetInt(K_SpeedModRuns, 0);
     public static int HazardsModRuns => PlayerPrefs.GetInt(K_HazardsModRuns, 0);
+    public static int VerticalModRuns => PlayerPrefs.GetInt(K_VerticalModRuns, 0);
 
     public static void AddLifetimeDistance(int meters)
     {
@@ -27,12 +29,13 @@ public static class StatsManager
         PlayerPrefs.SetInt(K_LifetimeEmbersEarned, LifetimeEmbersEarned + amount);
     }
 
-    public static void RecordRunStarted(bool speedOn, bool hazardsOn)
+    public static void RecordRunStarted(bool speedOn, bool hazardsOn, bool verticalOn)
     {
         PlayerPrefs.SetInt(K_RunsPlayed, RunsPlayed + 1);
 
         if (speedOn) PlayerPrefs.SetInt(K_SpeedModRuns, SpeedModRuns + 1);
         if (hazardsOn) PlayerPrefs.SetInt(K_HazardsModRuns, HazardsModRuns + 1);
+        if (verticalOn) PlayerPrefs.SetInt(K_VerticalModRuns, VerticalModRuns + 1);
     }
 
     public static void Save()

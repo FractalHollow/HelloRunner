@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: hard_100
   displayName: Give Me a Challenge
-  description: Reach 100m with both difficulty modifiers on.
+  description: Reach 100m with all three difficulty modifiers on.
   sortOrder: 17
   progressType: 9
   targetValue: 100

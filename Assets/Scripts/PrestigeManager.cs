@@ -12,6 +12,7 @@ public static class PrestigeManager
     const string K_ModsUnlocked  = "mods_unlocked";
     const string K_ModSpeedOn    = "mod_speed_on";
     const string K_ModHazardsOn  = "mod_hazards_on";
+    const string K_ModVerticalOn = "mod_vertical_on";
 
     // Best distance key you already use/confirmed
     const string K_BestDistanceM = "best_distance_m";
@@ -73,6 +74,7 @@ public static class PrestigeManager
         PlayerPrefs.SetInt(K_ModsUnlocked, 0);
         PlayerPrefs.SetInt(K_ModSpeedOn, 0);
         PlayerPrefs.SetInt(K_ModHazardsOn, 0);
+        PlayerPrefs.SetInt(K_ModVerticalOn, 0);
 
         // 5) Reset all upgrade levels (data-driven)
         var defs = Resources.LoadAll<UpgradeDef>("Upgrades");

@@ -23,6 +23,16 @@ public class CosmeticsPanelController : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        IapManager.StateChanged += HandleIapStateChanged;
+    }
+
+    void OnDisable()
+    {
+        IapManager.StateChanged -= HandleIapStateChanged;
+    }
+
     void Start()
     {
         // Start closed
@@ -84,9 +94,22 @@ public class CosmeticsPanelController : MonoBehaviour
             if (rows[i]) rows[i].Refresh();
     }
 
-        public void RestorePurchasesPlaceholder()
+    public void RestorePurchasesPlaceholder()
     {
-        Debug.Log("[Store] Restore purchases will be enabled when billing is live.");
+        if (IapManager.UseRealMoneyPurchasing && IapManager.I != null)
+        {
+            Debug.Log("[Store] Refreshing Google Play owned purchases.");
+            IapManager.I.RefreshPurchases();
+            return;
+        }
+
+        Debug.Log("[Store] Restore purchases is not needed for the local test billing stub.");
+    }
+
+    void HandleIapStateChanged()
+    {
+        if (panelRoot && panelRoot.activeSelf)
+            RefreshAll();
     }
 
 }

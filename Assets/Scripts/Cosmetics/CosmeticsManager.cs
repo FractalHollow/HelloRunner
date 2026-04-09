@@ -122,7 +122,13 @@ public class CosmeticsManager : MonoBehaviour
         if (def == null) return false;
 
         if (def.unlockType == SkinDef.UnlockType.DefaultUnlocked) return true;
-        if (def.unlockType == SkinDef.UnlockType.Paid) return PlayerPrefs.GetInt(K_Unlocked(id), 0) == 1; // stays locked unless you manually unlock for testing
+        if (def.unlockType == SkinDef.UnlockType.Paid)
+        {
+            if (IapManager.UseRealMoneyPurchasing && IapManager.I != null && IapManager.TryGetProductIdForSkin(id, out var productId))
+                return IapManager.I.IsOwned(productId) || PlayerPrefs.GetInt(K_Unlocked(id), 0) == 1;
+
+            return PlayerPrefs.GetInt(K_Unlocked(id), 0) == 1;
+        }
         return PlayerPrefs.GetInt(K_Unlocked(id), 0) == 1;
     }
 

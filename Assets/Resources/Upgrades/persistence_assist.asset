@@ -19,7 +19,7 @@ MonoBehaviour:
   baseCost: 1000
   costScale: 1
   maxLevel: 1
-  unlockDistance: 60
+  unlockDistance: 20
   sortOrder: 9
   dependencies: []
   v0PerTier: []

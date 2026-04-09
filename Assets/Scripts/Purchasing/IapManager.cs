@@ -22,13 +22,17 @@ public class IapManager : MonoBehaviour
 
     bool isConnecting;
     bool isInitialized;
+    bool isStoreConnected;
+    bool isFetchingProducts;
     bool isFetchingPurchases;
     string purchaseInProgressProductId;
     string selectOnGrantProductId;
+    string lastStatusDetail;
 
     public bool IsInitialized => isInitialized;
-    public bool IsStoreReady => isInitialized && storeController != null;
+    public bool IsStoreReady => isInitialized && isStoreConnected && storeController != null;
     public bool IsPurchaseInProgress => !string.IsNullOrEmpty(purchaseInProgressProductId);
+    public string LastStatusDetail => lastStatusDetail;
 
     public static bool UseRealMoneyPurchasing =>
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -65,7 +69,7 @@ public class IapManager : MonoBehaviour
         if (!UseRealMoneyPurchasing)
             return;
 
-        InitializeStore();
+        EnsureInitialized();
     }
 
     void OnDestroy()
@@ -109,6 +113,17 @@ public class IapManager : MonoBehaviour
         PurchaseProduct(PremiumSkinProductId);
     }
 
+    public void EnsureInitialized()
+    {
+        if (!UseRealMoneyPurchasing)
+            return;
+
+        if (isConnecting || isFetchingProducts || isInitialized)
+            return;
+
+        InitializeStore();
+    }
+
     public void PurchaseProduct(string productId)
     {
         if (!UseRealMoneyPurchasing)
@@ -119,6 +134,7 @@ public class IapManager : MonoBehaviour
 
         if (!IsStoreReady)
         {
+            EnsureInitialized();
             Debug.LogWarning($"[IAP] Purchase blocked for '{productId}' because the store is not ready.");
             NotifyStateChanged();
             return;
@@ -163,20 +179,27 @@ public class IapManager : MonoBehaviour
             return;
 
         isConnecting = true;
+        isStoreConnected = false;
+        isFetchingProducts = false;
+        lastStatusDetail = "Connecting to Google Play...";
         NotifyStateChanged();
 
         try
         {
+            if (storeController != null)
+                UnsubscribeFromStore();
+
             storeController = UnityIAPServices.StoreController();
             SubscribeToStore();
             storeController.ProcessPendingOrdersOnPurchasesFetched(false);
 
             await storeController.Connect();
-            storeController.FetchProducts(s_ProductsToFetch);
         }
         catch (Exception ex)
         {
             isConnecting = false;
+            isStoreConnected = false;
+            lastStatusDetail = $"Store initialization exception: {ex.Message}";
             Debug.LogError($"[IAP] Store initialization failed: {ex}");
             NotifyStateChanged();
         }
@@ -218,21 +241,31 @@ public class IapManager : MonoBehaviour
 
     void OnStoreConnected()
     {
+        isConnecting = false;
+        isStoreConnected = true;
+        isFetchingProducts = true;
+        lastStatusDetail = "Connected to Google Play. Fetching products...";
         Debug.Log("[IAP] Connected to Google Play.");
+        NotifyStateChanged();
+        storeController?.FetchProducts(s_ProductsToFetch);
     }
 
     void OnStoreDisconnected(StoreConnectionFailureDescription failure)
     {
         isConnecting = false;
         isInitialized = false;
+        isStoreConnected = false;
+        isFetchingProducts = false;
+        lastStatusDetail = $"Store disconnected: {failure?.Message}";
         Debug.LogWarning($"[IAP] Store disconnected: {failure?.Message}");
         NotifyStateChanged();
     }
 
     void OnProductsFetched(List<Product> products)
     {
-        isConnecting = false;
+        isFetchingProducts = false;
         isInitialized = true;
+        lastStatusDetail = $"Products fetched: {string.Join(", ", products.Select(p => p.definition.id))}";
 
         Debug.Log($"[IAP] Products fetched: {string.Join(", ", products.Select(p => p.definition.id))}");
         NotifyStateChanged();
@@ -243,6 +276,9 @@ public class IapManager : MonoBehaviour
     {
         isConnecting = false;
         isInitialized = false;
+        isStoreConnected = true;
+        isFetchingProducts = false;
+        lastStatusDetail = $"Product fetch failed: {failure?.FailureReason}";
         Debug.LogError($"[IAP] Product fetch failed: {failure?.FailureReason}");
         NotifyStateChanged();
     }
@@ -285,6 +321,7 @@ public class IapManager : MonoBehaviour
     void OnPurchasesFetched(Orders orders)
     {
         isFetchingPurchases = false;
+        lastStatusDetail = $"Owned products synced: {string.Join(", ", ownedProductIds)}";
 
         var fetchedProductIds = new HashSet<string>();
 
@@ -316,6 +353,7 @@ public class IapManager : MonoBehaviour
     void OnPurchasesFetchFailed(PurchasesFetchFailureDescription failure)
     {
         isFetchingPurchases = false;
+        lastStatusDetail = $"Fetch purchases failed: {failure?.FailureReason} | {failure?.Message}";
         Debug.LogWarning($"[IAP] Fetch purchases failed: {failure?.FailureReason} | {failure?.Message}");
         NotifyStateChanged();
     }

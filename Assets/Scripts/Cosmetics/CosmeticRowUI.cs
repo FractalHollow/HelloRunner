@@ -113,7 +113,11 @@ public class CosmeticRowUI : MonoBehaviour
 
             if (!IapManager.I.IsStoreReady)
             {
-                ShowInfoDialog("Store is still connecting. Please try again in a moment.");
+                IapManager.I.EnsureInitialized();
+                var detail = string.IsNullOrWhiteSpace(IapManager.I.LastStatusDetail)
+                    ? "Store is still connecting. Please try again in a moment."
+                    : $"Store not ready yet.\n{IapManager.I.LastStatusDetail}";
+                ShowInfoDialog(detail);
                 return;
             }
 

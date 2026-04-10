@@ -82,7 +82,14 @@ public class IapManager : MonoBehaviour
 
     public static string ProductIdForSkin(string skinId)
     {
-        return string.Equals(skinId, PremiumSkinProductId, StringComparison.Ordinal) ? PremiumSkinProductId : null;
+        if (string.Equals(skinId, PremiumSkinProductId, StringComparison.Ordinal))
+            return PremiumSkinProductId;
+
+        // Current cosmetic asset id for the paid skin.
+        if (string.Equals(skinId, "paid_1", StringComparison.Ordinal))
+            return PremiumSkinProductId;
+
+        return null;
     }
 
     public static bool TryGetProductIdForSkin(string skinId, out string productId)

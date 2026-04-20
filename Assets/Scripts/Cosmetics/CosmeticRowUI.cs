@@ -74,7 +74,7 @@ public class CosmeticRowUI : MonoBehaviour
     string GetLockReason(SkinDef skinDef, string paidPrice)
     {
         if (skinDef.unlockType == SkinDef.UnlockType.PrestigeRequired)
-            return $"Requires Prestige {skinDef.prestigeRequired}";
+            return $"Requires Prestige {UIIntFormatter.Format(skinDef.prestigeRequired)}";
         if (skinDef.unlockType == SkinDef.UnlockType.Paid)
             return $"Paid ({paidPrice})";
         return "Locked";

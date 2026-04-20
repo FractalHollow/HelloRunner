@@ -67,22 +67,22 @@ public class StatsPanelController : MonoBehaviour
         }
 
         bodyText.text =
-            $"Best Distance: {bestDistanceM:N0} m\n" +
-            $"Best Score: {bestScore:N0}\n" +
+            $"Best Distance: {UIIntFormatter.Format(bestDistanceM)} m\n" +
+            $"Best Score: {UIIntFormatter.Format(bestScore)}\n" +
             $"\n" +
-            $"Most Flips (Single Run): {bestFlipsInRun:N0}\n" +
-            $"Best No-Hit Distance: {bestNoHitM:N0} m\n" +
-            $"Best Hard Mode Distance: {bestHardModeM:N0} m\n" +
+            $"Most Flips (Single Run): {UIIntFormatter.Format(bestFlipsInRun)}\n" +
+            $"Best No-Hit Distance: {UIIntFormatter.Format(bestNoHitM)} m\n" +
+            $"Best Hard Mode Distance: {UIIntFormatter.Format(bestHardModeM)} m\n" +
             $"\n" +
-            $"Lifetime Distance: {lifetimeDistanceM:N0} m\n" +
-            $"Lifetime Embers Earned: {lifetimeEmbersEarned:N0}\n" +
-            $"Runs Played: {runsPlayed:N0}\n" +
-            $"Runs This Prestige: {runsThisPrestige:N0}\n" +
-            $"Speed Mod Runs: {speedModRuns:N0}\n" +
-            $"Hazards Mod Runs: {hazardsModRuns:N0}\n" +
-            $"Vertical Mod Runs: {verticalModRuns:N0}\n" +
+            $"Lifetime Distance: {UIIntFormatter.Format(lifetimeDistanceM)} m\n" +
+            $"Lifetime Embers Earned: {UIIntFormatter.Format(lifetimeEmbersEarned)}\n" +
+            $"Runs Played: {UIIntFormatter.Format(runsPlayed)}\n" +
+            $"Runs This Prestige: {UIIntFormatter.Format(runsThisPrestige)}\n" +
+            $"Speed Mod Runs: {UIIntFormatter.Format(speedModRuns)}\n" +
+            $"Hazards Mod Runs: {UIIntFormatter.Format(hazardsModRuns)}\n" +
+            $"Vertical Mod Runs: {UIIntFormatter.Format(verticalModRuns)}\n" +
             $"\n" +
-            $"Achievements: {unlockedAchievements:N0} / {totalAchievements:N0}\n";
+            $"Achievements: {UIIntFormatter.Format(unlockedAchievements)} / {UIIntFormatter.Format(totalAchievements)}\n";
     }
 
 }

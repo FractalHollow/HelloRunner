@@ -57,11 +57,13 @@ public class PrestigeUI : MonoBehaviour
         {
             levelText.gameObject.SetActive(lvl > 0);
             if (lvl > 0)
-                levelText.text = $"Prestige {lvl}  (x{PrestigeManager.ScoreMult:0.#} Score & Embers)";
+                levelText.text = $"Prestige {UIIntFormatter.Format(lvl)}  (x{PrestigeManager.ScoreMult:0.#} Score & Embers)";
         }
 
         if (requirementText)
-            requirementText.text = $"Prestige Requirement: Reach {req}m (This Prestige Best: {best}m)";
+            requirementText.text =
+                $"Prestige Requirement: Reach {UIIntFormatter.Format(req)}m " +
+                $"(This Prestige Best: {UIIntFormatter.Format(best)}m)";
 
         if (rewardText)
         {

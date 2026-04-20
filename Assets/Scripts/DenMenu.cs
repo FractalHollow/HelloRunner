@@ -97,7 +97,7 @@ public class DenMenu : MonoBehaviour
     // ---------- UI Refresh ----------
     void UpdateWispsUI(int total)
     {
-        if (wispsValue) wispsValue.text = total.ToString();
+        if (wispsValue) wispsValue.text = UIIntFormatter.Format(total);
         RefreshStoreUI();
     }
 
@@ -113,7 +113,7 @@ public class DenMenu : MonoBehaviour
         if (idleText)
         {
             idleText.text =
-                $"You can claim <b>{claim:N0}</b> Embers\n" +
+                $"You can claim <b>{UIIntFormatter.Format(claim)}</b> Embers\n" +
                 $"({rate:0.#}/hr \u2022 {stored:0}/{capHrs:0}h stored)";
         }
 

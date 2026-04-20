@@ -43,7 +43,7 @@ public class UpgradeButton : MonoBehaviour
 
     public void Refresh()
     {
-    if (!def) return;
+        if (!def) return;
 
         // ---------- INFO-ONLY / DUMMY ROWS ----------
         if (def.MaxTier <= 0)
@@ -55,8 +55,8 @@ public class UpgradeButton : MonoBehaviour
             if (descText)
             {
                 descText.text = infoLocked
-                    ? $"Unlocks at {def.unlockDistance} m"
-                    : "Unlocked — toggle from the Start screen.";
+                    ? $"Unlocks at {UIIntFormatter.Format(def.unlockDistance)} m"
+                    : "Unlocked - toggle from the Start screen.";
             }
 
             if (tierText) tierText.text = "";       // no tier label
@@ -68,8 +68,7 @@ public class UpgradeButton : MonoBehaviour
             return; // done
         }
 
-
-    // ---------- NORMAL UPGRADE ROWS CONTINUE BELOW ----------
+        // ---------- NORMAL UPGRADE ROWS CONTINUE BELOW ----------
 
         if (nameText) nameText.text = def.displayName;
 
@@ -85,13 +84,17 @@ public class UpgradeButton : MonoBehaviour
             descText.text = maxed ? "Max level reached." : def.GetDescriptionForTier(nextTier);
 
         if (tierText)
-            tierText.text = $"Tier {ownedTier}/{def.MaxTier}" + (maxed ? "" : $" → {nextTier}");
+        {
+            tierText.text =
+                $"Tier {UIIntFormatter.Format(ownedTier)}/{UIIntFormatter.Format(def.MaxTier)}" +
+                (maxed ? "" : $" -> {UIIntFormatter.Format(nextTier)}");
+        }
 
         int cost = def.GetCostForTier(nextTier);
         bool canAfford = !maxed && !locked && gm && gm.CanAfford(cost);
 
         if (costText)
-            costText.text = maxed ? "-" : cost.ToString("N0");
+            costText.text = maxed ? "-" : UIIntFormatter.Format(cost);
 
         // ----- STATE LOGIC -----
         if (locked)
@@ -140,9 +143,9 @@ public class UpgradeButton : MonoBehaviour
         if (lockedText)
         {
             if (byDistance && byDeps)
-                lockedText.text = $"Unlocks at {def.unlockDistance} m\n+ Dependencies not met";
+                lockedText.text = $"Unlocks at {UIIntFormatter.Format(def.unlockDistance)} m\n+ Dependencies not met";
             else if (byDistance)
-                lockedText.text = $"Unlocks at {def.unlockDistance} m";
+                lockedText.text = $"Unlocks at {UIIntFormatter.Format(def.unlockDistance)} m";
             else if (byDeps)
                 lockedText.text = "Requires other upgrades";
         }

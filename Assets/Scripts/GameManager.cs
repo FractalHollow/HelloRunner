@@ -352,13 +352,13 @@ public class GameManager : MonoBehaviour
         UpdateWispHUD();
 
         // Fill final UI
-        if (finalScoreText) finalScoreText.text = $"Score: {finalScore:N0}";
-        if (finalDistanceText) finalDistanceText.text = $"Distance: {(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
-        if (bestDistanceText) bestDistanceText.text = $"Best: {(int)(distanceTracker ? distanceTracker.bestDistance : 0f)} m";
-        if (wispsRunText) wispsRunText.text = $"Earned: {wispsRun} {(wispsRun == 1 ? "Ember" : "Embers")}";
-        if (wispTotalFinal) wispTotalFinal.text = $"Ember Bank: {bank:N0}";
-        if (scoreText) scoreText.text = $"Score: {finalScore:N0}";
-        if (distanceText) distanceText.text = $"{(int)(distanceTracker ? distanceTracker.distance : 0f)} m";
+        if (finalScoreText) finalScoreText.text = $"Score: {UIIntFormatter.Format(finalScore)}";
+        if (finalDistanceText) finalDistanceText.text = $"Distance: {UIIntFormatter.Format((int)(distanceTracker ? distanceTracker.distance : 0f))} m";
+        if (bestDistanceText) bestDistanceText.text = $"Best: {UIIntFormatter.Format((int)(distanceTracker ? distanceTracker.bestDistance : 0f))} m";
+        if (wispsRunText) wispsRunText.text = $"Earned: {UIIntFormatter.Format(wispsRun)} {(wispsRun == 1 ? "Ember" : "Embers")}";
+        if (wispTotalFinal) wispTotalFinal.text = $"Ember Bank: {UIIntFormatter.Format(bank)}";
+        if (scoreText) scoreText.text = $"Score: {UIIntFormatter.Format(finalScore)}";
+        if (distanceText) distanceText.text = $"{UIIntFormatter.Format((int)(distanceTracker ? distanceTracker.distance : 0f))} m";
 
         if (gameOverPanel)
         {
@@ -390,13 +390,13 @@ public class GameManager : MonoBehaviour
     {
         if (!highScoreText) return;
         int hi = PlayerPrefs.GetInt("HighScore", 0);
-        highScoreText.text = $"Best: {hi:N0}";
+        highScoreText.text = $"Best: {UIIntFormatter.Format(hi)}";
     }
 
     void UpdateWispHUD()
     {
         // HUD shows Embers collected THIS RUN
-        if (wispTotalHUD) wispTotalHUD.text = $"Embers: {wispsRun}";
+        if (wispTotalHUD) wispTotalHUD.text = $"Embers: {UIIntFormatter.Format(wispsRun)}";
     }
 
     public void PauseGame()
@@ -452,10 +452,10 @@ public class GameManager : MonoBehaviour
     void UpdateUILive()
     {
         if (distanceText && distanceTracker)
-            distanceText.text = $"Dist: {(int)distanceTracker.distance} m";
+            distanceText.text = $"Dist: {UIIntFormatter.Format((int)distanceTracker.distance)} m";
 
         if (scoreText && scoreSystem)
-            scoreText.text = $"Score: {ComputeScoreWithMods():N0}";
+            scoreText.text = $"Score: {UIIntFormatter.Format(ComputeScoreWithMods())}";
 
     }
 

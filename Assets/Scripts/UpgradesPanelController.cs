@@ -101,8 +101,8 @@ public class UpgradesPanelController : MonoBehaviour
         int bank = gameManager ? gameManager.GetWispsBank() : 0;
         float best = GetBestDistanceMeters();
 
-         if (bestDistanceText) bestDistanceText.text = $"Best: {(int)best} m";
-        if (emberBankText) emberBankText.text = $"Embers: {bank:N0}";
+        if (bestDistanceText) bestDistanceText.text = $"Best: {UIIntFormatter.Format((int)best)} m";
+        if (emberBankText) emberBankText.text = $"Embers: {UIIntFormatter.Format(bank)}";
 
         // Refresh all rows with current bank & distance
         foreach (Transform child in contentParent)

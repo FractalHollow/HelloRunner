@@ -135,9 +135,9 @@ public class UpgradeDef : ScriptableObject
         s = s.Replace("{v2}", v2.ToString("0.##"));
 
         // typed formats (rounded ints)
-        s = s.Replace("{v0_i}", Mathf.RoundToInt(v0).ToString());
-        s = s.Replace("{v1_i}", Mathf.RoundToInt(v1).ToString());
-        s = s.Replace("{v2_i}", Mathf.RoundToInt(v2).ToString());
+        s = s.Replace("{v0_i}", UIIntFormatter.Format(Mathf.RoundToInt(v0)));
+        s = s.Replace("{v1_i}", UIIntFormatter.Format(Mathf.RoundToInt(v1)));
+        s = s.Replace("{v2_i}", UIIntFormatter.Format(Mathf.RoundToInt(v2)));
 
         // meters with 1 decimal
         s = s.Replace("{v0_m}", v0.ToString("0.0"));
@@ -145,9 +145,9 @@ public class UpgradeDef : ScriptableObject
         s = s.Replace("{v2_m}", v2.ToString("0.0"));
 
         // percents as rounded ints (you control whether v0 is 10 or 0.10 in your data)
-        s = s.Replace("{v0_pct}", Mathf.RoundToInt(v0).ToString());
-        s = s.Replace("{v1_pct}", Mathf.RoundToInt(v1).ToString());
-        s = s.Replace("{v2_pct}", Mathf.RoundToInt(v2).ToString());
+        s = s.Replace("{v0_pct}", UIIntFormatter.Format(Mathf.RoundToInt(v0)));
+        s = s.Replace("{v1_pct}", UIIntFormatter.Format(Mathf.RoundToInt(v1)));
+        s = s.Replace("{v2_pct}", UIIntFormatter.Format(Mathf.RoundToInt(v2)));
 
         // simple pluralization helper for shield charges based on v0_i
         s = s.Replace("{charge_s}", (Mathf.RoundToInt(v0) == 1) ? "charge" : "charges");

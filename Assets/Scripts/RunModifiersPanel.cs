@@ -62,9 +62,18 @@ public class RunModifiersPanel : MonoBehaviour
         }
     }
 
+    public void Open()
+    {
+        var fader = PanelFader.Ensure(gameObject);
+        if (fader) fader.FadeIn();
+        else gameObject.SetActive(true);
+    }
+
     // Called by the Back button
     public void Close()
     {
-        gameObject.SetActive(false);
+        var fader = PanelFader.Ensure(gameObject);
+        if (fader) fader.FadeOut();
+        else gameObject.SetActive(false);
     }
 }

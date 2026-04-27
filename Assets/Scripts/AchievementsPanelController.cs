@@ -16,13 +16,18 @@ public class AchievementsPanelController : MonoBehaviour
     public void Open()
     {
         AchievementManager.I?.MarkUnlockedAchievementsAsSeen();
-        gameObject.SetActive(true);
         Refresh();
+
+        var fader = PanelFader.Ensure(gameObject);
+        if (fader) fader.FadeIn();
+        else gameObject.SetActive(true);
     }
 
     public void Close()
     {
-        gameObject.SetActive(false);
+        var fader = PanelFader.Ensure(gameObject);
+        if (fader) fader.FadeOut();
+        else gameObject.SetActive(false);
     }
 
     public void Refresh()

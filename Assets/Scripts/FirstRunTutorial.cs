@@ -9,6 +9,7 @@ public class FirstRunTutorial : MonoBehaviour
 
     const string SafeAreaName = "StartUI(SafeArea)";
     const float FadeDuration = 0.2f;
+    const float DotsAboveButtonsY = 88f;
 
     [SerializeField] Sprite emberSprite;
 
@@ -249,7 +250,7 @@ public class FirstRunTutorial : MonoBehaviour
         startButton.onClick.AddListener(CompleteTutorial);
 
         RectTransform dotsRoot = CreateRect("Dots", footer);
-        Anchor(dotsRoot, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(200f, 28f));
+        Anchor(dotsRoot, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, DotsAboveButtonsY), new Vector2(200f, 28f));
 
         for (int i = 0; i < dots.Length; i++)
         {
@@ -318,7 +319,7 @@ public class FirstRunTutorial : MonoBehaviour
         Stretch(body.rectTransform, new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.28f), Vector2.zero, Vector2.zero);
         body.alignment = TextAlignmentOptions.Center;
         body.color = bodyColor;
-        body.enableWordWrapping = true;
+        body.textWrappingMode = TextWrappingModes.Normal;
         body.text = data.Body;
 
         return page.gameObject;

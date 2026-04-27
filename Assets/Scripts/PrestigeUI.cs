@@ -21,7 +21,7 @@ public class PrestigeUI : MonoBehaviour
     {
         Wire();
         Refresh();
-        if (confirmPanel) confirmPanel.SetActive(false);
+        HideConfirmInstant();
     }
 
     void Wire()
@@ -97,12 +97,18 @@ public class PrestigeUI : MonoBehaviour
                 $"Are you sure you want to Prestige?";
         }
 
-        confirmPanel.SetActive(true);
+        var confirmFader = PanelFader.Ensure(confirmPanel);
+        if (confirmFader) confirmFader.FadeIn();
+        else confirmPanel.SetActive(true);
     }
 
     void CancelPrestige()
     {
-        if (confirmPanel) confirmPanel.SetActive(false);
+        if (!confirmPanel) return;
+
+        var confirmFader = PanelFader.Ensure(confirmPanel);
+        if (confirmFader) confirmFader.FadeOut();
+        else confirmPanel.SetActive(false);
     }
 
     void ConfirmPrestige()
@@ -111,5 +117,14 @@ public class PrestigeUI : MonoBehaviour
 
         PrestigeManager.DoPrestige();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    void HideConfirmInstant()
+    {
+        if (!confirmPanel || !confirmPanel.activeSelf) return;
+
+        var confirmFader = confirmPanel.GetComponent<PanelFader>();
+        if (confirmFader) confirmFader.HideInstant();
+        else confirmPanel.SetActive(false);
     }
 }

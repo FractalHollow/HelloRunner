@@ -55,20 +55,29 @@ public class SettingsMenu : MonoBehaviour
 
     void OpenResetConfirmPanel()
     {
-        if (confirmResetPanel)
-            confirmResetPanel.SetActive(true);
+        if (!confirmResetPanel) return;
+
+        var resetFader = PanelFader.Ensure(confirmResetPanel);
+        if (resetFader) resetFader.FadeIn();
+        else confirmResetPanel.SetActive(true);
     }
 
     void CloseResetConfirmPanel()
     {
-        if (confirmResetPanel)
-            confirmResetPanel.SetActive(false);
+        if (!confirmResetPanel) return;
+
+        var resetFader = PanelFader.Ensure(confirmResetPanel);
+        if (resetFader) resetFader.FadeOut();
+        else confirmResetPanel.SetActive(false);
     }
 
     void HideResetConfirmPanelInstant()
     {
-        if (confirmResetPanel && confirmResetPanel.activeSelf)
-            confirmResetPanel.SetActive(false);
+        if (!confirmResetPanel || !confirmResetPanel.activeSelf) return;
+
+        var resetFader = confirmResetPanel.GetComponent<PanelFader>();
+        if (resetFader) resetFader.HideInstant();
+        else confirmResetPanel.SetActive(false);
     }
 
     void PerformFullReset()

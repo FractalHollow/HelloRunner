@@ -7,6 +7,21 @@ public class PanelFader : MonoBehaviour
     public CanvasGroup group;
     public float duration = 0.25f;
 
+    public static PanelFader Ensure(GameObject target, float duration = 0.25f)
+    {
+        if (!target) return null;
+
+        var fader = target.GetComponent<PanelFader>();
+        if (!fader) fader = target.AddComponent<PanelFader>();
+
+        var group = target.GetComponent<CanvasGroup>();
+        if (!group) group = target.AddComponent<CanvasGroup>();
+
+        fader.group = group;
+        fader.duration = duration;
+        return fader;
+    }
+
     void Awake()
     {
         if (!group) group = GetComponent<CanvasGroup>();

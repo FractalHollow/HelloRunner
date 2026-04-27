@@ -12,16 +12,23 @@ public class StatsPanelController : MonoBehaviour
 
     public void Open()
     {
-        if (panelRoot) panelRoot.SetActive(true);
         Refresh();
+
+        var target = panelRoot ? panelRoot : gameObject;
+        var fader = PanelFader.Ensure(target);
+        if (fader) fader.FadeIn();
+        else target.SetActive(true);
     }
 
     public void Close()
     {
-        if (panelRoot) panelRoot.SetActive(false);
+        var target = panelRoot ? panelRoot : gameObject;
+        var fader = PanelFader.Ensure(target);
+        if (fader) fader.FadeOut();
+        else target.SetActive(false);
     }
 
-        public void Refresh()
+    public void Refresh()
     {
         if (!bodyText) return;
 

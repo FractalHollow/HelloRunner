@@ -74,7 +74,10 @@ public class StartScreen : MonoBehaviour
             Debug.LogWarning("[StartScreen] Run Modifiers Panel not assigned.");
             return;
         }
-        runModifiersPanel.SetActive(true);
+
+        var modifiers = runModifiersPanel.GetComponent<RunModifiersPanel>();
+        if (modifiers) modifiers.Open();
+        else runModifiersPanel.SetActive(true);
     }
 
     void OnStartPressed()

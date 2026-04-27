@@ -15234,6 +15234,8 @@ MonoBehaviour:
   gameTitle: Fox Run & Rest
   websiteURL: https://fractalhollow.com
   contactEmail: info@fractalhollow.com
+  versionText: {fileID: 1813064955}
+  versionTextTemplate: "Version {VERSION}\n\nFractal\n\nHollow Games"
 --- !u!114 &1541272994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22815,12 +22817,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Version 1.0.0
-
-
-    Fractal
-
-    Hollow Games'
+  m_text: "Version {VERSION}\n\nFractal\n\nHollow Games"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d09b7790238219443ba728daa969ccd2, type: 2}
   m_sharedMaterial: {fileID: 6643556769826710504, guid: d09b7790238219443ba728daa969ccd2, type: 2}

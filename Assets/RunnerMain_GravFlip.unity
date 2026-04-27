@@ -2459,6 +2459,7 @@ GameObject:
   - component: {fileID: 200450324}
   - component: {fileID: 200450326}
   - component: {fileID: 200450327}
+  - component: {fileID: 200450328}
   m_Layer: 5
   m_Name: StartScreen
   m_TagString: Untagged
@@ -2522,6 +2523,7 @@ MonoBehaviour:
   startButton: {fileID: 605783959}
   fader: {fileID: 200450327}
   gm: {fileID: 1345499408}
+  tutorial: {fileID: 200450328}
   runModifiersButton: {fileID: 1845885470}
   runModifiersPanel: {fileID: 1873738975}
   prestigeText: {fileID: 192380843}
@@ -2539,6 +2541,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   group: {fileID: 0}
   duration: 0.25
+--- !u!114 &200450328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200450322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b7d4f8c2a5e4c37a9d3f0b6c8e1a452, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  emberSprite: {fileID: -71033637, guid: 97a5e6f7d9b3bd04187c81eac735e949, type: 3}
 --- !u!1 &201007794
 GameObject:
   m_ObjectHideFlags: 0

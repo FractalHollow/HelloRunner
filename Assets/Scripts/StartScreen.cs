@@ -8,6 +8,7 @@ public class StartScreen : MonoBehaviour
     [SerializeField] Button startButton;
     [SerializeField] PanelFader fader;
     [SerializeField] GameManager gm;   // drag the scene GameManager here
+    [SerializeField] FirstRunTutorial tutorial;
 
     [Header("Run Modifiers")]
     [SerializeField] Button runModifiersButton;     // Btn_RunModifiers on StartPanel
@@ -22,6 +23,7 @@ public class StartScreen : MonoBehaviour
     {
         cg = GetComponent<CanvasGroup>();
         if (!fader) fader = GetComponent<PanelFader>();
+        if (!tutorial) tutorial = GetComponent<FirstRunTutorial>();
     }
 
     void OnEnable()
@@ -78,7 +80,19 @@ public class StartScreen : MonoBehaviour
     void OnStartPressed()
     {
         if (!gm) { Debug.LogError("[StartScreen] GameManager reference missing"); return; }
+        if (tutorial && tutorial.IsShowing) return;
 
+        if (tutorial && tutorial.ShouldShow())
+        {
+            tutorial.Begin(StartGameFromMenu);
+            return;
+        }
+
+        StartGameFromMenu();
+    }
+
+    void StartGameFromMenu()
+    {
         if (fader && fader.isActiveAndEnabled)
             fader.FadeOut(() => { DisablePanel(); gm.StartGame(); });
         else

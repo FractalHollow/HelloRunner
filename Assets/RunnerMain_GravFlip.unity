@@ -2553,6 +2553,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b7d4f8c2a5e4c37a9d3f0b6c8e1a452, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  panelBackgroundSprite: {fileID: -8353915069095539700, guid: dce64b00f190d444bb10b47afc64ec45, type: 3}
+  reaperSprite: {fileID: 21300000, guid: 8e806c70cc1bf464990dceaf1f32a8fb, type: 3}
   emberSprite: {fileID: -71033637, guid: 97a5e6f7d9b3bd04187c81eac735e949, type: 3}
 --- !u!1 &201007794
 GameObject:

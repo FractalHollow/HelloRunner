@@ -9,13 +9,20 @@ public class FirstRunTutorial : MonoBehaviour
 
     const string SafeAreaName = "StartUI(SafeArea)";
     const float FadeDuration = 0.2f;
-    const float DotsAboveButtonsY = 88f;
+    const float FooterButtonInsetX = 215f;
+    const float FooterButtonY = 62f;
+    const float DotsAboveButtonsY = 158f;
+    const float ContentOffsetY = 64f;
+    const string LabelColorHex = "#F1B655";
 
+    [SerializeField] Sprite panelBackgroundSprite;
+    [SerializeField] Sprite reaperSprite;
     [SerializeField] Sprite emberSprite;
 
     readonly Color overlayColor = new Color(0.035f, 0.055f, 0.085f, 0.94f);
     readonly Color cardColor = new Color(0.11f, 0.15f, 0.18f, 0.985f);
     readonly Color bodyColor = new Color(0.92f, 0.95f, 0.98f, 1f);
+    readonly Color labelColor = new Color32(0xF1, 0xB6, 0x55, 0xFF);
     readonly Color mutedColor = new Color(0.65f, 0.72f, 0.79f, 1f);
     readonly Color dotOffColor = new Color(1f, 1f, 1f, 0.2f);
     readonly Color buttonTextColor = new Color(0.12f, 0.08f, 0.03f, 1f);
@@ -35,7 +42,8 @@ public class FirstRunTutorial : MonoBehaviour
     {
         None,
         Player,
-        Ember
+        Ember,
+        Reaper
     }
 
     class PageBuildData
@@ -173,10 +181,18 @@ public class FirstRunTutorial : MonoBehaviour
         RectTransform card = CreateRect("Card", overlayRoot);
         Stretch(card, new Vector2(0.06f, 0.075f), new Vector2(0.94f, 0.925f), Vector2.zero, Vector2.zero);
         Image cardImage = card.gameObject.AddComponent<Image>();
-        cardImage.color = cardColor;
+        if (panelBackgroundSprite)
+        {
+            cardImage.sprite = panelBackgroundSprite;
+            cardImage.color = Color.white;
+        }
+        else
+        {
+            cardImage.color = cardColor;
+        }
 
         RectTransform pagesRoot = CreateRect("Pages", card);
-        Stretch(pagesRoot, new Vector2(0f, 0.12f), new Vector2(1f, 1f), new Vector2(28f, -20f), new Vector2(-28f, -140f));
+        Stretch(pagesRoot, new Vector2(0f, 0.12f), new Vector2(1f, 1f), new Vector2(28f, -20f + ContentOffsetY), new Vector2(-28f, -140f + ContentOffsetY));
 
         PageBuildData[] pageData =
         {
@@ -224,7 +240,8 @@ public class FirstRunTutorial : MonoBehaviour
                 BottomLabel = "GO FURTHER",
                 CenterLabel = "GOOD LUCK",
                 Accent = GetPageAccent(3),
-                SpriteKind = TutorialSpriteKind.None
+                SpriteKind = TutorialSpriteKind.Reaper,
+                SpriteScale = 1.2f
             }
         };
 
@@ -232,21 +249,21 @@ public class FirstRunTutorial : MonoBehaviour
         dots = new Image[pageData.Length];
 
         for (int i = 0; i < pageData.Length; i++)
-            pages[i] = CreatePage(pagesRoot, pageData[i], textTemplate, playerSprite, tutorialEmberSprite);
+            pages[i] = CreatePage(pagesRoot, pageData[i], textTemplate, playerSprite, tutorialEmberSprite, reaperSprite);
 
         RectTransform footer = CreateRect("Footer", card);
-        Stretch(footer, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(28f, 20f), new Vector2(-28f, 132f));
+        Stretch(footer, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(28f, 20f + ContentOffsetY), new Vector2(-28f, 132f + ContentOffsetY));
 
         skipButton = CreateButton("SkipButton", footer, textTemplate, buttonTemplate, "Skip");
-        Anchor(skipButton.GetComponent<RectTransform>(), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(175f, 0f), new Vector2(330f, 117f));
+        Anchor(skipButton.GetComponent<RectTransform>(), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(FooterButtonInsetX, FooterButtonY), new Vector2(330f, 117f));
         skipButton.onClick.AddListener(Skip);
 
         nextButton = CreateButton("NextButton", footer, textTemplate, buttonTemplate, "Next");
-        Anchor(nextButton.GetComponent<RectTransform>(), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-175f, 0f), new Vector2(330f, 117f));
+        Anchor(nextButton.GetComponent<RectTransform>(), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-FooterButtonInsetX, FooterButtonY), new Vector2(330f, 117f));
         nextButton.onClick.AddListener(NextPage);
 
         startButton = CreateButton("StartButton", footer, textTemplate, buttonTemplate, "Start");
-        Anchor(startButton.GetComponent<RectTransform>(), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-175f, 0f), new Vector2(330f, 117f));
+        Anchor(startButton.GetComponent<RectTransform>(), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-FooterButtonInsetX, FooterButtonY), new Vector2(330f, 117f));
         startButton.onClick.AddListener(CompleteTutorial);
 
         RectTransform dotsRoot = CreateRect("Dots", footer);
@@ -263,23 +280,20 @@ public class FirstRunTutorial : MonoBehaviour
         }
     }
 
-    GameObject CreatePage(Transform parent, PageBuildData data, TMP_Text textTemplate, Sprite playerSprite, Sprite tutorialEmberSprite)
+    GameObject CreatePage(Transform parent, PageBuildData data, TMP_Text textTemplate, Sprite playerSprite, Sprite tutorialEmberSprite, Sprite tutorialReaperSprite)
     {
         RectTransform page = CreateRect(data.Name, parent);
         Stretch(page, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-        RectTransform accentBar = CreateRect("Accent", page);
-        Stretch(accentBar, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -10f), new Vector2(0f, 0f));
-        Image accentImage = accentBar.gameObject.AddComponent<Image>();
-        accentImage.color = data.Accent;
-
         TextMeshProUGUI title = CreateText("Title", page, textTemplate, 54f, FontStyles.Bold);
         Stretch(title.rectTransform, new Vector2(0f, 0.8f), new Vector2(1f, 1f), new Vector2(8f, -12f), new Vector2(-8f, -14f));
-        title.text = data.Title;
         title.alignment = TextAlignmentOptions.Center;
+        title.color = labelColor;
+        title.richText = true;
+        title.text = ColorizeLabel(data.Title);
 
         RectTransform artBox = CreateRect("ArtBox", page);
-        Stretch(artBox, new Vector2(0.09f, 0.34f), new Vector2(0.91f, 0.72f), Vector2.zero, Vector2.zero);
+        Stretch(artBox, new Vector2(0.09f, 0.38f), new Vector2(0.91f, 0.76f), Vector2.zero, Vector2.zero);
         Image artImage = artBox.gameObject.AddComponent<Image>();
         artImage.color = new Color(data.Accent.r * 0.28f, data.Accent.g * 0.28f, data.Accent.b * 0.28f, 0.95f);
 
@@ -301,7 +315,7 @@ public class FirstRunTutorial : MonoBehaviour
         bottomLabel.color = data.Accent;
         bottomLabel.text = data.BottomLabel;
 
-        Sprite panelSprite = GetPageSprite(data, playerSprite, tutorialEmberSprite);
+        Sprite panelSprite = GetPageSprite(data, playerSprite, tutorialEmberSprite, tutorialReaperSprite);
         if (panelSprite)
         {
             RectTransform player = CreateRect("PlayerSprite", artBox);
@@ -316,16 +330,17 @@ public class FirstRunTutorial : MonoBehaviour
 
         TextMeshProUGUI body = CreateText("Body", page, textTemplate, 34f, FontStyles.Normal);
         body.fontSize = 48f;
-        Stretch(body.rectTransform, new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.28f), Vector2.zero, Vector2.zero);
+        Stretch(body.rectTransform, new Vector2(0.05f, 0.11f), new Vector2(0.95f, 0.36f), Vector2.zero, Vector2.zero);
         body.alignment = TextAlignmentOptions.Center;
-        body.color = bodyColor;
+        body.color = labelColor;
+        body.richText = true;
         body.textWrappingMode = TextWrappingModes.Normal;
-        body.text = data.Body;
+        body.text = ColorizeLabel(data.Body);
 
         return page.gameObject;
     }
 
-    Sprite GetPageSprite(PageBuildData data, Sprite playerSprite, Sprite tutorialEmberSprite)
+    Sprite GetPageSprite(PageBuildData data, Sprite playerSprite, Sprite tutorialEmberSprite, Sprite tutorialReaperSprite)
     {
         switch (data.SpriteKind)
         {
@@ -333,9 +348,16 @@ public class FirstRunTutorial : MonoBehaviour
                 return playerSprite;
             case TutorialSpriteKind.Ember:
                 return tutorialEmberSprite;
+            case TutorialSpriteKind.Reaper:
+                return tutorialReaperSprite;
             default:
                 return null;
         }
+    }
+
+    string ColorizeLabel(string text)
+    {
+        return string.IsNullOrEmpty(text) ? "" : $"<color={LabelColorHex}>{text}</color>";
     }
 
     RectTransform FindOverlayParent()

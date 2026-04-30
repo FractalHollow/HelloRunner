@@ -429,6 +429,18 @@ public class GameManager : MonoBehaviour
         player?.EnableControl(true);
     }
 
+    void OnApplicationPause(bool isPaused)
+    {
+        if (isPaused)
+            PauseGame();
+    }
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+            PauseGame();
+    }
+
     void Update()
 {
     if (playing && Input.GetKeyDown(KeyCode.Escape))   // Android Back maps to Escape

@@ -39,7 +39,7 @@ public class DistanceTracker : MonoBehaviour
         if (!tracking) return;
 
         float speedMult = (gm != null) ? gm.RunSpeedMultiplier : 1f;
-        distance += metersPerSecond * speedMult * Time.unscaledDeltaTime * Time.timeScale;
+        distance += metersPerSecond * speedMult * Time.deltaTime;
     }
     
     

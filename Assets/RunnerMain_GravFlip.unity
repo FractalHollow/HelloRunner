@@ -12571,7 +12571,7 @@ MonoBehaviour:
   musicSource: {fileID: 1194164683}
   sfxSource: {fileID: 1194164682}
   flipSource: {fileID: 0}
-  musicLoop: {fileID: 8300000, guid: 9406a95989631764cbcf9b3ce51c5fe0, type: 3}
+  musicLoop: {fileID: 8300000, guid: 0666b3a1c3d6f094088565a6c9ec349d, type: 3}
   flipClip: {fileID: 8300000, guid: 30933eba5ec3fea498ac7495dbdca379, type: 3}
   crashClip: {fileID: 8300000, guid: 70f130ec37ecc54449172822fc627683, type: 3}
   sfxPurchase: {fileID: 8300000, guid: c3b166abcd8b9664cb878d3155c6ab81, type: 3}
@@ -12710,7 +12710,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -4980218105298135757, guid: ce6a7d0814a09ec41be85b6ab8cb0d72, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 10d540e756052cc4bb26e10e1977672b, type: 3}
+  m_Resource: {fileID: 8300000, guid: 0666b3a1c3d6f094088565a6c9ec349d, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -15252,7 +15252,13 @@ MonoBehaviour:
   websiteURL: https://fractalhollow.com
   contactEmail: info@fractalhollow.com
   versionText: {fileID: 1813064955}
-  versionTextTemplate: "Version {VERSION}\n\nFractal\n\nHollow Games"
+  versionTextTemplate: 'Version {VERSION}
+
+
+    Fractal
+
+
+    Hollow Games'
 --- !u!114 &1541272994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22834,7 +22840,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Version {VERSION}\n\nFractal\n\nHollow Games"
+  m_text: 'Version {VERSION}
+
+
+    Fractal
+
+
+    Hollow Games'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d09b7790238219443ba728daa969ccd2, type: 2}
   m_sharedMaterial: {fileID: 6643556769826710504, guid: d09b7790238219443ba728daa969ccd2, type: 2}

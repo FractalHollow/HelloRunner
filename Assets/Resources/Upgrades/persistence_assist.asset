@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: persistence_assist
   displayName: Persistence
-  description: Every run this prestige reduces difficulty scaling.
+  description: Every run this prestige reduces difficulty multiplier.
   descriptionTemplate: 
   baseCost: 1000
   costScale: 1

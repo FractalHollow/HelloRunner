@@ -33,6 +33,20 @@ public class AchievementToast : MonoBehaviour
         }
     }
 
+    public void HideAndCancel()
+    {
+        if (routine != null)
+        {
+            StopCoroutine(routine);
+            routine = null;
+        }
+
+        HideInstant();
+
+        if (titleText) titleText.text = "";
+        if (bodyText) bodyText.text = "";
+    }
+
     public void ShowUnlocked(List<AchievementDef> unlocked)
     {
         if (unlocked == null || unlocked.Count == 0) return;

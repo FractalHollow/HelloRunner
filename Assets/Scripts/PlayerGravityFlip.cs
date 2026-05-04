@@ -266,6 +266,8 @@ public class PlayerGravityFlip : MonoBehaviour
     {
         isAlive = true;
         canControl = false; // StartGame will enable control
+        gravDir = 1;
+        ApplyGravityFromDir();
         bufferedFlipUntil = -1f;
         nextFlipAllowed = 0f;
         Debug.Log("[Flip] ResetState() -> canControl = false");

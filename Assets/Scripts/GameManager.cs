@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     [Header("UI - Buttons")]
     public Button startButton;    // not required (StartScreen wires button)
     public Button restartButton; //"End Run" button on Pause Panel
+    Button retryButton;
 
     [Header("UI - Text (HUD)")]
     public TMP_Text distanceText;     // "123 m"
@@ -170,6 +171,7 @@ public class GameManager : MonoBehaviour
         UpdateWispHUD();
         UpdateUILive();
 
+        ConfigureGameOverActions();
         StartCoroutine(EnsureSceneLocal());
         ApplyAllOwnedUpgrades();
     }
@@ -192,11 +194,13 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         paused = false;
         HideGameOverPanel();
+        HideAchievementToast();
 
         if (spawner) spawner.StopSpawning();
         if (wispSpawner) wispSpawner.StopSpawning();
         ClearWorld();
         ResetPlayerToStart();
+        ApplyAllOwnedUpgrades();
 
         // Enable control in case it was left disabled after a previous run (bug adjustment)
         if (player)
@@ -379,6 +383,21 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void RetryRun()
+    {
+        if (playing) return;
+        if (gameOverPanel && !gameOverPanel.activeInHierarchy) return;
+
+        if (pausePanel)
+        {
+            var f = pausePanel.GetComponent<PanelFader>();
+            if (f) f.HideInstant();
+            pausePanel.SetActive(false);
+        }
+
+        StartGame();
     }
 
     // -------------------- UI / INPUT --------------------
@@ -581,10 +600,41 @@ public void RefreshAllCurrencyUI()
     void ClearWorld()
     {
         var obstacles = GameObject.FindGameObjectsWithTag("Obstacle");
-        foreach (var o in obstacles) Destroy(o);
+        foreach (var o in obstacles) DestroyRuntimeObject(o);
+
+        var movers = FindObjectsByType<ObstacleMover>(FindObjectsSortMode.None);
+        foreach (var mover in movers) DestroySpawnedEnemy(mover);
+
+        var shooters = FindObjectsByType<EnemyShooter>(FindObjectsSortMode.None);
+        foreach (var shooter in shooters) DestroySpawnedEnemy(shooter);
+
+        var bobs = FindObjectsByType<EnemyVerticalBob2D>(FindObjectsSortMode.None);
+        foreach (var bob in bobs) DestroySpawnedEnemy(bob);
+
+        var scoreGates = FindObjectsByType<ScoreGate>(FindObjectsSortMode.None);
+        foreach (var scoreGate in scoreGates) DestroySpawnedEnemy(scoreGate);
 
         var wisps = FindObjectsByType<WispPickup>(FindObjectsSortMode.None);
-        foreach (var w in wisps) Destroy(w.gameObject);
+        foreach (var w in wisps) DestroyRuntimeObject(w.gameObject);
+
+        var projectiles = FindObjectsByType<Projectile2D>(FindObjectsSortMode.None);
+        foreach (var p in projectiles) DestroyRuntimeObject(p.gameObject);
+    }
+
+    void DestroySpawnedEnemy(Component component)
+    {
+        if (!component) return;
+
+        var mover = component.GetComponentInParent<ObstacleMover>();
+        DestroyRuntimeObject(mover ? mover.gameObject : component.gameObject);
+    }
+
+    void DestroyRuntimeObject(GameObject go)
+    {
+        if (!go) return;
+
+        go.SetActive(false);
+        Destroy(go);
     }
 
     void HideGameOverPanel()
@@ -593,6 +643,88 @@ public void RefreshAllCurrencyUI()
         var f = gameOverPanel.GetComponent<PanelFader>();
         if (f) f.HideInstant();
         gameOverPanel.SetActive(false);
+    }
+
+    void HideAchievementToast()
+    {
+        var toast = FindFirstObjectByType<AchievementToast>(FindObjectsInactive.Include);
+        if (toast) toast.HideAndCancel();
+    }
+
+    void ConfigureGameOverActions()
+    {
+        if (!gameOverPanel || !restartButton) return;
+
+        var buttonParent = restartButton.transform.parent as RectTransform;
+        if (!buttonParent) return;
+
+        RectTransform row = null;
+        if (buttonParent.name == "GameOverActionsRow")
+            row = buttonParent;
+        else
+            row = buttonParent.Find("GameOverActionsRow") as RectTransform;
+
+        if (!row)
+        {
+            var rowGo = new GameObject("GameOverActionsRow", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+            row = rowGo.GetComponent<RectTransform>();
+
+            var originalRect = restartButton.transform as RectTransform;
+            row.SetParent(buttonParent, false);
+            row.anchorMin = originalRect.anchorMin;
+            row.anchorMax = originalRect.anchorMax;
+            row.anchoredPosition = originalRect.anchoredPosition;
+            row.sizeDelta = originalRect.sizeDelta;
+            row.pivot = originalRect.pivot;
+
+            var layout = row.GetComponent<HorizontalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 40f;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+
+            restartButton.transform.SetParent(row, false);
+        }
+
+        if (!retryButton)
+        {
+            var retryTransform = row.Find("RetryButton");
+            if (retryTransform)
+            {
+                retryButton = retryTransform.GetComponent<Button>();
+            }
+        }
+
+        if (!retryButton)
+        {
+            var retryGo = Instantiate(restartButton.gameObject, row);
+            retryGo.name = "RetryButton";
+            retryButton = retryGo.GetComponent<Button>();
+            SetButtonText(retryButton, "Retry");
+        }
+
+        WireGameOverActionButton(retryButton, RetryRun);
+        WireGameOverActionButton(restartButton, Restart);
+    }
+
+    void WireGameOverActionButton(Button button, UnityEngine.Events.UnityAction action)
+    {
+        if (!button) return;
+
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(action);
+    }
+
+    void SetButtonText(Button button, string label)
+    {
+        if (!button) return;
+
+        var text = button.GetComponentInChildren<TMP_Text>(true);
+        if (!text) return;
+
+        text.text = label;
     }
 
     // ==================== UPGRADES / EMBERS HELPERS ====================

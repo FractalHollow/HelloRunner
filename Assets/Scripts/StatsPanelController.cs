@@ -77,7 +77,7 @@ public class StatsPanelController : MonoBehaviour
             $"Best Distance: {UIIntFormatter.Format(bestDistanceM)} m\n" +
             $"Best Score: {UIIntFormatter.Format(bestScore)}\n" +
             $"\n" +
-            $"Most Flips (Single Run): {UIIntFormatter.Format(bestFlipsInRun)}\n" +
+            $"Most Taps (Single Run): {UIIntFormatter.Format(bestFlipsInRun)}\n" +
             $"Best No-Hit Distance: {UIIntFormatter.Format(bestNoHitM)} m\n" +
             $"Best Hard Mode Distance: {UIIntFormatter.Format(bestHardModeM)} m\n" +
             $"\n" +

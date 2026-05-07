@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: flips_100
   m_EditorClassIdentifier: 
   id: flips_100
-  displayName: Get Tappin
-  description: Flip 100 times in a single run.
+  displayName: Get Tappin'
+  description: Tap 100 times in a single run.
   sortOrder: 7
   progressType: 7
   targetValue: 100

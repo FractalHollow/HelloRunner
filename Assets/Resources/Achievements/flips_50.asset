@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: flips_50
   m_EditorClassIdentifier: 
   id: flips_50
-  displayName: Flip Apprentice
-  description: Flip 50 times in a single run.
+  displayName: Tap Apprentice
+  description: Tap 50 times in a single run.
   sortOrder: 6
   progressType: 7
   targetValue: 50

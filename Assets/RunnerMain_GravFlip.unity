@@ -2593,7 +2593,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c03631bffec68b7499e00228807fb31a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravityMagnitude: 4
+  gravityMagnitude: 3.5
   maxYSpeed: 16
   flipCooldown: 0.1
   flipInputBuffer: 0.12
@@ -13936,7 +13936,7 @@ MonoBehaviour:
   pauseOnStart: 1
   pausePanel: {fileID: 830305323}
   pauseButton: {fileID: 558485786}
-  prestigeDifficultyStart: 3
+  prestigeDifficultyStart: 2
   prestigeDifficultyStep: 0.13
   prestigeDifficultyMax: 20
   playerStartPos: {x: 0, y: 0, z: 0}

@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 public class PlayerGravityFlip : MonoBehaviour
 {
     [Header("Feel")]
-    public float gravityMagnitude = 7f;   // how strong gravity feels in either direction
+    public float gravityMagnitude = 3.5f;   // how strong gravity feels in either direction
     public float maxYSpeed = 18f;         // clamp vertical speed so it stays readable
     public float flipCooldown = 0.08f;    // small debounce so taps do not spam
     public float flipInputBuffer = 0.12f; // keep short taps alive through brief cooldown/impact windows

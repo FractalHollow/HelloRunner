@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -17,6 +18,7 @@ public class PlayerGravityFlip : MonoBehaviour
     GameManager gm;
     PlayerShield shield;
     PlayerSpriteAnimator spriteAnimator;
+    readonly List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
 
     bool isAlive = true;
     bool canControl = true;
@@ -123,20 +125,34 @@ public class PlayerGravityFlip : MonoBehaviour
     {
         blockedByUi = false;
 
-        for (int i = 0; i < Input.touchCount; i++)
+        if (Input.touchCount > 0)
         {
-            Touch touch = Input.GetTouch(i);
-            if (touch.phase != TouchPhase.Began)
-                continue;
+            bool touchBeganOnGameplay = false;
 
-            if (IsTouchOverUi(touch.fingerId))
+            for (int i = 0; i < Input.touchCount; i++)
             {
-                blockedByUi = true;
-                continue;
+                Touch touch = Input.GetTouch(i);
+                if (touch.phase != TouchPhase.Began)
+                    continue;
+
+                if (IsTouchOverUi(touch.fingerId, touch.position))
+                {
+                    blockedByUi = true;
+                    return false;
+                }
+
+                touchBeganOnGameplay = true;
             }
 
-            QueueBufferedFlip();
-            return true;
+            if (touchBeganOnGameplay)
+            {
+                QueueBufferedFlip();
+                return true;
+            }
+
+            // Mobile touches can also appear as mouse input in the legacy input API.
+            // When touch input is present, do not let the same physical tap fall through.
+            return false;
         }
 
         if (Input.GetMouseButtonDown(0))
@@ -178,12 +194,29 @@ public class PlayerGravityFlip : MonoBehaviour
 
     bool IsMousePointerOverUi()
     {
-        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+        return EventSystem.current != null &&
+               (EventSystem.current.IsPointerOverGameObject() || IsScreenPositionOverUi(Input.mousePosition));
     }
 
-    bool IsTouchOverUi(int fingerId)
+    bool IsTouchOverUi(int fingerId, Vector2 screenPosition)
     {
-        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(fingerId);
+        return EventSystem.current != null &&
+               (EventSystem.current.IsPointerOverGameObject(fingerId) || IsScreenPositionOverUi(screenPosition));
+    }
+
+    bool IsScreenPositionOverUi(Vector2 screenPosition)
+    {
+        if (EventSystem.current == null)
+            return false;
+
+        uiRaycastResults.Clear();
+        var eventData = new PointerEventData(EventSystem.current)
+        {
+            position = screenPosition
+        };
+
+        EventSystem.current.RaycastAll(eventData, uiRaycastResults);
+        return uiRaycastResults.Count > 0;
     }
 
     void DoFlip(bool playSfx, bool playFx)

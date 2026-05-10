@@ -4937,7 +4937,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 415, y: -180}
+  m_AnchoredPosition: {x: 401.72205, y: -180}
   m_SizeDelta: {x: 850, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &432827473
@@ -5274,7 +5274,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 415, y: -540}
+  m_AnchoredPosition: {x: 401.72205, y: -540}
   m_SizeDelta: {x: 850, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &515501983
@@ -7317,7 +7317,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 415, y: -420}
+  m_AnchoredPosition: {x: 401.72205, y: -420}
   m_SizeDelta: {x: 850, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &645456793
@@ -9874,8 +9874,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 140}
-  m_SizeDelta: {x: 830, y: 700}
+  m_AnchoredPosition: {x: 39.222, y: 140}
+  m_SizeDelta: {x: 803.4441, y: 700}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &890664607
 MonoBehaviour:
@@ -10314,7 +10314,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 415, y: -60}
+  m_AnchoredPosition: {x: 401.72205, y: -60}
   m_SizeDelta: {x: 850, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &930816129
@@ -12012,7 +12012,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 415, y: -300}
+  m_AnchoredPosition: {x: 401.72205, y: -300}
   m_SizeDelta: {x: 850, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1075781595
@@ -12580,8 +12580,8 @@ MonoBehaviour:
   pickupSFX: {fileID: 8300000, guid: c48904584937af34b92ff87d53212b55, type: 3}
   sfxShootDefault: {fileID: 0}
   shootVolume: 0.8
-  flipPitchJitter: 0.1
-  shootPitchJitter: 0.1
+  sfxPitchMin: 0.94
+  sfxPitchMax: 1.06
   sfxPurchaseVolume: 0.9
   sfxWakeUpVolume: 1
   uiClickVolume: 1
@@ -14882,7 +14882,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 415, y: -660}
+  m_AnchoredPosition: {x: 401.72205, y: -660}
   m_SizeDelta: {x: 850, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1480035152

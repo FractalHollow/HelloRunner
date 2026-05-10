@@ -26,9 +26,9 @@ public class AudioManager : MonoBehaviour
     public AudioClip sfxShootDefault;                  // optional default if caller passes null
     [Range(0f, 1f)] public float shootVolume = 0.8f;
 
-    [Header("Flip SFX Pitch Variation")]
-    [Range(0f, 0.2f)] public float flipPitchJitter = 0.04f; // ~+/-4% subtle
-    [Range(0f, 0.2f)] public float shootPitchJitter = 0.03f; // +-3% subtle
+    [Header("Jittered SFX Pitch Range")]
+    [Range(0.5f, 1f)] public float sfxPitchMin = 0.94f;
+    [Range(1f, 1.5f)] public float sfxPitchMax = 1.06f;
 
     [Header("Volumes")]
     [Range(0f, 1f)] public float sfxPurchaseVolume = 0.9f;
@@ -281,6 +281,19 @@ public class AudioManager : MonoBehaviour
         return IsSourceRoutedToMixer(source) ? shotVolume : shotVolume * sfx01;
     }
 
+    float RandomSfxPitch()
+    {
+        float min = Mathf.Min(sfxPitchMin, sfxPitchMax);
+        float max = Mathf.Max(sfxPitchMin, sfxPitchMax);
+        return Random.Range(min, max);
+    }
+
+    void PlaySfxOneShot(AudioSource source, AudioClip clip, float vol01 = 1f, bool randomPitch = false)
+    {
+        source.pitch = randomPitch ? RandomSfxPitch() : 1f;
+        source.PlayOneShot(clip, GetOneShotSfxVolume(source, vol01));
+    }
+
     // ---------------- playback helpers ----------------
     public void PlayMusic()
     {
@@ -295,7 +308,7 @@ public class AudioManager : MonoBehaviour
     public void Play2D(AudioClip clip, float vol01 = 1f)
     {
         if (!CanPlaySfx(clip, sfxSource)) return;
-        sfxSource.PlayOneShot(clip, GetOneShotSfxVolume(sfxSource, vol01));
+        PlaySfxOneShot(sfxSource, clip, vol01);
     }
 
     public void PlayShoot(AudioClip clipOverride = null, float vol01 = -1f)
@@ -306,11 +319,7 @@ public class AudioManager : MonoBehaviour
         if (!CanPlaySfx(clip, sfxSource)) return;
 
         float v = (vol01 >= 0f) ? vol01 : shootVolume;
-        float jitter = Mathf.Clamp(shootPitchJitter, 0f, 0.5f);
-        float newPitch = 1f + Random.Range(-jitter, jitter);
-
-        sfxSource.pitch = newPitch;
-        sfxSource.PlayOneShot(clip, GetOneShotSfxVolume(sfxSource, v));
+        PlaySfxOneShot(sfxSource, clip, v, true);
     }
 
     public void PlayFlip()
@@ -319,43 +328,37 @@ public class AudioManager : MonoBehaviour
 
         if (!CanPlaySfx(flipClip, flipSource)) return;
 
-        float jitter = Mathf.Clamp(flipPitchJitter, 0f, 0.5f);
-        float newPitch = 1f + Random.Range(-jitter, jitter);
-
-        flipSource.pitch = newPitch;
-        flipSource.PlayOneShot(flipClip, GetOneShotSfxVolume(flipSource));
-
-        Debug.Log($"[Audio] Flip pitch = {newPitch:0.000}");
+        PlaySfxOneShot(flipSource, flipClip, 1f, true);
     }
 
     public void PlayCrash()
     {
         if (!CanPlaySfx(crashClip, sfxSource)) return;
-        sfxSource.PlayOneShot(crashClip, GetOneShotSfxVolume(sfxSource));
+        PlaySfxOneShot(sfxSource, crashClip);
     }
 
     public void PlayPurchase()
     {
         if (!CanPlaySfx(sfxPurchase, sfxSource)) return;
-        sfxSource.PlayOneShot(sfxPurchase, GetOneShotSfxVolume(sfxSource, sfxPurchaseVolume));
+        PlaySfxOneShot(sfxSource, sfxPurchase, sfxPurchaseVolume);
     }
 
     public void PlayWakeUp()
     {
         if (!CanPlaySfx(sfxWakeUp, sfxSource)) return;
-        sfxSource.PlayOneShot(sfxWakeUp, GetOneShotSfxVolume(sfxSource, sfxWakeUpVolume));
+        PlaySfxOneShot(sfxSource, sfxWakeUp, sfxWakeUpVolume);
     }
 
     public void PlayUiClick()
     {
         if (!CanPlaySfx(sfxUiClick, sfxSource)) return;
-        sfxSource.PlayOneShot(sfxUiClick, GetOneShotSfxVolume(sfxSource, uiClickVolume));
+        PlaySfxOneShot(sfxSource, sfxUiClick, uiClickVolume);
     }
 
     public void PlayPickup()
     {
         if (!CanPlaySfx(pickupSFX, sfxSource)) return;
-        sfxSource.PlayOneShot(pickupSFX, GetOneShotSfxVolume(sfxSource, pickupVolume));
+        PlaySfxOneShot(sfxSource, pickupSFX, pickupVolume, true);
     }
 
     bool IsSourceRoutedToMixer(AudioSource source)

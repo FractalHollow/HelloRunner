@@ -14,6 +14,8 @@ public class FirstRunTutorial : MonoBehaviour
     const float DotsAboveButtonsY = 158f;
     const float ContentOffsetY = 64f;
     const string LabelColorHex = "#F1B655";
+    const string StartButtonLabel = "Start";
+    const string ManualFinishButtonLabel = "OK";
 
     [SerializeField] Sprite panelBackgroundSprite;
     [SerializeField] Sprite reaperSprite;
@@ -66,6 +68,11 @@ public class FirstRunTutorial : MonoBehaviour
         return PlayerPrefs.GetInt(SeenKey, 0) == 0;
     }
 
+    public static FirstRunTutorial FindAvailableTutorial()
+    {
+        return FindFirstObjectByType<FirstRunTutorial>(FindObjectsInactive.Include);
+    }
+
     void Awake()
     {
         EnsureBuilt();
@@ -79,9 +86,20 @@ public class FirstRunTutorial : MonoBehaviour
 
     public void Begin(Action onFinishedCallback)
     {
+        BeginInternal(onFinishedCallback, StartButtonLabel);
+    }
+
+    public void BeginManualReview()
+    {
+        BeginInternal(null, ManualFinishButtonLabel);
+    }
+
+    void BeginInternal(Action onFinishedCallback, string finishButtonLabel)
+    {
         EnsureBuilt();
 
         onFinished = onFinishedCallback;
+        SetButtonLabel(startButton, finishButtonLabel);
         ShowPage(0);
 
         overlayRoot.SetAsLastSibling();
@@ -362,6 +380,10 @@ public class FirstRunTutorial : MonoBehaviour
 
     RectTransform FindOverlayParent()
     {
+        Canvas rootCanvas = GetComponentInParent<Canvas>(true);
+        if (rootCanvas && rootCanvas.transform is RectTransform rootCanvasRect)
+            return rootCanvasRect;
+
         Transform safeArea = transform.Find(SafeAreaName);
         if (safeArea is RectTransform safeAreaRect)
             return safeAreaRect;
@@ -453,6 +475,16 @@ public class FirstRunTutorial : MonoBehaviour
         labelText.text = label;
 
         return button;
+    }
+
+    void SetButtonLabel(Button button, string label)
+    {
+        if (!button)
+            return;
+
+        TMP_Text labelText = button.GetComponentInChildren<TMP_Text>(true);
+        if (labelText)
+            labelText.text = label;
     }
 
     TextMeshProUGUI CreateText(string name, Transform parent, TMP_Text template, float size, FontStyles style)

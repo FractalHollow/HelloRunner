@@ -6,6 +6,9 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
+    const string HowToPlayButtonName = "HowToPlayButton";
+    const string HowToPlayButtonLabel = "How to Play";
+
     [Header("Refs")]
     public PlayerGravityFlip player;
     public Spawner spawner;
@@ -42,12 +45,16 @@ public class GameManager : MonoBehaviour
     [Header("UI - Settings")]
     public SettingsMenu settingsMenu;   // drag your Settings Panel object (with SettingsMenu.cs) here
 
+    [Header("Tutorial")]
+    public FirstRunTutorial tutorial;
+
     [Header("Options")]
     public bool pauseOnStart = true;
 
     [Header("Pause")]
     public GameObject pausePanel;
     public Button pauseButton;
+    Button pauseHowToPlayButton;
 
     [Header("Prestige Difficulty Scaling")]
     public int prestigeDifficultyStart = 3;     // no scaling until this prestige
@@ -142,6 +149,7 @@ public class GameManager : MonoBehaviour
         }
 
         wispsTotal = PlayerPrefs.GetInt("wisps_total", 0);
+        if (!tutorial) tutorial = FirstRunTutorial.FindAvailableTutorial();
     }
 
     void Start()
@@ -172,6 +180,7 @@ public class GameManager : MonoBehaviour
         UpdateUILive();
 
         ConfigureGameOverActions();
+        ConfigurePauseHowToPlayButton();
         StartCoroutine(EnsureSceneLocal());
         ApplyAllOwnedUpgrades();
     }
@@ -461,22 +470,24 @@ public class GameManager : MonoBehaviour
     }
 
     void Update()
-{
-    if (playing && Input.GetKeyDown(KeyCode.Escape))   // Android Back maps to Escape
     {
-        if (paused)
+        if (playing && Input.GetKeyDown(KeyCode.Escape))   // Android Back maps to Escape
         {
-            if (settingsMenu && settingsMenu.gameObject.activeSelf) settingsMenu.Close();
-            else ResumeGame();
-        }
-        else
-        {
-            PauseGame();
-        }
-    }
+            if (IsTutorialShowing()) return;
 
-    if (playing) UpdateUILive();
-}
+            if (paused)
+            {
+                if (settingsMenu && settingsMenu.gameObject.activeSelf) settingsMenu.Close();
+                else ResumeGame();
+            }
+            else
+            {
+                PauseGame();
+            }
+        }
+
+        if (playing) UpdateUILive();
+    }
 
 
 
@@ -709,6 +720,80 @@ public void RefreshAllCurrencyUI()
         WireGameOverActionButton(restartButton, Restart);
     }
 
+    void ConfigurePauseHowToPlayButton()
+    {
+        if (!pausePanel)
+            return;
+
+        Button template = FindPauseButton("SettingsButton")
+            ?? FindPauseButton("RestartButton")
+            ?? FindPauseButton("ResumeButton");
+        if (!template)
+            return;
+
+        Transform existing = pausePanel.transform.Find(HowToPlayButtonName);
+        if (existing)
+        {
+            pauseHowToPlayButton = existing.GetComponent<Button>();
+        }
+        else
+        {
+            GameObject buttonGo = Instantiate(template.gameObject, pausePanel.transform);
+            buttonGo.name = HowToPlayButtonName;
+            buttonGo.SetActive(true);
+            pauseHowToPlayButton = buttonGo.GetComponent<Button>();
+        }
+
+        SetButtonText(pauseHowToPlayButton, HowToPlayButtonLabel);
+        WireButton(pauseHowToPlayButton, OpenHowToPlay);
+        LayoutPauseButtons();
+    }
+
+    Button FindPauseButton(string buttonName)
+    {
+        if (!pausePanel)
+            return null;
+
+        Transform child = pausePanel.transform.Find(buttonName);
+        return child ? child.GetComponent<Button>() : null;
+    }
+
+    void LayoutPauseButtons()
+    {
+        SetRectY(pausePanel.transform.Find("PausedText") as RectTransform, -420f);
+        SetButtonY(FindPauseButton("ResumeButton"), 280f);
+        SetButtonY(FindPauseButton("RestartButton"), 0f);
+        SetButtonY(pauseHowToPlayButton, -280f);
+        SetButtonY(FindPauseButton("SettingsButton"), -560f);
+    }
+
+    void SetButtonY(Button button, float y)
+    {
+        if (!button)
+            return;
+
+        SetRectY(button.transform as RectTransform, y);
+    }
+
+    void SetRectY(RectTransform rect, float y)
+    {
+        if (!rect)
+            return;
+
+        Vector2 position = rect.anchoredPosition;
+        position.y = y;
+        rect.anchoredPosition = position;
+    }
+
+    void WireButton(Button button, UnityEngine.Events.UnityAction action)
+    {
+        if (!button)
+            return;
+
+        button.onClick = new Button.ButtonClickedEvent();
+        button.onClick.AddListener(action);
+    }
+
     void WireGameOverActionButton(Button button, UnityEngine.Events.UnityAction action)
     {
         if (!button) return;
@@ -725,6 +810,32 @@ public void RefreshAllCurrencyUI()
         if (!text) return;
 
         text.text = label;
+    }
+
+    public void OpenHowToPlay()
+    {
+        FirstRunTutorial activeTutorial = ResolveTutorial();
+        if (!activeTutorial)
+        {
+            Debug.LogWarning("[GM] FirstRunTutorial not found.");
+            return;
+        }
+
+        activeTutorial.BeginManualReview();
+    }
+
+    FirstRunTutorial ResolveTutorial()
+    {
+        if (!tutorial)
+            tutorial = FirstRunTutorial.FindAvailableTutorial();
+
+        return tutorial;
+    }
+
+    bool IsTutorialShowing()
+    {
+        FirstRunTutorial activeTutorial = ResolveTutorial();
+        return activeTutorial && activeTutorial.IsShowing;
     }
 
     // ==================== UPGRADES / EMBERS HELPERS ====================

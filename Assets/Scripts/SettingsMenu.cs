@@ -2,10 +2,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 
 public class SettingsMenu : MonoBehaviour
 {
+    const string HowToPlayButtonName = "HowToPlayButton";
+    const string HowToPlayButtonLabel = "How to\nPlay";
+    const string AboutHowSpacerName = "Spacer_About_HowToPlay";
+    const string HowResetSpacerName = "Spacer_HowToPlay_Reset";
+    const float SettingsBottomButtonSpacing = 20f;
+    const float SettingsPreBottomSpacing = 52f;
+    const float SettingsResetCloseSpacing = 34f;
+
     public Slider musicSlider;
     public Slider sfxSlider;
     public PanelFader fader;
@@ -17,14 +26,33 @@ public class SettingsMenu : MonoBehaviour
     public UnityEngine.UI.Button confirmResetButton;
     public UnityEngine.UI.Button confirmResetCloseButton;
 
+    Button howToPlayButton;
+
+    void Awake()
+    {
+        EnsureHowToPlayButton();
+    }
 
     public void OpenAbout()
     {
         aboutMenu?.Open();
     }
 
+    public void OpenHowToPlay()
+    {
+        FirstRunTutorial tutorial = FirstRunTutorial.FindAvailableTutorial();
+        if (!tutorial)
+        {
+            Debug.LogWarning("[SettingsMenu] FirstRunTutorial not found.");
+            return;
+        }
+
+        tutorial.BeginManualReview();
+    }
+
     void OnEnable()
     {
+        EnsureHowToPlayButton();
         StartCoroutine(SyncWhenReady());
 
         if (resetSaveButton)
@@ -46,6 +74,162 @@ public class SettingsMenu : MonoBehaviour
         }
 
         HideResetConfirmPanelInstant();
+    }
+
+    void EnsureHowToPlayButton()
+    {
+        Transform buttonsTable = transform.Find("ButtonsTable");
+        if (!buttonsTable)
+            return;
+
+        Transform aboutButtonTransform = buttonsTable.Find("AboutButton");
+        Transform existing = buttonsTable.Find(HowToPlayButtonName);
+        if (existing)
+        {
+            howToPlayButton = existing.GetComponent<Button>();
+            WireHowToPlayButton();
+            SetButtonText(howToPlayButton, HowToPlayButtonLabel);
+            LayoutBottomButtons(buttonsTable, aboutButtonTransform);
+            return;
+        }
+
+        Button template = aboutButtonTransform
+            ? aboutButtonTransform.GetComponent<Button>()
+            : resetSaveButton;
+        if (!template)
+            return;
+
+        GameObject buttonGo = Instantiate(template.gameObject, buttonsTable);
+        buttonGo.name = HowToPlayButtonName;
+        buttonGo.SetActive(true);
+
+        int insertIndex = aboutButtonTransform
+            ? aboutButtonTransform.GetSiblingIndex() + 1
+            : buttonsTable.childCount - 1;
+        buttonGo.transform.SetSiblingIndex(insertIndex);
+
+        howToPlayButton = buttonGo.GetComponent<Button>();
+        SetButtonText(howToPlayButton, HowToPlayButtonLabel);
+        WireHowToPlayButton();
+        LayoutBottomButtons(buttonsTable, aboutButtonTransform);
+    }
+
+    void LayoutBottomButtons(Transform buttonsTable, Transform aboutButtonTransform)
+    {
+        Button aboutButton = aboutButtonTransform
+            ? aboutButtonTransform.GetComponent<Button>()
+            : null;
+        ResizeLikeResetButton(aboutButton);
+        ResizeLikeResetButton(howToPlayButton);
+        MatchResetButtonTextSize(howToPlayButton);
+
+        Transform aboutHowSpacer = EnsureSpacer(buttonsTable, AboutHowSpacerName, SettingsBottomButtonSpacing);
+        Transform howResetSpacer = buttonsTable.Find("Filler2 (1)")
+            ?? EnsureSpacer(buttonsTable, HowResetSpacerName, SettingsBottomButtonSpacing);
+        Transform resetCloseSpacer = buttonsTable.Find("Filler2 (2)");
+        Transform preBottomSpacer = buttonsTable.Find("Filler2");
+        Transform closeButton = buttonsTable.Find("CloseButton");
+
+        SetSpacerHeight(preBottomSpacer, SettingsPreBottomSpacing);
+        SetSpacerHeight(howResetSpacer, SettingsBottomButtonSpacing);
+        SetSpacerHeight(resetCloseSpacer, SettingsResetCloseSpacing);
+
+        if (!aboutButtonTransform)
+            return;
+
+        int nextIndex = preBottomSpacer
+            ? preBottomSpacer.GetSiblingIndex() + 1
+            : aboutButtonTransform.GetSiblingIndex();
+
+        aboutButtonTransform.SetSiblingIndex(nextIndex++);
+        aboutHowSpacer.SetSiblingIndex(nextIndex++);
+        howToPlayButton.transform.SetSiblingIndex(nextIndex++);
+        howResetSpacer.SetSiblingIndex(nextIndex++);
+
+        if (resetSaveButton)
+            resetSaveButton.transform.SetSiblingIndex(nextIndex++);
+
+        if (resetCloseSpacer)
+            resetCloseSpacer.SetSiblingIndex(nextIndex++);
+
+        if (closeButton)
+            closeButton.SetSiblingIndex(nextIndex);
+    }
+
+    void ResizeLikeResetButton(Button button)
+    {
+        if (!button || !resetSaveButton)
+            return;
+
+        RectTransform buttonRect = button.transform as RectTransform;
+        RectTransform resetRect = resetSaveButton.transform as RectTransform;
+        if (!buttonRect || !resetRect)
+            return;
+
+        buttonRect.sizeDelta = resetRect.sizeDelta;
+    }
+
+    void MatchResetButtonTextSize(Button button)
+    {
+        if (!button || !resetSaveButton)
+            return;
+
+        TMP_Text text = button.GetComponentInChildren<TMP_Text>(true);
+        TMP_Text resetText = resetSaveButton.GetComponentInChildren<TMP_Text>(true);
+        if (!text || !resetText)
+            return;
+
+        text.enableAutoSizing = resetText.enableAutoSizing;
+        text.fontSize = resetText.fontSize;
+        text.fontSizeMin = resetText.fontSizeMin;
+        text.fontSizeMax = resetText.fontSizeMax;
+        text.lineSpacing = resetText.lineSpacing;
+    }
+
+    Transform EnsureSpacer(Transform parent, string name, float height)
+    {
+        Transform spacer = parent.Find(name);
+        if (!spacer)
+        {
+            GameObject spacerGo = new GameObject(name, typeof(RectTransform));
+            spacerGo.layer = parent.gameObject.layer;
+            spacer = spacerGo.transform;
+            spacer.SetParent(parent, false);
+        }
+
+        SetSpacerHeight(spacer, height);
+        return spacer;
+    }
+
+    void SetSpacerHeight(Transform spacer, float height)
+    {
+        if (!spacer)
+            return;
+
+        RectTransform rect = spacer as RectTransform;
+        if (!rect)
+            return;
+
+        rect.sizeDelta = new Vector2(rect.sizeDelta.x, height);
+    }
+
+    void WireHowToPlayButton()
+    {
+        if (!howToPlayButton)
+            return;
+
+        howToPlayButton.onClick = new Button.ButtonClickedEvent();
+        howToPlayButton.onClick.AddListener(OpenHowToPlay);
+    }
+
+    void SetButtonText(Button button, string label)
+    {
+        if (!button)
+            return;
+
+        TMP_Text text = button.GetComponentInChildren<TMP_Text>(true);
+        if (text)
+            text.text = label;
     }
 
     void OnDisable()

@@ -6,6 +6,7 @@ public class PanelFader : MonoBehaviour
 {
     public CanvasGroup group;
     public float duration = 0.25f;
+    Coroutine activeFade;
 
     public static PanelFader Ensure(GameObject target, float duration = 0.25f)
     {
@@ -29,6 +30,7 @@ public class PanelFader : MonoBehaviour
 
     public void ShowInstant()
     {
+        StopActiveFade();
         gameObject.SetActive(true);
         if (group)
         {
@@ -40,6 +42,7 @@ public class PanelFader : MonoBehaviour
 
     public void HideInstant()
     {
+        StopActiveFade();
         if (group)
         {
             group.alpha = 0f;
@@ -52,12 +55,26 @@ public class PanelFader : MonoBehaviour
     public void FadeIn(Action onComplete = null)
     {
         gameObject.SetActive(true);
-        StartCoroutine(Fade(0f, 1f, onComplete, deactivateAtEnd: false));
+        StartFade(0f, 1f, onComplete, deactivateAtEnd: false);
     }
 
     public void FadeOut(Action onComplete = null, bool deactivateAtEnd = true)
     {
-        StartCoroutine(Fade(1f, 0f, onComplete, deactivateAtEnd));
+        StartFade(1f, 0f, onComplete, deactivateAtEnd);
+    }
+
+    void StartFade(float from, float to, Action onComplete, bool deactivateAtEnd)
+    {
+        StopActiveFade();
+        activeFade = StartCoroutine(Fade(from, to, onComplete, deactivateAtEnd));
+    }
+
+    void StopActiveFade()
+    {
+        if (activeFade == null) return;
+
+        StopCoroutine(activeFade);
+        activeFade = null;
     }
 
     IEnumerator Fade(float from, float to, Action onComplete, bool deactivateAtEnd)
@@ -88,6 +105,12 @@ public class PanelFader : MonoBehaviour
         }
 
         if (deactivateAtEnd && to <= 0f) gameObject.SetActive(false);
+        activeFade = null;
         onComplete?.Invoke();
+    }
+
+    void OnDisable()
+    {
+        activeFade = null;
     }
 }

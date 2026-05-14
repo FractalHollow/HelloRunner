@@ -30,5 +30,5 @@ MonoBehaviour:
   - 25
   v1PerTier: []
   v2PerTier: []
-  effectType: 0
+  effectType: 6
   descriptionPerTier: []

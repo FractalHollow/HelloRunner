@@ -451,13 +451,34 @@ public class GameManager : MonoBehaviour
         if (pausePanel)
         {
             var f = pausePanel.GetComponent<PanelFader>();
-            if (f) f.FadeOut(() =>
+            if (f && f.IsTransitioning)
             {
-                if (!paused) pausePanel.SetActive(false);
-            });
-            else pausePanel.SetActive(false);
+                f.HideInstant();
+                pausePanel.SetActive(false);
+                EnablePlayerControlIfResumed();
+                return;
+            }
+
+            if (f)
+            {
+                f.FadeOut(() =>
+                {
+                    if (!paused) pausePanel.SetActive(false);
+                    EnablePlayerControlIfResumed();
+                });
+                return;
+            }
+
+            pausePanel.SetActive(false);
         }
-        player?.EnableControl(true);
+
+        EnablePlayerControlIfResumed();
+    }
+
+    void EnablePlayerControlIfResumed()
+    {
+        if (!paused)
+            player?.EnableControl(true);
     }
 
     void OnApplicationPause(bool isPaused)

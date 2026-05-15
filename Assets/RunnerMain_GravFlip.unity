@@ -8106,7 +8106,7 @@ CanvasGroup:
   m_Enabled: 1
   m_Alpha: 0
   m_Interactable: 0
-  m_BlocksRaycasts: 1
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!1 &727528512
 GameObject:
@@ -13939,7 +13939,7 @@ MonoBehaviour:
   pauseButton: {fileID: 558485786}
   prestigeDifficultyStart: 2
   prestigeDifficultyStep: 0.13
-  prestigeDifficultyMax: 20
+  prestigeDifficultyMax: 35
   playerStartPos: {x: 0, y: 0, z: 0}
   playerStartRot: {x: 0, y: 0, z: 0, w: 0}
   upgradesPanel: {fileID: 7709592574260189304}

@@ -14,6 +14,9 @@ public class PlayerGravityFlip : MonoBehaviour
     public ParticleSystem flipFXUp;       // Optional: particle effects for flipping
     public ParticleSystem flipFXDown;
 
+    [Header("Debug")]
+    public bool logBlockedTapDetails = false;
+
     Rigidbody2D rb;
     GameManager gm;
     PlayerShield shield;
@@ -26,6 +29,7 @@ public class PlayerGravityFlip : MonoBehaviour
     int gravDir = 1; // +1 = normal (down), -1 = inverted (up)
     float nextFlipAllowed = 0f;
     float bufferedFlipUntil = -1f;
+    string lastBlockedTapDebug = "";
 
     void Awake()
     {
@@ -57,7 +61,9 @@ public class PlayerGravityFlip : MonoBehaviour
 
         TryQueueFlipInput(out bool tapBlockedByUi);
         if (tapBlockedByUi)
-            Debug.Log($"[Flip] tap blocked by UI | touchCount={Input.touchCount}");
+            Debug.Log(logBlockedTapDetails
+                ? $"[Flip] tap blocked by UI | {lastBlockedTapDebug}"
+                : $"[Flip] tap blocked by UI | touchCount={Input.touchCount}");
 
         bool flipBuffered = bufferedFlipUntil >= Time.time;
         bool cooldownReady = Time.time >= nextFlipAllowed;
@@ -124,9 +130,12 @@ public class PlayerGravityFlip : MonoBehaviour
     bool TryQueueFlipInput(out bool blockedByUi)
     {
         blockedByUi = false;
+        lastBlockedTapDebug = "";
 
         if (Input.touchCount > 0)
         {
+            bool sawTouchBegan = false;
+            bool sawBlockedTouch = false;
             bool touchBeganOnGameplay = false;
 
             for (int i = 0; i < Input.touchCount; i++)
@@ -135,10 +144,15 @@ public class PlayerGravityFlip : MonoBehaviour
                 if (touch.phase != TouchPhase.Began)
                     continue;
 
-                if (IsTouchOverUi(touch.fingerId, touch.position))
+                sawTouchBegan = true;
+
+                if (IsTouchOverUi(touch.fingerId, touch.position, out GameObject blockedObject))
                 {
-                    blockedByUi = true;
-                    return false;
+                    sawBlockedTouch = true;
+                    if (logBlockedTapDetails && string.IsNullOrEmpty(lastBlockedTapDebug))
+                        lastBlockedTapDebug = BuildBlockedTapDebug("touch", touch.fingerId, touch.position, blockedObject);
+
+                    continue;
                 }
 
                 touchBeganOnGameplay = true;
@@ -150,16 +164,24 @@ public class PlayerGravityFlip : MonoBehaviour
                 return true;
             }
 
-            // Mobile touches can also appear as mouse input in the legacy input API.
-            // When touch input is present, do not let the same physical tap fall through.
-            return false;
+            if (sawTouchBegan && sawBlockedTouch)
+            {
+                blockedByUi = true;
+                if (logBlockedTapDetails && string.IsNullOrEmpty(lastBlockedTapDebug))
+                    lastBlockedTapDebug = BuildBlockedTapDebug("touch", -1, Vector2.zero, null);
+
+                return false;
+            }
         }
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (IsMousePointerOverUi())
+            if (IsMousePointerOverUi(out GameObject blockedObject))
             {
                 blockedByUi = true;
+                if (logBlockedTapDetails)
+                    lastBlockedTapDebug = BuildBlockedTapDebug("mouse", -1, Input.mousePosition, blockedObject);
+
                 return false;
             }
 
@@ -192,20 +214,25 @@ public class PlayerGravityFlip : MonoBehaviour
         return false;
     }
 
-    bool IsMousePointerOverUi()
+    bool IsMousePointerOverUi(out GameObject blockedObject)
     {
+        blockedObject = null;
+        bool screenHit = IsScreenPositionOverUi(Input.mousePosition, out blockedObject);
         return EventSystem.current != null &&
-               (EventSystem.current.IsPointerOverGameObject() || IsScreenPositionOverUi(Input.mousePosition));
+               (EventSystem.current.IsPointerOverGameObject() || screenHit);
     }
 
-    bool IsTouchOverUi(int fingerId, Vector2 screenPosition)
+    bool IsTouchOverUi(int fingerId, Vector2 screenPosition, out GameObject blockedObject)
     {
+        blockedObject = null;
+        bool screenHit = IsScreenPositionOverUi(screenPosition, out blockedObject);
         return EventSystem.current != null &&
-               (EventSystem.current.IsPointerOverGameObject(fingerId) || IsScreenPositionOverUi(screenPosition));
+               (EventSystem.current.IsPointerOverGameObject(fingerId) || screenHit);
     }
 
-    bool IsScreenPositionOverUi(Vector2 screenPosition)
+    bool IsScreenPositionOverUi(Vector2 screenPosition, out GameObject blockedObject)
     {
+        blockedObject = null;
         if (EventSystem.current == null)
             return false;
 
@@ -216,7 +243,34 @@ public class PlayerGravityFlip : MonoBehaviour
         };
 
         EventSystem.current.RaycastAll(eventData, uiRaycastResults);
+        if (uiRaycastResults.Count > 0)
+            blockedObject = uiRaycastResults[0].gameObject;
+
         return uiRaycastResults.Count > 0;
+    }
+
+    string BuildBlockedTapDebug(string source, int fingerId, Vector2 screenPosition, GameObject blockedObject)
+    {
+        return
+            $"source={source} fingerId={fingerId} position={screenPosition} " +
+            $"blockedBy={GetObjectPath(blockedObject)} touchCount={Input.touchCount} " +
+            $"cooldownReady={Time.time >= nextFlipAllowed} buffered={bufferedFlipUntil >= Time.time} " +
+            $"isAlive={isAlive} canControl={canControl}";
+    }
+
+    static string GetObjectPath(GameObject go)
+    {
+        if (!go) return "UNKNOWN";
+
+        Transform current = go.transform;
+        string path = current.name;
+        while (current.parent)
+        {
+            current = current.parent;
+            path = current.name + "/" + path;
+        }
+
+        return path;
     }
 
     void DoFlip(bool playSfx, bool playFx)

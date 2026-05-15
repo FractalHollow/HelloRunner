@@ -18,6 +18,7 @@ public class AboutMenu : MonoBehaviour
 
     void Awake()
     {
+        EnsureFader();
         RefreshVersionText();
     }
 
@@ -26,13 +27,25 @@ public class AboutMenu : MonoBehaviour
     {
         RefreshVersionText();
         gameObject.SetActive(true);
-        if (fader) fader.FadeIn();
+        EnsureFader()?.FadeIn();
     }
 
     public void Close()
     {
-        if (fader) fader.FadeOut(() => gameObject.SetActive(false));
+        var panelFader = EnsureFader();
+        if (panelFader) panelFader.FadeOut(() => gameObject.SetActive(false));
         else gameObject.SetActive(false);
+    }
+
+    PanelFader EnsureFader()
+    {
+        if (!fader)
+            fader = GetComponent<PanelFader>();
+
+        if (!fader)
+            fader = PanelFader.Ensure(gameObject);
+
+        return fader;
     }
 
     // Buttons

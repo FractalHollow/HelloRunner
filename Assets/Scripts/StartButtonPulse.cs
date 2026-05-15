@@ -12,6 +12,7 @@ public class TapPromptPulse : MonoBehaviour
     public float scaleBobAmount = 0.02f;   // 0 = disable scale bob
 
     Vector3 baseScale;
+    bool hasBaseScale;
 
     void Reset()
     {
@@ -21,11 +22,18 @@ public class TapPromptPulse : MonoBehaviour
     void Awake()
     {
         if (!text) text = GetComponent<TMP_Text>();
-        baseScale = transform.localScale;
+        CaptureBaseScale();
+    }
+
+    void OnDisable()
+    {
+        ResetVisualState();
     }
 
     void Update()
     {
+        CaptureBaseScale();
+
         // Use unscaled time so it animates while Time.timeScale == 0
         float t = 0.5f * (1f + Mathf.Sin(Time.unscaledTime * pulsesPerSecond * Mathf.PI * 2f));
         float a = Mathf.Lerp(minAlpha, maxAlpha, t);
@@ -46,5 +54,31 @@ public class TapPromptPulse : MonoBehaviour
             float s = 1f + scaleBobAmount * Mathf.Sin(Time.unscaledTime * pulsesPerSecond * Mathf.PI * 2f);
             transform.localScale = baseScale * s;
         }
+    }
+
+    public void ResetVisualState()
+    {
+        CaptureBaseScale();
+
+        if (group)
+        {
+            group.alpha = maxAlpha;
+        }
+        else if (text)
+        {
+            var c = text.color;
+            c.a = maxAlpha;
+            text.color = c;
+        }
+
+        transform.localScale = baseScale;
+    }
+
+    void CaptureBaseScale()
+    {
+        if (hasBaseScale) return;
+
+        baseScale = transform.localScale;
+        hasBaseScale = true;
     }
 }

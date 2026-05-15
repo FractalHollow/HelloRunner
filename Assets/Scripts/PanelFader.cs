@@ -8,6 +8,8 @@ public class PanelFader : MonoBehaviour
     public float duration = 0.25f;
     Coroutine activeFade;
 
+    public bool IsTransitioning => activeFade != null;
+
     public static PanelFader Ensure(GameObject target, float duration = 0.25f)
     {
         if (!target) return null;
@@ -54,18 +56,21 @@ public class PanelFader : MonoBehaviour
 
     public void FadeIn(Action onComplete = null)
     {
+        if (IsTransitioning) return;
+
         gameObject.SetActive(true);
         StartFade(0f, 1f, onComplete, deactivateAtEnd: false);
     }
 
     public void FadeOut(Action onComplete = null, bool deactivateAtEnd = true)
     {
+        if (IsTransitioning) return;
+
         StartFade(1f, 0f, onComplete, deactivateAtEnd);
     }
 
     void StartFade(float from, float to, Action onComplete, bool deactivateAtEnd)
     {
-        StopActiveFade();
         activeFade = StartCoroutine(Fade(from, to, onComplete, deactivateAtEnd));
     }
 
@@ -80,13 +85,11 @@ public class PanelFader : MonoBehaviour
     IEnumerator Fade(float from, float to, Action onComplete, bool deactivateAtEnd)
     {
         float t = 0f;
-        if (group) group.alpha = from;
-
-        // Pre-set interactivity for fade-out so clicks pass through immediately
-        if (group && to <= 0f)
+        if (group)
         {
+            group.alpha = from;
             group.interactable = false;
-            group.blocksRaycasts = false;
+            group.blocksRaycasts = true;
         }
 
         while (t < duration)
@@ -96,12 +99,13 @@ public class PanelFader : MonoBehaviour
             yield return null;
         }
 
-        if (group) group.alpha = to;
-
-        if (group && to > 0f)
+        if (group)
         {
-            group.interactable = true;
-            group.blocksRaycasts = true;
+            group.alpha = to;
+
+            bool visible = to > 0f;
+            group.interactable = visible;
+            group.blocksRaycasts = visible;
         }
 
         if (deactivateAtEnd && to <= 0f) gameObject.SetActive(false);

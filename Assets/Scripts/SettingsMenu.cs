@@ -30,6 +30,7 @@ public class SettingsMenu : MonoBehaviour
 
     void Awake()
     {
+        EnsureFader();
         EnsureHowToPlayButton();
     }
 
@@ -345,14 +346,26 @@ public class SettingsMenu : MonoBehaviour
         gameObject.SetActive(true);
         HideResetConfirmPanelInstant();
         SyncFromAudioManager();   // set sliders to saved values once
-        if (fader) fader.FadeIn();
+        EnsureFader()?.FadeIn();
     }
 
     public void Close()
     {
         HideResetConfirmPanelInstant();
-        if (fader) fader.FadeOut(() => gameObject.SetActive(false));
+        var panelFader = EnsureFader();
+        if (panelFader) panelFader.FadeOut(() => gameObject.SetActive(false));
         else gameObject.SetActive(false);
+    }
+
+    PanelFader EnsureFader()
+    {
+        if (!fader)
+            fader = GetComponent<PanelFader>();
+
+        if (!fader)
+            fader = PanelFader.Ensure(gameObject);
+
+        return fader;
     }
 
     // ---- UI events ----

@@ -25,6 +25,7 @@ public class DenMenu : MonoBehaviour
     {
         // Unity 6+ replacement for deprecated FindObjectOfType
         gm = FindFirstObjectByType<GameManager>();
+        EnsureFader();
 
         EnsureGenericClickSuppressed(wakeUpButton);
         EnsureGenericClickSuppressed(unlockUpgradesButton);
@@ -59,14 +60,26 @@ public class DenMenu : MonoBehaviour
         UpdateWispsUI(CurrentBank());
         RefreshStoreUI();
 
-        if (fader) fader.FadeIn();
+        EnsureFader()?.FadeIn();
     }
 
     public void Close()
     {
         ApplyDenFoxSprite(false); // reset to sleep on close
-        if (fader) fader.FadeOut(() => gameObject.SetActive(false));
+        var panelFader = EnsureFader();
+        if (panelFader) panelFader.FadeOut(() => gameObject.SetActive(false));
         else gameObject.SetActive(false);
+    }
+
+    PanelFader EnsureFader()
+    {
+        if (!fader)
+            fader = GetComponent<PanelFader>();
+
+        if (!fader)
+            fader = PanelFader.Ensure(gameObject);
+
+        return fader;
     }
 
     // ---------- Helpers ----------

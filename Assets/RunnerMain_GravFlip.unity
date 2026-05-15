@@ -1412,7 +1412,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Acheivements
+  m_text: Achievements
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d09b7790238219443ba728daa969ccd2, type: 2}
   m_sharedMaterial: {fileID: 6643556769826710504, guid: d09b7790238219443ba728daa969ccd2, type: 2}
@@ -2643,7 +2643,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.75, y: 0.75}
+  m_Size: {x: 0.78, y: 0.78}
   m_EdgeRadius: 0
 --- !u!50 &201007797
 Rigidbody2D:
@@ -2772,8 +2772,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4e8fb59250bda141a3d7c5d8174175c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseWidthFactor: 0.75
-  baseHeightFactor: 0.75
+  baseWidthFactor: 0.78
+  baseHeightFactor: 0.78
   perLevelWidth: 0.035
   perLevelHeight: 0.035
   minWidth: 0.7

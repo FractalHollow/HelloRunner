@@ -21,8 +21,9 @@ public class StartScreen : MonoBehaviour
 
     void Awake()
     {
-        cg = GetComponent<CanvasGroup>();
         if (!fader) fader = GetComponent<PanelFader>();
+        if (!fader) fader = PanelFader.Ensure(gameObject);
+        cg = GetComponent<CanvasGroup>();
         if (!tutorial) tutorial = GetComponent<FirstRunTutorial>();
     }
 
@@ -30,7 +31,7 @@ public class StartScreen : MonoBehaviour
     {
         if (cg) { cg.alpha = 1f; cg.interactable = true; cg.blocksRaycasts = true; }
         Wire();
-        RefreshLockUI();  // show/hide the button based on purchase
+        RefreshLockUI();  // lock/unlock the button based on purchase
     }
 
     void Wire()
@@ -111,18 +112,33 @@ public class StartScreen : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // Only show the button if the purchasable unlock has been bought.
+    // Keep the button visible, but disable it until the purchasable unlock has been bought.
     public void RefreshLockUI()
     {
         bool unlocked = PlayerPrefs.GetInt("mods_unlocked", 0) == 1;
 
         if (runModifiersButton)
         {
-            // Keep it in the layout even when "hidden"
-            SetVisibleInLayout(runModifiersButton.gameObject, unlocked);
+            ApplyRunModifiersButtonState(unlocked);
         }
 
         RefreshPrestigeUI();
+    }
+
+    void ApplyRunModifiersButtonState(bool unlocked)
+    {
+        var buttonObject = runModifiersButton.gameObject;
+        var buttonGroup = buttonObject.GetComponent<CanvasGroup>();
+        if (!buttonGroup) buttonGroup = buttonObject.AddComponent<CanvasGroup>();
+
+        buttonGroup.alpha = 1f;
+        buttonGroup.interactable = unlocked;
+        buttonGroup.blocksRaycasts = unlocked;
+
+        runModifiersButton.interactable = unlocked;
+
+        var pulse = buttonObject.GetComponentInChildren<TapPromptPulse>(true);
+        if (pulse) pulse.enabled = unlocked;
     }
 
     void RefreshPrestigeUI()

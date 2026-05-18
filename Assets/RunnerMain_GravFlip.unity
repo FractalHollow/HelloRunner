@@ -2599,6 +2599,7 @@ MonoBehaviour:
   flipInputBuffer: 0.12
   flipFXUp: {fileID: 1892314596}
   flipFXDown: {fileID: 1570754928}
+  logBlockedTapDetails: 0
 --- !u!61 &201007796
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -13939,7 +13940,7 @@ MonoBehaviour:
   pauseButton: {fileID: 558485786}
   prestigeDifficultyStart: 2
   prestigeDifficultyStep: 0.13
-  prestigeDifficultyMax: 35
+  prestigeDifficultyMax: 50
   playerStartPos: {x: 0, y: 0, z: 0}
   playerStartRot: {x: 0, y: 0, z: 0, w: 0}
   upgradesPanel: {fileID: 7709592574260189304}
@@ -20379,8 +20380,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 100}
-  m_SizeDelta: {x: 800, y: 800}
+  m_AnchoredPosition: {x: 0, y: 105}
+  m_SizeDelta: {x: 800, y: 825}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1575432390
 MonoBehaviour:

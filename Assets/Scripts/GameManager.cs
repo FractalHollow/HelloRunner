@@ -77,6 +77,8 @@ public class GameManager : MonoBehaviour
         return Mathf.Max(1f, reduced);
     }
 
+    public float PrestigeDifficultyMultiplier => DifficultyMultiplier();
+
 
     // spawn reset
     public Vector3 playerStartPos;

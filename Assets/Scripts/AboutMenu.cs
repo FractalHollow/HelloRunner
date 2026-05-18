@@ -10,7 +10,7 @@ public class AboutMenu : MonoBehaviour
     public string gameTitle = "My Endless Runner";
     public string websiteURL = "https://example.com";
     public string contactEmail = "support@example.com";
-
+ 
     [Header("Version Display")]
     public TMP_Text versionText;
     [TextArea]

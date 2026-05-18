@@ -47,7 +47,22 @@ public class PlayerGravityFlip : MonoBehaviour
     void ApplyGravityFromDir()
     {
         if (!rb) return;
-        rb.gravityScale = gravityMagnitude * gravDir;
+        rb.gravityScale = EffectiveGravityMagnitude() * gravDir;
+    }
+
+    float PrestigeDifficultyMultiplier()
+    {
+        return gm ? gm.PrestigeDifficultyMultiplier : 1f;
+    }
+
+    float EffectiveGravityMagnitude()
+    {
+        return gravityMagnitude * PrestigeDifficultyMultiplier();
+    }
+
+    float EffectiveMaxYSpeed()
+    {
+        return maxYSpeed * PrestigeDifficultyMultiplier();
     }
 
     void Update()
@@ -79,7 +94,8 @@ public class PlayerGravityFlip : MonoBehaviour
         if (rb)
         {
             var v = rb.linearVelocity;
-            if (Mathf.Abs(v.y) > maxYSpeed) v.y = Mathf.Sign(v.y) * maxYSpeed;
+            float effectiveMaxYSpeed = EffectiveMaxYSpeed();
+            if (Mathf.Abs(v.y) > effectiveMaxYSpeed) v.y = Mathf.Sign(v.y) * effectiveMaxYSpeed;
             rb.linearVelocity = v;
         }
     }

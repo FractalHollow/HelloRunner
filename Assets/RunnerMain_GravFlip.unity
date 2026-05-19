@@ -13895,6 +13895,7 @@ GameObject:
   - component: {fileID: 1345499411}
   - component: {fileID: 1345499412}
   - component: {fileID: 1345499413}
+  - component: {fileID: 1345499414}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -14010,6 +14011,20 @@ MonoBehaviour:
   messageText: {fileID: 1858359295}
   cancelButton: {fileID: 1269192658}
   confirmButton: {fileID: 1289495591}
+--- !u!114 &1345499414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345499407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8baf495c4c3447e99cf0d8c53299f3d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  overrideEnabled: 0
+  testPrestigeLevel: 0
 --- !u!1 &1353303926
 GameObject:
   m_ObjectHideFlags: 0

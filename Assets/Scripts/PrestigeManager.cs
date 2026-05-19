@@ -37,8 +37,54 @@ public static class PrestigeManager
         }
     }
 
-    public static float ScoreMult => Mathf.Pow(1.5f, Level);
-    public static float WispMult  => Mathf.Pow(1.5f, Level);
+#if UNITY_EDITOR
+    static bool effectiveLevelOverrideEnabled;
+    static int effectiveLevelOverride;
+#endif
+
+    public static int EffectiveLevel
+    {
+        get
+        {
+#if UNITY_EDITOR
+            if (effectiveLevelOverrideEnabled)
+                return effectiveLevelOverride;
+#endif
+            return Level;
+        }
+    }
+
+    public static bool IsEffectiveLevelOverridden
+    {
+        get
+        {
+#if UNITY_EDITOR
+            return effectiveLevelOverrideEnabled;
+#else
+            return false;
+#endif
+        }
+    }
+
+#if UNITY_EDITOR
+    public static void SetEffectiveLevelOverride(int level)
+    {
+        effectiveLevelOverride = Mathf.Max(0, level);
+        effectiveLevelOverrideEnabled = true;
+    }
+
+    public static void ClearEffectiveLevelOverride()
+    {
+        effectiveLevelOverrideEnabled = false;
+        effectiveLevelOverride = 0;
+    }
+#else
+    public static void SetEffectiveLevelOverride(int level) { }
+    public static void ClearEffectiveLevelOverride() { }
+#endif
+
+    public static float ScoreMult => Mathf.Pow(1.5f, EffectiveLevel);
+    public static float WispMult  => Mathf.Pow(1.5f, EffectiveLevel);
     public static int RunAttemptsThisPrestige => PlayerPrefs.GetInt(K_RunAttemptsThisPrestige, 0);
 
     public static int BestDistanceM

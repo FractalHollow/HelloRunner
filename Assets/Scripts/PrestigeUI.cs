@@ -47,7 +47,8 @@ public class PrestigeUI : MonoBehaviour
 
     public void Refresh()
     {
-        int lvl = PrestigeManager.Level;
+        int lvl = PrestigeManager.EffectiveLevel;
+        int savedLvl = PrestigeManager.Level;
         int best = PrestigeManager.BestDistanceThisPrestigeM;
         int req = PrestigeManager.PrestigeDistanceRequirementM;
 
@@ -67,7 +68,7 @@ public class PrestigeUI : MonoBehaviour
 
         if (rewardText)
         {
-            float nextMult = Mathf.Pow(1.5f, lvl + 1);
+            float nextMult = Mathf.Pow(1.5f, savedLvl + 1);
             rewardText.text = $"Next Prestige Reward: x{nextMult:0.#} Score & Embers";
         }
 

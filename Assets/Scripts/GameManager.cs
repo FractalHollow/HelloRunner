@@ -61,7 +61,7 @@ public class GameManager : MonoBehaviour
     public float prestigeDifficultyStep = 0.05f; // +5% speed per prestige AFTER start
     public float prestigeDifficultyMax = 1.6f;   // cap
 
-    int PrestigeLevel => PlayerPrefs.GetInt("prestige_level", 0);
+    int PrestigeLevel => PrestigeManager.EffectiveLevel;
     bool HasPersistenceAssist => PlayerPrefs.GetInt("upgrade_persistence_assist", 0) > 0;
 
     float DifficultyMultiplier()
@@ -220,7 +220,7 @@ public class GameManager : MonoBehaviour
             if (flip) flip.EnableControl(true);
         }
 
-        Debug.Log($"[D2] Prestige={PlayerPrefs.GetInt("prestige_level", 0)} | " +
+        Debug.Log($"[D2] Prestige={PrestigeLevel} | " +
                 $"DifficultyMult={DifficultyMultiplier():0.00} | " +
                 $"ModSpeedOn={ModSpeedOn} | RunSpeedMult={RunSpeedMultiplier:0.00}");
 

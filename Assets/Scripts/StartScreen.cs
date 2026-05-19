@@ -145,7 +145,7 @@ public class StartScreen : MonoBehaviour
     {
         if (!prestigeText) return;
 
-        int lvl = PrestigeManager.Level;
+        int lvl = PrestigeManager.EffectiveLevel;
         if (lvl <= 0)
         {
             prestigeText.gameObject.SetActive(false);

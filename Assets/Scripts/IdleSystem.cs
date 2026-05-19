@@ -15,7 +15,6 @@ public static class IdleSystem
     const string ID_IDLE_CAP  = "idle_capacity";
 
     // Prestige
-    const string KEY_PRESTIGE_LEVEL = "prestige_level";
     public static float prestigeIdleBonusPerLevel = 0.05f; // +5% per prestige
 
     static long NowUnix() => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -81,7 +80,7 @@ public static class IdleSystem
             }
         }
 
-        int prestige = PlayerPrefs.GetInt(KEY_PRESTIGE_LEVEL, 0);
+        int prestige = PrestigeManager.EffectiveLevel;
         float mult = 1f + prestige * prestigeIdleBonusPerLevel;
 
         rate = Mathf.Max(0f, rate * mult);

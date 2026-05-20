@@ -144,6 +144,8 @@ public class GameManager : MonoBehaviour
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
         }
 
+        PlayGamesLeaderboardService.Initialize();
+
         if (player)
         {
             playerStartPos = player.transform.position;
@@ -357,8 +359,14 @@ public class GameManager : MonoBehaviour
         int hi = PlayerPrefs.GetInt("HighScore", 0);
         if (finalScore > hi)
         {
+            hi = finalScore;
             PlayerPrefs.SetInt("HighScore", finalScore);
         }
+
+        PlayGamesLeaderboardService.SubmitGameOverScores(
+            hi,
+            bestDistM,
+            PrestigeManager.Level);
 
         int bank = GetWispsBank();
         bank += wispsRun;

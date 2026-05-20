@@ -14,6 +14,9 @@ public class StartScreen : MonoBehaviour
     [SerializeField] Button runModifiersButton;     // Btn_RunModifiers on StartPanel
     [SerializeField] GameObject runModifiersPanel;  // Panel_RunModifiers to open
 
+    [Header("Leaderboards")]
+    [SerializeField] Button leaderboardsButton;
+
     [Header("Prestige")]
     [SerializeField] TMP_Text prestigeText; // assign in inspector (optional)
 
@@ -54,6 +57,27 @@ public class StartScreen : MonoBehaviour
             runModifiersButton.onClick.RemoveAllListeners();
             runModifiersButton.onClick.AddListener(OpenRunModifiers);
         }
+
+        if (!leaderboardsButton)
+            leaderboardsButton = FindButtonByName("LeaderboardsButton");
+
+        if (leaderboardsButton)
+        {
+            leaderboardsButton.onClick.RemoveAllListeners();
+            leaderboardsButton.onClick.AddListener(PlayGamesLeaderboardService.ShowLeaderboards);
+        }
+    }
+
+    Button FindButtonByName(string buttonName)
+    {
+        var buttons = GetComponentsInChildren<Button>(true);
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            if (buttons[i] && buttons[i].name == buttonName)
+                return buttons[i];
+        }
+
+        return null;
     }
 
     public static void SetVisibleInLayout(GameObject go, bool visible)

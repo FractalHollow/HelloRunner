@@ -4,6 +4,8 @@ using TMPro;
 
 public class StartScreen : MonoBehaviour
 {
+    const float LeaderboardPulseSpeed = 0.75f;
+
     [Header("Core")]
     [SerializeField] Button startButton;
     [SerializeField] PanelFader fader;
@@ -65,7 +67,19 @@ public class StartScreen : MonoBehaviour
         {
             leaderboardsButton.onClick.RemoveAllListeners();
             leaderboardsButton.onClick.AddListener(PlayGamesLeaderboardService.ShowLeaderboards);
+            EnsureLeaderboardPulse();
         }
+    }
+
+    void EnsureLeaderboardPulse()
+    {
+        if (!leaderboardsButton) return;
+
+        var pulse = leaderboardsButton.GetComponent<UIButtonPulse>();
+        if (!pulse)
+            pulse = leaderboardsButton.gameObject.AddComponent<UIButtonPulse>();
+
+        pulse.pulsesPerSecond = LeaderboardPulseSpeed;
     }
 
     Button FindButtonByName(string buttonName)

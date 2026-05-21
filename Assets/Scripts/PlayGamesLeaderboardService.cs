@@ -8,6 +8,7 @@ using GooglePlayGames.BasicApi;
 public static class PlayGamesLeaderboardService
 {
     const string LogPrefix = "[GPGS Leaderboards]";
+    const long HighScoreSubmissionMax = 9_000_000_000_000_000_000L;
 
     static bool initialized;
 
@@ -45,10 +46,12 @@ public static class PlayGamesLeaderboardService
             return;
         }
 
-        Debug.Log($"{LogPrefix} Submitting Game Over scores. " +
-                  $"highScore={highScore}, bestDistanceM={bestDistanceM}, prestigeLevel={prestigeLevel}");
+        long highScoreForSubmission = ClampHighScoreForSubmission(highScore);
 
-        SubmitScore("High Score", GPGSIds.leaderboard_high_score, highScore);
+        Debug.Log($"{LogPrefix} Submitting Game Over scores. " +
+                  $"highScore={highScoreForSubmission}, bestDistanceM={bestDistanceM}, prestigeLevel={prestigeLevel}");
+
+        SubmitScore("High Score", GPGSIds.leaderboard_high_score, highScoreForSubmission);
         SubmitScore("Longest Distance", GPGSIds.leaderboard_distance, bestDistanceM);
         SubmitScore("Prestige Level", GPGSIds.leaderboard_prestige_level, prestigeLevel);
 #else
@@ -162,6 +165,19 @@ public static class PlayGamesLeaderboardService
         {
             Debug.Log($"{LogPrefix} ReportScore callback. label={label}, leaderboardId={leaderboardId}, score={score}, success={success}");
         });
+    }
+
+    static long ClampHighScoreForSubmission(long highScore)
+    {
+        if (highScore < 0L)
+            return 0L;
+
+        if (highScore <= HighScoreSubmissionMax)
+            return highScore;
+
+        Debug.Log($"{LogPrefix} High Score exceeds Play Games submission cap. " +
+                  $"raw={highScore}, submitted={HighScoreSubmissionMax}");
+        return HighScoreSubmissionMax;
     }
 #endif
 }

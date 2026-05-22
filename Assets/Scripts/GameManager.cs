@@ -78,6 +78,7 @@ public class GameManager : MonoBehaviour
     }
 
     public float PrestigeDifficultyMultiplier => DifficultyMultiplier();
+    public float FoxVerticalPrestigeMultiplier => 1f + ((PrestigeDifficultyMultiplier - 1f) * 0.5f);
 
 
     // spawn reset
@@ -224,6 +225,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"[D2] Prestige={PrestigeLevel} | " +
                 $"DifficultyMult={DifficultyMultiplier():0.00} | " +
+                $"FoxVerticalMult={FoxVerticalPrestigeMultiplier:0.000} | " +
                 $"ModSpeedOn={ModSpeedOn} | RunSpeedMult={RunSpeedMultiplier:0.00}");
 
         // Record stats at run start (persists across prestiges)

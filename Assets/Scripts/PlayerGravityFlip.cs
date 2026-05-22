@@ -50,19 +50,19 @@ public class PlayerGravityFlip : MonoBehaviour
         rb.gravityScale = EffectiveGravityMagnitude() * gravDir;
     }
 
-    float PrestigeDifficultyMultiplier()
+    float FoxVerticalPrestigeMultiplier()
     {
-        return gm ? gm.PrestigeDifficultyMultiplier : 1f;
+        return gm ? gm.FoxVerticalPrestigeMultiplier : 1f;
     }
 
     float EffectiveGravityMagnitude()
     {
-        return gravityMagnitude * PrestigeDifficultyMultiplier();
+        return gravityMagnitude * FoxVerticalPrestigeMultiplier();
     }
 
     float EffectiveMaxYSpeed()
     {
-        return maxYSpeed * PrestigeDifficultyMultiplier();
+        return maxYSpeed * FoxVerticalPrestigeMultiplier();
     }
 
     void Update()

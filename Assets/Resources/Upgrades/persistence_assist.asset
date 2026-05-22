@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Persistence
   description: Every run this prestige reduces difficulty multiplier.
   descriptionTemplate: 
-  baseCost: 1000
+  baseCost: 9999
   costScale: 1
   maxLevel: 1
   unlockDistance: 20

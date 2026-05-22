@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(BoxCollider2D))]
 public class ColliderTightener2D : MonoBehaviour
@@ -24,6 +25,12 @@ public class ColliderTightener2D : MonoBehaviour
         col = GetComponent<BoxCollider2D>();
         sr  = GetComponentInChildren<SpriteRenderer>();
         ApplyLevel(currentLevel); // apply defaults on load
+    }
+
+    IEnumerator Start()
+    {
+        yield return null;
+        ApplyLevel(currentLevel);
     }
 
     void OnValidate()

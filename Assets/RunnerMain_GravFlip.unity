@@ -8394,7 +8394,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.8509804}
-  m_EffectDistance: {x: 11, y: -13}
+  m_EffectDistance: {x: 6, y: -7}
   m_UseGraphicAlpha: 1
 --- !u!114 &755211017
 MonoBehaviour:
@@ -9942,7 +9942,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 125, y: -600}
+  m_AnchoredPosition: {x: 125, y: -650}
   m_SizeDelta: {x: 13, y: 18}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &900000102

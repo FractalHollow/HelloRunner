@@ -73,7 +73,7 @@ public class GameManager : MonoBehaviour
         if (!HasPersistenceAssist)
             return mult;
 
-        float reduced = mult - (PrestigeManager.RunAttemptsThisPrestige * 0.02f);
+        float reduced = mult - (PrestigeManager.RunAttemptsThisPrestige * 0.01f);
         return Mathf.Max(1f, reduced);
     }
 

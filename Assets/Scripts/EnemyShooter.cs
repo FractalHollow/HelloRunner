@@ -92,7 +92,7 @@ public class EnemyShooter : MonoBehaviour
         if (proj)
         {
             proj.dir = dir;
-            proj.speed = projectileSpeed;
+            proj.speed = projectileSpeed * (gm ? gm.RunSpeedMultiplier : 1f);
         }
 
         var s = go.transform.localScale;

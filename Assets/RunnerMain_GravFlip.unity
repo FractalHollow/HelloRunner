@@ -4940,8 +4940,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 401.72205, y: -180}
-  m_SizeDelta: {x: 850, y: 120}
+  m_AnchoredPosition: {x: 401.72205, y: -163.75}
+  m_SizeDelta: {x: 850, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &432827473
 MonoBehaviour:
@@ -5277,8 +5277,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 401.72205, y: -540}
-  m_SizeDelta: {x: 850, y: 120}
+  m_AnchoredPosition: {x: 401.72205, y: -508.75}
+  m_SizeDelta: {x: 850, y: 135}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &515501983
 MonoBehaviour:
@@ -5300,7 +5300,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +0 Embers
+  m_text: 'Earned: 0 Embers'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d09b7790238219443ba728daa969ccd2, type: 2}
   m_sharedMaterial: {fileID: 6643556769826710504, guid: d09b7790238219443ba728daa969ccd2, type: 2}
@@ -7320,8 +7320,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 401.72205, y: -420}
-  m_SizeDelta: {x: 850, y: 120}
+  m_AnchoredPosition: {x: 401.72205, y: -382.08334}
+  m_SizeDelta: {x: 850, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &645456793
 MonoBehaviour:
@@ -10453,8 +10453,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 401.72205, y: -60}
-  m_SizeDelta: {x: 850, y: 120}
+  m_AnchoredPosition: {x: 401.72205, y: -54.583332}
+  m_SizeDelta: {x: 850, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &930816129
 MonoBehaviour:
@@ -12151,8 +12151,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 401.72205, y: -300}
-  m_SizeDelta: {x: 850, y: 120}
+  m_AnchoredPosition: {x: 401.72205, y: -272.91666}
+  m_SizeDelta: {x: 850, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1075781595
 MonoBehaviour:
@@ -15037,8 +15037,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 401.72205, y: -658.4401}
-  m_SizeDelta: {x: 850, y: 116.8802}
+  m_AnchoredPosition: {x: 401.72205, y: -640.4166}
+  m_SizeDelta: {x: 850, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1480035152
 MonoBehaviour:
@@ -15060,7 +15060,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Total Embers: 0'
+  m_text: 'Ember Bank: 0'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d09b7790238219443ba728daa969ccd2, type: 2}
   m_sharedMaterial: {fileID: 6643556769826710504, guid: d09b7790238219443ba728daa969ccd2, type: 2}

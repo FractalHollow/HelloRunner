@@ -8,7 +8,7 @@ using GooglePlayGames.BasicApi;
 public static class PlayGamesLeaderboardService
 {
     const string LogPrefix = "[GPGS Leaderboards]";
-    const long HighScoreSubmissionMax = 9_000_000_000_000_000_000L;
+    const long ScoreSubmissionMax = 9_000_000_000_000_000_000L;
 
     static bool initialized;
 
@@ -34,7 +34,7 @@ public static class PlayGamesLeaderboardService
 #endif
     }
 
-    public static void SubmitGameOverScores(long highScore, long bestDistanceM, long prestigeLevel)
+    public static void SubmitGameOverScores(long runScore, long runDistanceM, long runPrestigeLevel)
     {
         Initialize();
 
@@ -42,21 +42,21 @@ public static class PlayGamesLeaderboardService
         if (!IsAuthenticated())
         {
             Debug.Log($"{LogPrefix} Skipping score submission; player is not authenticated. " +
-                      $"highScore={highScore}, bestDistanceM={bestDistanceM}, prestigeLevel={prestigeLevel}");
+                      $"runScore={runScore}, runDistanceM={runDistanceM}, runPrestigeLevel={runPrestigeLevel}");
             return;
         }
 
-        long highScoreForSubmission = ClampHighScoreForSubmission(highScore);
+        long runScoreForSubmission = ClampScoreForSubmission(runScore);
 
         Debug.Log($"{LogPrefix} Submitting Game Over scores. " +
-                  $"highScore={highScoreForSubmission}, bestDistanceM={bestDistanceM}, prestigeLevel={prestigeLevel}");
+                  $"runScore={runScoreForSubmission}, runDistanceM={runDistanceM}, runPrestigeLevel={runPrestigeLevel}");
 
-        SubmitScore("High Score", GPGSIds.leaderboard_high_score, highScoreForSubmission);
-        SubmitScore("Longest Distance", GPGSIds.leaderboard_distance, bestDistanceM);
-        SubmitScore("Prestige Level", GPGSIds.leaderboard_prestige_level, prestigeLevel);
+        SubmitScore("High Score", GPGSIds.leaderboard_high_score, runScoreForSubmission);
+        SubmitScore("Longest Distance", GPGSIds.leaderboard_distance, runDistanceM);
+        SubmitScore("Prestige Level", GPGSIds.leaderboard_prestige_level, runPrestigeLevel);
 #else
         Debug.Log($"{LogPrefix} Score submission ignored on this platform. " +
-                  $"highScore={highScore}, bestDistanceM={bestDistanceM}, prestigeLevel={prestigeLevel}");
+                  $"runScore={runScore}, runDistanceM={runDistanceM}, runPrestigeLevel={runPrestigeLevel}");
 #endif
     }
 
@@ -167,17 +167,17 @@ public static class PlayGamesLeaderboardService
         });
     }
 
-    static long ClampHighScoreForSubmission(long highScore)
+    static long ClampScoreForSubmission(long score)
     {
-        if (highScore < 0L)
+        if (score < 0L)
             return 0L;
 
-        if (highScore <= HighScoreSubmissionMax)
-            return highScore;
+        if (score <= ScoreSubmissionMax)
+            return score;
 
-        Debug.Log($"{LogPrefix} High Score exceeds Play Games submission cap. " +
-                  $"raw={highScore}, submitted={HighScoreSubmissionMax}");
-        return HighScoreSubmissionMax;
+        Debug.Log($"{LogPrefix} Score exceeds Play Games submission cap. " +
+                  $"raw={score}, submitted={ScoreSubmissionMax}");
+        return ScoreSubmissionMax;
     }
 #endif
 }

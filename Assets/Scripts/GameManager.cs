@@ -366,8 +366,8 @@ public class GameManager : MonoBehaviour
         }
 
         PlayGamesLeaderboardService.SubmitGameOverScores(
-            hi,
-            bestDistM,
+            finalScore,
+            runDistM,
             PrestigeManager.Level);
 
         int bank = GetWispsBank();

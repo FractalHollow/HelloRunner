@@ -29,7 +29,7 @@ public static class StatsManager
         PlayerPrefs.SetInt(K_LifetimeEmbersEarned, LifetimeEmbersEarned + amount);
     }
 
-    public static void RecordRunStarted(bool speedOn, bool hazardsOn, bool verticalOn)
+    public static void RecordRunCompleted(bool speedOn, bool hazardsOn, bool verticalOn)
     {
         PlayerPrefs.SetInt(K_RunsPlayed, RunsPlayed + 1);
 

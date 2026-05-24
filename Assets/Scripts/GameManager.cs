@@ -116,6 +116,9 @@ public class GameManager : MonoBehaviour
 
     // --- Run stats for achievements ---
     int flipsThisRun = 0;
+    bool runStartedWithSpeed = false;
+    bool runStartedWithHazards = false;
+    bool runStartedWithVertical = false;
 
     float noHitSegmentStartDistM = 0f;
     float longestNoHitDistM = 0f;
@@ -228,9 +231,9 @@ public class GameManager : MonoBehaviour
                 $"FoxVerticalMult={FoxVerticalPrestigeMultiplier:0.000} | " +
                 $"ModSpeedOn={ModSpeedOn} | RunSpeedMult={RunSpeedMultiplier:0.00}");
 
-        // Record stats at run start (persists across prestiges)
-        StatsManager.RecordRunStarted(ModSpeedOn, ModHazardsOn, ModVerticalOn);
-        StatsManager.Save();
+        runStartedWithSpeed = ModSpeedOn;
+        runStartedWithHazards = ModHazardsOn;
+        runStartedWithVertical = ModVerticalOn;
 
         // Reset currency for this run
         wispsRun = 0;
@@ -328,6 +331,8 @@ public class GameManager : MonoBehaviour
 
         if (!playing) return;
         playing = false;
+        StatsManager.RecordRunCompleted(runStartedWithSpeed, runStartedWithHazards, runStartedWithVertical);
+        StatsManager.Save();
 
         if (spawner) spawner.StopSpawning();
         if (wispSpawner) wispSpawner.StopSpawning();
@@ -393,7 +398,13 @@ public class GameManager : MonoBehaviour
         }
 
         int runEmbersEarned = wispsRun;
-        AchievementManager.I?.EvaluateUnlocksOnGameOver(bestDistM, runDistM, finalScore, runEmbersEarned);
+        AchievementManager.I?.EvaluateUnlocksOnGameOver(
+            bestDistM,
+            runDistM,
+            finalScore,
+            runEmbersEarned,
+            runStartedWithSpeed,
+            runStartedWithHazards);
 
         // reset run currency so it can't be re-added accidentally
         wispsRun = 0;

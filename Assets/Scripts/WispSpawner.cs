@@ -16,6 +16,11 @@ public class WispSpawner : MonoBehaviour
     [Header("Motion")]
     public float baseMoveSpeed = 5f;              // renamed for clarity
 
+    [Header("Rare Variant")]
+    [Range(0f, 1f)] public float largeWispChance = 0.04f;
+    [Min(0.01f)] public float largeWispScaleMultiplier = 2.0f;
+    [Min(1)] public int largeWispAmountMultiplier = 2;
+
     Coroutine loop;
     GameManager gm;
 
@@ -47,6 +52,7 @@ public class WispSpawner : MonoBehaviour
             float y = Random.Range(yBounds.x, yBounds.y);
             var pos = new Vector3(spawnX, y, 0f);
             var go  = Instantiate(wispPrefab, pos, Quaternion.identity);
+            TryApplyLargeVariant(go);
 
             // move wisps leftward at world speed
             var rb = go.GetComponent<Rigidbody2D>();
@@ -56,5 +62,23 @@ public class WispSpawner : MonoBehaviour
                 rb.linearVelocity = Vector2.left * speed;
             }
         }
+    }
+
+    void TryApplyLargeVariant(GameObject wisp)
+    {
+        if (!wisp || Random.value >= Mathf.Clamp01(largeWispChance))
+            return;
+
+        float scaleMultiplier = Mathf.Max(0.01f, largeWispScaleMultiplier);
+        int amountMultiplier = Mathf.Max(1, largeWispAmountMultiplier);
+
+        wisp.transform.localScale *= scaleMultiplier;
+
+        var pickup = wisp.GetComponent<WispPickup>();
+        if (!pickup)
+            return;
+
+        pickup.amount *= amountMultiplier;
+        pickup.collectionRadius *= scaleMultiplier;
     }
 }

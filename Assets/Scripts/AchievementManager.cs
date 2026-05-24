@@ -137,7 +137,13 @@ public class AchievementManager : MonoBehaviour
     }
 
     // Call this ONLY at GameOver
-    public List<AchievementDef> EvaluateUnlocksOnGameOver(int bestDistanceM, int runDistanceM, int runScore, int runEmbersEarned)
+    public List<AchievementDef> EvaluateUnlocksOnGameOver(
+        int bestDistanceM,
+        int runDistanceM,
+        int runScore,
+        int runEmbersEarned,
+        bool runUsedSpeedMod = false,
+        bool runUsedHazardsMod = false)
     {
         var newlyUnlocked = new List<AchievementDef>();
 
@@ -147,6 +153,7 @@ public class AchievementManager : MonoBehaviour
         {
             if (!def || string.IsNullOrEmpty(def.id)) continue;
             if (IsUnlocked(def.id)) continue;
+            if (IsModifierRunAchievementBlocked(def, runUsedSpeedMod, runUsedHazardsMod)) continue;
 
             if (IsComplete(def, bestDistanceM, runDistanceM, runScore, runEmbersEarned))
             {
@@ -179,6 +186,21 @@ public class AchievementManager : MonoBehaviour
         }
 
         return newlyUnlocked;
+    }
+
+    bool IsModifierRunAchievementBlocked(AchievementDef def, bool runUsedSpeedMod, bool runUsedHazardsMod)
+    {
+        switch (def.progressType)
+        {
+            case AchievementDef.ProgressType.SpeedModRuns:
+                return !runUsedSpeedMod;
+
+            case AchievementDef.ProgressType.HazardsModRuns:
+                return !runUsedHazardsMod;
+
+            default:
+                return false;
+        }
     }
 
     public void MarkUnlockedAchievementsAsSeen()

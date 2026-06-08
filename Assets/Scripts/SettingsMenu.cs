@@ -267,6 +267,8 @@ public class SettingsMenu : MonoBehaviour
 
     void PerformFullReset()
     {
+        PlayReviewPromptManager.PrepareForFullReset();
+
         // 1. Cache paid skin unlocks
         var paidSkinUnlocks = new System.Collections.Generic.Dictionary<string, int>();
         float? musicVolume = null;
@@ -308,6 +310,8 @@ public class SettingsMenu : MonoBehaviour
             if (kv.Value == 1)
                 PlayerPrefs.SetInt(kv.Key, 1);
         }
+
+        PlayReviewPromptManager.RestoreAfterFullReset();
 
         if (AudioManager.I != null && musicVolume.HasValue && sfxVolume.HasValue)
         {

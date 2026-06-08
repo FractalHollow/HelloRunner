@@ -1,6 +1,11 @@
 <dependencies>
   <packages>
+    <package>androidx.fragment:fragment:1.8.9</package>
+    <package>com.google.android.play:core-common:2.0.4</package>
+    <package>com.google.android.play:review:2.0.2</package>
     <package>com.google.games:gpgs-plugin-support:2.1.0</package>
+    <package>org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22</package>
+    <package>org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22</package>
   </packages>
   <files>
     <file>Assets/GeneratedLocalRepo/GooglePlayGames/com.google.play.games/Editor/m2repository/com/google/games/gpgs-plugin-support/2.1.0/gpgs-plugin-support-2.1.0.aar</file>

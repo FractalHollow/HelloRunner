@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dependencies>
+  <androidPackages>
+    <androidPackage spec="androidx.fragment:fragment:1.8.9" />
+    <androidPackage spec="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22" />
+    <androidPackage spec="org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22" />
+  </androidPackages>
+</dependencies>

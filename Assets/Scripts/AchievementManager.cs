@@ -6,6 +6,7 @@ public class AchievementManager : MonoBehaviour
 {
     public static AchievementManager I { get; private set; }
     public static event System.Action<bool> NewAchievementIndicatorChanged;
+    internal static event System.Action AchievementRewardClaimed;
     GameManager gm;
 
 
@@ -61,6 +62,19 @@ public class AchievementManager : MonoBehaviour
     public bool IsClaimed(string id) => PlayerPrefs.GetInt(KClaimed(id), 0) == 1;
     bool IsSeen(string id) => PlayerPrefs.GetInt(KSeen(id), 0) == 1;
     public bool HasUnseenUnlockedAchievement => hasUnseenUnlockedAchievement;
+    internal int ClaimedCount
+    {
+        get
+        {
+            int count = 0;
+            foreach (var def in defs)
+            {
+                if (!def || string.IsNullOrEmpty(def.id)) continue;
+                if (IsClaimed(def.id)) count++;
+            }
+            return count;
+        }
+    }
 
     void SetUnlocked(string id) => PlayerPrefs.SetInt(KUnlocked(id), 1);
     void SetClaimed(string id) => PlayerPrefs.SetInt(KClaimed(id), 1);
@@ -234,6 +248,7 @@ public class AchievementManager : MonoBehaviour
 
         SetClaimed(def.id);
         PlayerPrefs.Save();
+        AchievementRewardClaimed?.Invoke();
         return true;
     }
 

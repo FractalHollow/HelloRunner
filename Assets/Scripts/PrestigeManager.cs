@@ -2,6 +2,8 @@ using UnityEngine;
 
 public static class PrestigeManager
 {
+    internal static event System.Action PrestigeCompleted;
+
     const string K_PrestigeLevel = "prestige_level";
     const string K_RunAttemptsThisPrestige = "run_attempts_this_prestige";
 
@@ -143,5 +145,6 @@ public static class PrestigeManager
         // - ach_unlocked_*, ach_claimed_*
 
         PlayerPrefs.Save();
+        PrestigeCompleted?.Invoke();
     }
 }

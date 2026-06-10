@@ -4,6 +4,8 @@ using UnityEngine.EventSystems;
 
 public class PlayerGravityFlip : MonoBehaviour
 {
+    public event System.Action InputFlipPerformed;
+
     [Header("Feel")]
     public float gravityMagnitude = 3.5f;   // how strong gravity feels in either direction
     public float maxYSpeed = 18f;         // clamp vertical speed so it stays readable
@@ -29,6 +31,7 @@ public class PlayerGravityFlip : MonoBehaviour
     int gravDir = 1; // +1 = normal (down), -1 = inverted (up)
     float nextFlipAllowed = 0f;
     float bufferedFlipUntil = -1f;
+    float nextFallbackTutorialHitFeedbackAt;
     string lastBlockedTapDebug = "";
 
     void Awake()
@@ -119,6 +122,9 @@ public class PlayerGravityFlip : MonoBehaviour
         {
             ForceFlipAndBounce(collision, 6f); // tweak bounce speed if needed
 
+            if (TryHandleTutorialProtectedHit())
+                return;
+
             // But still treat it as a HIT (unless invulnerable)
             if (shield && shield.IsInvulnerable)
                 return;
@@ -133,6 +139,9 @@ public class PlayerGravityFlip : MonoBehaviour
         }
 
         // Non-boundary hits:
+        if (TryHandleTutorialProtectedHit())
+            return;
+
         if (shield && shield.IsInvulnerable)
             return;
 
@@ -141,6 +150,38 @@ public class PlayerGravityFlip : MonoBehaviour
 
         isAlive = false;
         gm?.GameOver();
+    }
+
+    public bool TryHandleTutorialProtectedHit()
+    {
+        if (!gm || !gm.IsInteractiveTutorialActive)
+            return false;
+
+        bool startedFeedback;
+        if (shield)
+        {
+            startedFeedback = shield.PlayTutorialHitFeedback();
+        }
+        else
+        {
+            startedFeedback = Time.unscaledTime >= nextFallbackTutorialHitFeedbackAt;
+            if (startedFeedback)
+                nextFallbackTutorialHitFeedbackAt = Time.unscaledTime + 0.8f;
+        }
+
+        if (startedFeedback)
+        {
+            gm.NotifyPlayerHit();
+            AudioManager.I?.PlayCrash();
+        }
+
+        return true;
+    }
+
+    public void StopTutorialHitFeedback()
+    {
+        nextFallbackTutorialHitFeedbackAt = 0f;
+        shield?.StopTutorialHitFeedback();
     }
 
     bool TryQueueFlipInput(out bool blockedByUi)
@@ -317,6 +358,8 @@ public class PlayerGravityFlip : MonoBehaviour
                 if (flipFXUp) flipFXUp.Play(); // now gravity up
             }
         }
+
+        InputFlipPerformed?.Invoke();
     }
 
     public void SetFlipFxColor(Color c)
@@ -373,6 +416,7 @@ public class PlayerGravityFlip : MonoBehaviour
         ApplyGravityFromDir();
         bufferedFlipUntil = -1f;
         nextFlipAllowed = 0f;
+        nextFallbackTutorialHitFeedbackAt = 0f;
         Debug.Log("[Flip] ResetState() -> canControl = false");
         spriteAnimator?.ShowIdleImmediate();
 

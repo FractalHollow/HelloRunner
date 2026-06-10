@@ -64,6 +64,12 @@ public class Projectile2D : MonoBehaviour
         var player = other.GetComponent<PlayerGravityFlip>();
         if (!player) return;
 
+        if (player.TryHandleTutorialProtectedHit())
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         // Try shield first if present
         var shield = player.GetComponent<PlayerShield>();
         if (shield && shield.TryAbsorbHit())

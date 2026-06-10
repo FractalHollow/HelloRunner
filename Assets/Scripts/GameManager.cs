@@ -47,6 +47,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Tutorial")]
     public FirstRunTutorial tutorial;
+    [SerializeField] FirstRunInteractiveTutorialManager interactiveTutorial;
 
     [Header("Options")]
     public bool pauseOnStart = true;
@@ -90,7 +91,12 @@ public class GameManager : MonoBehaviour
     // state
     bool paused = false;
     bool playing = false;
+    float runTimeScale = 1f;
+    float defaultFixedDeltaTime;
     public bool IsPlaying => playing;
+    public bool IsPaused => paused;
+    public float RunTimeScale => runTimeScale;
+    public bool IsInteractiveTutorialActive => interactiveTutorial && interactiveTutorial.IsActive;
 
     // --- Run Modifiers tuning ---
     [Header("Run Modifiers Tuning")]
@@ -139,6 +145,7 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        defaultFixedDeltaTime = Time.fixedDeltaTime;
         SaveSanitizer.Run();
         if (_inst != null && _inst != this) { Destroy(gameObject); return; }
         _inst = this;
@@ -158,6 +165,7 @@ public class GameManager : MonoBehaviour
 
         wispsTotal = PlayerPrefs.GetInt("wisps_total", 0);
         if (!tutorial) tutorial = FirstRunTutorial.FindAvailableTutorial();
+        if (!interactiveTutorial) interactiveTutorial = GetComponent<FirstRunInteractiveTutorialManager>();
     }
 
     void Start()
@@ -208,7 +216,8 @@ public class GameManager : MonoBehaviour
     {
         PrestigeManager.RecordRunAttempt();
 
-        Time.timeScale = 1f;
+        interactiveTutorial?.OnRunEnded();
+        ResetRunTimeScale();
         paused = false;
         HideGameOverPanel();
         HideAchievementToast();
@@ -273,14 +282,15 @@ public class GameManager : MonoBehaviour
 
     void BeginGameplay()
     {
-        Time.timeScale = 1f;
         playing = true;
+        ApplyRunTimeScale();
 
         if (spawner) spawner.Begin();
         if (wispSpawner) wispSpawner.StartSpawning();
         if (player) player.EnableControl(true);
 
         AudioManager.I?.PlayMusic();
+        interactiveTutorial?.OnRunStarted();
     }
 
     public void GameOver()
@@ -330,6 +340,8 @@ public class GameManager : MonoBehaviour
 
 
         if (!playing) return;
+        interactiveTutorial?.OnRunEnded();
+        ResetRunTimeScale();
         playing = false;
         StatsManager.RecordRunCompleted(runStartedWithSpeed, runStartedWithHazards, runStartedWithVertical);
         StatsManager.Save();
@@ -413,7 +425,8 @@ public class GameManager : MonoBehaviour
 
     public void Restart()
     {
-        Time.timeScale = 1f;
+        interactiveTutorial?.OnRunEnded();
+        ResetRunTimeScale();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -455,6 +468,7 @@ public class GameManager : MonoBehaviour
         if (paused || !playing) return;
         paused = true;
         player?.EnableControl(false);
+        interactiveTutorial?.OnGamePaused();
         Time.timeScale = 0f;
 
         if (pausePanel)
@@ -469,7 +483,8 @@ public class GameManager : MonoBehaviour
     {
         if (!paused) return;
         paused = false;
-        Time.timeScale = 1f;
+        ApplyRunTimeScale();
+        interactiveTutorial?.OnGameResumed();
 
         if (pausePanel)
         {
@@ -502,6 +517,26 @@ public class GameManager : MonoBehaviour
     {
         if (!paused)
             player?.EnableControl(true);
+    }
+
+    public void SetRunTimeScale(float value)
+    {
+        runTimeScale = Mathf.Clamp(value, 0.01f, 1f);
+        if (playing && !paused)
+            ApplyRunTimeScale();
+    }
+
+    public void ResetRunTimeScale()
+    {
+        runTimeScale = 1f;
+        if (!paused)
+            ApplyRunTimeScale();
+    }
+
+    void ApplyRunTimeScale()
+    {
+        Time.timeScale = runTimeScale;
+        Time.fixedDeltaTime = defaultFixedDeltaTime * runTimeScale;
     }
 
     void OnApplicationPause(bool isPaused)
@@ -1133,7 +1168,8 @@ public void RefreshAllCurrencyUI()
         // Ensure we’re not paused so faders/timers use unscaled/normal flow
         // (If your faders use unscaled time, this is still fine.)
         paused = false;
-        Time.timeScale = 1f;
+        interactiveTutorial?.OnRunEnded();
+        ResetRunTimeScale();
 
         // Hide Pause overlay if it’s up
         if (pausePanel)

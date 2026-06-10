@@ -12,6 +12,9 @@ public class PlayerShield : MonoBehaviour
     float invulnUntil = 0f;
     public bool IsInvulnerable => Time.time < invulnUntil;
 
+    [Header("Tutorial Hit Feedback")]
+    [Min(0.05f)] public float tutorialHitFeedbackDuration = 0.8f;
+
     [Header("FX")]
     public GameObject shieldVisual;          // ring shown while charges > 0
     public ParticleSystem breakBurst;        // one-shot burst when a charge is used
@@ -56,8 +59,11 @@ public class PlayerShield : MonoBehaviour
 
     Coroutine shieldBounceCo;
     Coroutine regenRingBounceCo;
+    Coroutine tutorialHitFeedbackCo;
     Vector3 shieldBaseScale = Vector3.one;
     Vector3 regenRingBaseScale = Vector3.one;
+    RigidbodyConstraints2D tutorialOriginalConstraints;
+    bool tutorialConstraintsCaptured;
 
     void Awake()
     {
@@ -150,6 +156,26 @@ public class PlayerShield : MonoBehaviour
         // Update ring for remaining charges
         RefreshVisual();
         return true;
+    }
+
+    public bool PlayTutorialHitFeedback()
+    {
+        if (tutorialHitFeedbackCo != null)
+            return false;
+
+        tutorialHitFeedbackCo = StartCoroutine(TutorialHitFeedbackCo());
+        return true;
+    }
+
+    public void StopTutorialHitFeedback()
+    {
+        if (tutorialHitFeedbackCo != null)
+        {
+            StopCoroutine(tutorialHitFeedbackCo);
+            tutorialHitFeedbackCo = null;
+        }
+
+        RestoreTutorialHitFeedbackState();
     }
 
     void RestartRegenCooldown()
@@ -272,6 +298,55 @@ public class PlayerShield : MonoBehaviour
         }
 
         SetAlpha(1f);
+    }
+
+    IEnumerator TutorialHitFeedbackCo()
+    {
+        const float blinkHz = 10f;
+        float endAt = Time.unscaledTime + Mathf.Max(0.05f, tutorialHitFeedbackDuration);
+        float nextBlinkAt = Time.unscaledTime;
+        bool visible = true;
+
+        EnableGhostCollisions(true);
+
+        if (freezeXDuringInvuln && rb)
+        {
+            tutorialOriginalConstraints = rb.constraints;
+            tutorialConstraintsCaptured = true;
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            rb.constraints = tutorialOriginalConstraints |
+                RigidbodyConstraints2D.FreezePositionX |
+                RigidbodyConstraints2D.FreezeRotation;
+        }
+
+        while (Time.unscaledTime < endAt)
+        {
+            if (Time.unscaledTime >= nextBlinkAt)
+            {
+                visible = !visible;
+                SetAlpha(visible ? 1f : 0.35f);
+                nextBlinkAt = Time.unscaledTime + (1f / blinkHz);
+            }
+
+            yield return null;
+        }
+
+        tutorialHitFeedbackCo = null;
+        RestoreTutorialHitFeedbackState();
+    }
+
+    void RestoreTutorialHitFeedbackState()
+    {
+        if (!IsInvulnerable)
+            EnableGhostCollisions(false);
+
+        if (tutorialConstraintsCaptured && rb && !IsInvulnerable)
+            rb.constraints = tutorialOriginalConstraints;
+
+        tutorialConstraintsCaptured = false;
+
+        if (!IsInvulnerable)
+            SetAlpha(1f);
     }
 
     void SetAlpha(float a)
@@ -474,6 +549,8 @@ public class PlayerShield : MonoBehaviour
 
     void OnDisable()
     {
+        StopTutorialHitFeedback();
+
         if (shieldVisual)
             shieldVisual.transform.localScale = shieldBaseScale;
 
@@ -497,6 +574,8 @@ public class PlayerShield : MonoBehaviour
 
     void OnDestroy()
     {
+        StopTutorialHitFeedback();
+
         // Same safety net for destroy paths.
         EnableGhostCollisions(false);
     }

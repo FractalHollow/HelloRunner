@@ -124,12 +124,6 @@ public class StartScreen : MonoBehaviour
         if (!gm) { Debug.LogError("[StartScreen] GameManager reference missing"); return; }
         if (tutorial && tutorial.IsShowing) return;
 
-        if (tutorial && tutorial.ShouldShow())
-        {
-            tutorial.Begin(StartGameFromMenu);
-            return;
-        }
-
         StartGameFromMenu();
     }
 

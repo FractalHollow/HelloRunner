@@ -2834,6 +2834,7 @@ MonoBehaviour:
   shieldBreakClip: {fileID: 8300000, guid: d0f6e0b208c96d14da2975a4fa8eaefb, type: 3}
   shieldRegenClip: {fileID: 8300000, guid: 0f4a72311904f3e48b4a19bb0d26ba22, type: 3}
   shieldRegenVolume: 0.8
+  tutorialHitFeedbackDuration: 0.8
   colorOne: {r: 0.45098042, g: 1, b: 0.89588296, a: 0.5176471}
   colorTwo: {r: 0.216981, g: 0.68744314, b: 1, a: 0.64705884}
   playerLayerName: Player
@@ -14037,6 +14038,7 @@ GameObject:
   - component: {fileID: 1345499412}
   - component: {fileID: 1345499413}
   - component: {fileID: 1345499414}
+  - component: {fileID: 1345499415}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -14077,6 +14079,7 @@ MonoBehaviour:
   wispTotalFinal: {fileID: 1480035152}
   settingsMenu: {fileID: 1570379538}
   tutorial: {fileID: 0}
+  interactiveTutorial: {fileID: 1345499415}
   pauseOnStart: 1
   pausePanel: {fileID: 830305323}
   pauseButton: {fileID: 558485786}
@@ -14088,6 +14091,46 @@ MonoBehaviour:
   upgradesPanel: {fileID: 7709592574260189304}
   speedMultWhenOn: 1.25
   rewardBonusPerMod: 0.25
+--- !u!114 &1345499415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345499407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d8fb98cf92443e9ad0a92a1252785b7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  gameManager: {fileID: 1345499408}
+  player: {fileID: 201007795}
+  overlayParent: {fileID: 1005017114}
+  styleSource: {fileID: 918246864}
+  playerCollider: {fileID: 201007796}
+  groundCollider: {fileID: 1525593718}
+  ceilingCollider: {fileID: 125453084}
+  openingTimeScale: 0.15
+  dangerTimeScale: 0.05
+  postFlipTimeScale: 0.35
+  dangerDistance: 3
+  flipInstructionMinimumDuration: 4
+  interMessageGapDuration: 2
+  survivalHintMinimumDuration: 3
+  progressionHintMinimumDuration: 3
+  normalSpeedRestoreDuration: 1.5
+  flipInstruction: Tap anywhere to flip Fox's gravity
+  survivalHint: Stay on screen and dodge enemies
+  progressionHint: Earn Embers to upgrade and go farther
+  dangerHint: Tap now!
+  mainFontSize: 80
+  warningFontSize: 52
+  mainLineSpacing: 10
+  overlayPosition: {x: 0, y: 390}
+  overlaySize: {x: 980, y: 330}
+  warningYOffset: -40
+  pulseSpeed: 3.2
+  pulseMinScale: 0.88
 --- !u!4 &1345499409
 Transform:
   m_ObjectHideFlags: 0

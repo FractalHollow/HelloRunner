@@ -4,7 +4,8 @@ using TMPro;
 
 public class StartScreen : MonoBehaviour
 {
-    const float LeaderboardPulseSpeed = 0.75f;
+    const float StartScreenButtonPulseSpeed = 0.75f;
+    const float StartScreenButtonPulseScale = 0.02f;
 
     [Header("Core")]
     [SerializeField] Button startButton;
@@ -18,6 +19,9 @@ public class StartScreen : MonoBehaviour
 
     [Header("Leaderboards")]
     [SerializeField] Button leaderboardsButton;
+
+    [Header("How To")]
+    [SerializeField] Button howToButton;
 
     [Header("Prestige")]
     [SerializeField] TMP_Text prestigeText; // assign in inspector (optional)
@@ -67,19 +71,30 @@ public class StartScreen : MonoBehaviour
         {
             leaderboardsButton.onClick.RemoveAllListeners();
             leaderboardsButton.onClick.AddListener(PlayGamesLeaderboardService.ShowLeaderboards);
-            EnsureLeaderboardPulse();
+            EnsureButtonPulse(leaderboardsButton);
+        }
+
+        if (!howToButton)
+            howToButton = FindButtonByName("HowToButton");
+
+        if (howToButton)
+        {
+            howToButton.onClick.RemoveAllListeners();
+            howToButton.onClick.AddListener(OpenHowToPlay);
+            EnsureButtonPulse(howToButton);
         }
     }
 
-    void EnsureLeaderboardPulse()
+    void EnsureButtonPulse(Button button)
     {
-        if (!leaderboardsButton) return;
+        if (!button) return;
 
-        var pulse = leaderboardsButton.GetComponent<UIButtonPulse>();
+        var pulse = button.GetComponent<UIButtonPulse>();
         if (!pulse)
-            pulse = leaderboardsButton.gameObject.AddComponent<UIButtonPulse>();
+            pulse = button.gameObject.AddComponent<UIButtonPulse>();
 
-        pulse.pulsesPerSecond = LeaderboardPulseSpeed;
+        pulse.pulsesPerSecond = StartScreenButtonPulseSpeed;
+        pulse.scaleBobAmount = StartScreenButtonPulseScale;
     }
 
     Button FindButtonByName(string buttonName)
@@ -117,6 +132,20 @@ public class StartScreen : MonoBehaviour
         var modifiers = runModifiersPanel.GetComponent<RunModifiersPanel>();
         if (modifiers) modifiers.Open();
         else runModifiersPanel.SetActive(true);
+    }
+
+    void OpenHowToPlay()
+    {
+        if (!tutorial)
+            tutorial = FirstRunTutorial.FindAvailableTutorial();
+
+        if (!tutorial)
+        {
+            Debug.LogWarning("[StartScreen] FirstRunTutorial not found.");
+            return;
+        }
+
+        tutorial.BeginManualReview();
     }
 
     void OnStartPressed()

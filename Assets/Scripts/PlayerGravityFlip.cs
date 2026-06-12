@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 public class PlayerGravityFlip : MonoBehaviour
 {
     public event System.Action InputFlipPerformed;
+    public event System.Action BoundaryHit;
 
     [Header("Feel")]
     public float gravityMagnitude = 3.5f;   // how strong gravity feels in either direction
@@ -121,6 +122,7 @@ public class PlayerGravityFlip : MonoBehaviour
         if (isBoundary)
         {
             ForceFlipAndBounce(collision, 6f); // tweak bounce speed if needed
+            BoundaryHit?.Invoke();
 
             if (TryHandleTutorialProtectedHit())
                 return;

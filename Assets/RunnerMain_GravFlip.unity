@@ -2527,6 +2527,7 @@ MonoBehaviour:
   runModifiersButton: {fileID: 1845885470}
   runModifiersPanel: {fileID: 1873738975}
   leaderboardsButton: {fileID: 900000104}
+  howToButton: {fileID: 1339086030}
   prestigeText: {fileID: 192380843}
 --- !u!114 &200450327
 MonoBehaviour:
@@ -2829,12 +2830,12 @@ MonoBehaviour:
   charges: 0
   maxCharges: 0
   invulnDuration: 1.5
+  tutorialHitFeedbackDuration: 0.8
   shieldVisual: {fileID: 1356442172}
   breakBurst: {fileID: 1902767471}
   shieldBreakClip: {fileID: 8300000, guid: d0f6e0b208c96d14da2975a4fa8eaefb, type: 3}
   shieldRegenClip: {fileID: 8300000, guid: 0f4a72311904f3e48b4a19bb0d26ba22, type: 3}
   shieldRegenVolume: 0.8
-  tutorialHitFeedbackDuration: 0.8
   colorOne: {r: 0.45098042, g: 1, b: 0.89588296, a: 0.5176471}
   colorTwo: {r: 0.216981, g: 0.68744314, b: 1, a: 0.64705884}
   playerLayerName: Player
@@ -3019,7 +3020,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 742, y: 173.53516}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &212843542
 MonoBehaviour:
@@ -3929,6 +3930,7 @@ RectTransform:
   - {fileID: 2003353581}
   - {fileID: 212843541}
   - {fileID: 900000101}
+  - {fileID: 1339086028}
   m_Father: {fileID: 1680933934}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -6979,9 +6981,9 @@ RectTransform:
   - {fileID: 1706638336}
   m_Father: {fileID: 212843541}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1, y: -148.53516}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 350, y: 148.53516}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &605783959
@@ -8286,9 +8288,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2003353581}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 766, y: -157}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 175, y: 157}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &755211013
@@ -9723,9 +9725,9 @@ RectTransform:
   - {fileID: 965534193}
   m_Father: {fileID: 212843541}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 566, y: -74.26758}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 350, y: 148.53516}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &884209475
@@ -14024,6 +14026,142 @@ RectTransform:
   m_AnchoredPosition: {x: 540, y: -811.779}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1339086027
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1339086028}
+  - component: {fileID: 1339086032}
+  - component: {fileID: 1339086031}
+  - component: {fileID: 1339086030}
+  - component: {fileID: 1339086029}
+  m_Layer: 5
+  m_Name: HowToButton
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1339086028
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339086027}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 10, y: 10, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 356685282}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -67, y: -550}
+  m_SizeDelta: {x: 13, y: 18}
+  m_Pivot: {x: 1, y: 1}
+--- !u!114 &1339086029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339086027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.8509804}
+  m_EffectDistance: {x: 1.1, y: -1.3}
+  m_UseGraphicAlpha: 1
+--- !u!114 &1339086030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339086027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: -8984174494225732007, guid: 12701299bed4f454286ddaacfcc13783, type: 3}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 1339086031}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1339086031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339086027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.96981126, g: 0.96981126, b: 0.96981126, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 0e1ad16de786e3a45acbe07e00283fe3, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1339086032
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339086027}
+  m_CullTransparentMesh: 1
 --- !u!1 &1345499407
 GameObject:
   m_ObjectHideFlags: 0
@@ -14091,46 +14229,6 @@ MonoBehaviour:
   upgradesPanel: {fileID: 7709592574260189304}
   speedMultWhenOn: 1.25
   rewardBonusPerMod: 0.25
---- !u!114 &1345499415
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1345499407}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d8fb98cf92443e9ad0a92a1252785b7, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  gameManager: {fileID: 1345499408}
-  player: {fileID: 201007795}
-  overlayParent: {fileID: 1005017114}
-  styleSource: {fileID: 918246864}
-  playerCollider: {fileID: 201007796}
-  groundCollider: {fileID: 1525593718}
-  ceilingCollider: {fileID: 125453084}
-  openingTimeScale: 0.15
-  dangerTimeScale: 0.05
-  postFlipTimeScale: 0.35
-  dangerDistance: 3
-  flipInstructionMinimumDuration: 4
-  interMessageGapDuration: 2
-  survivalHintMinimumDuration: 3
-  progressionHintMinimumDuration: 3
-  normalSpeedRestoreDuration: 1.5
-  flipInstruction: Tap anywhere to flip Fox's gravity
-  survivalHint: Stay on screen and dodge enemies
-  progressionHint: Earn Embers to upgrade and go farther
-  dangerHint: Tap now!
-  mainFontSize: 80
-  warningFontSize: 52
-  mainLineSpacing: 10
-  overlayPosition: {x: 0, y: 390}
-  overlaySize: {x: 980, y: 330}
-  warningYOffset: -40
-  pulseSpeed: 3.2
-  pulseMinScale: 0.88
 --- !u!4 &1345499409
 Transform:
   m_ObjectHideFlags: 0
@@ -14209,6 +14307,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   overrideEnabled: 0
   testPrestigeLevel: 0
+--- !u!114 &1345499415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345499407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d8fb98cf92443e9ad0a92a1252785b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameManager: {fileID: 1345499408}
+  player: {fileID: 201007795}
+  overlayParent: {fileID: 1005017114}
+  styleSource: {fileID: 918246864}
+  playerCollider: {fileID: 201007796}
+  groundCollider: {fileID: 1525593718}
+  ceilingCollider: {fileID: 125453084}
+  openingTimeScale: 0.15
+  dangerTimeScale: 0.05
+  postFlipTimeScale: 0.35
+  dangerDistance: 3
+  flipInstructionMinimumDuration: 4
+  interMessageGapDuration: 2
+  survivalHintMinimumDuration: 3
+  progressionHintMinimumDuration: 3
+  tapAdvanceTimeout: 9
+  normalSpeedRestoreDuration: 1.5
+  flipInstruction: Tap anywhere to flip Fox's gravity
+  survivalHint: Stay on screen and dodge enemies
+  progressionHint: Earn Embers to upgrade and go farther
+  dangerHint: Tap now!
+  mainFontSize: 80
+  warningFontSize: 52
+  mainLineSpacing: 10
+  overlayPosition: {x: 0, y: 390}
+  overlaySize: {x: 980, y: 330}
+  warningYOffset: -40
+  pulseSpeed: 3.2
+  pulseMinScale: 0.88
 --- !u!1 &1353303926
 GameObject:
   m_ObjectHideFlags: 0
@@ -23538,9 +23677,9 @@ RectTransform:
   - {fileID: 558335913}
   m_Father: {fileID: 2003353581}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 276, y: -152.76761}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 550, y: 148.53522}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1845885470
@@ -34454,7 +34593,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 767, y: 347}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &2003353582
 MonoBehaviour:

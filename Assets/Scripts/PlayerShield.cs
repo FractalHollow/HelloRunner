@@ -71,6 +71,7 @@ public class PlayerShield : MonoBehaviour
 
         blinkRenderers = GetComponentsInChildren<SpriteRenderer>(true);
         if (shieldVisual) shieldSR = shieldVisual.GetComponent<SpriteRenderer>();
+        DisableRegenRingRaycasts();
 
         audioSrc = GetComponent<AudioSource>();
         if (!audioSrc) audioSrc = gameObject.AddComponent<AudioSource>();
@@ -97,7 +98,14 @@ public class PlayerShield : MonoBehaviour
 
     void OnEnable()
     {
+        DisableRegenRingRaycasts();
         CacheBounceBaseScales();
+    }
+
+    void DisableRegenRingRaycasts()
+    {
+        if (regenRing)
+            regenRing.raycastTarget = false;
     }
 
     /// Called by GM at run start

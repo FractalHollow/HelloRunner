@@ -2598,10 +2598,10 @@ MonoBehaviour:
   gravityMagnitude: 3.5
   maxYSpeed: 16
   flipCooldown: 0.1
-  flipInputBuffer: 0.12
+  flipInputBuffer: 0.18
   flipFXUp: {fileID: 1892314596}
   flipFXDown: {fileID: 1570754928}
-  logBlockedTapDetails: 0
+  logInputDiagnostics: 0
 --- !u!61 &201007796
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -36690,7 +36690,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.93207544, g: 0.6302113, b: 0.11079383, a: 0.5568628}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

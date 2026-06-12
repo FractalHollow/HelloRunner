@@ -63,9 +63,9 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
     TutorialStep step;
     float stepElapsed;
     float restoreStartScale;
+    float tutorialBaseTimeScale = 1f;
     bool dangerCueActive;
     bool dangerCueSuppressedUntilClear;
-    bool controlDemonstrated;
     bool subscribedToPlayer;
     bool warnedMissingEssentials;
     bool warnedMissingBoundaries;
@@ -91,11 +91,13 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
 
         float delta = Time.unscaledDeltaTime;
 
+        if (step != TutorialStep.Completing)
+            UpdateDangerCue();
+
         switch (step)
         {
             case TutorialStep.FlipInstruction:
                 stepElapsed += delta;
-                UpdateFlipInstruction();
                 if (HasTapAdvanceTimedOut(flipInstructionMinimumDuration))
                     AdvanceCurrentStep();
                 break;
@@ -151,7 +153,6 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
         stepElapsed = 0f;
         dangerCueActive = false;
         dangerCueSuppressedUntilClear = false;
-        controlDemonstrated = false;
 
         overlayRoot.localScale = Vector3.one;
         overlayRoot.SetAsLastSibling();
@@ -163,7 +164,7 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
         warningText.rectTransform.localScale = Vector3.one;
         warningText.gameObject.SetActive(false);
 
-        gameManager.SetRunTimeScale(openingTimeScale);
+        SetTutorialBaseTimeScale(openingTimeScale);
     }
 
     public void OnRunEnded()
@@ -187,7 +188,7 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
             : 1f;
     }
 
-    void UpdateFlipInstruction()
+    void UpdateDangerCue()
     {
         bool playerNearBoundary = IsPlayerNearBoundary();
         if (dangerCueSuppressedUntilClear)
@@ -198,7 +199,7 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
             dangerCueSuppressedUntilClear = false;
         }
 
-        if (!controlDemonstrated && !dangerCueActive && playerNearBoundary)
+        if (!dangerCueActive && playerNearBoundary)
         {
             dangerCueActive = true;
             warningText.text = dangerHint;
@@ -216,27 +217,20 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
 
     void HandleInputFlip()
     {
-        if (!controlDemonstrated)
-        {
-            controlDemonstrated = true;
-            ClearDangerCue();
-            dangerCueSuppressedUntilClear = false;
-
-            if (step == TutorialStep.FlipInstruction)
-                gameManager.SetRunTimeScale(openingTimeScale);
-        }
+        if (dangerCueActive)
+            DismissDangerCue(suppressUntilClear: true);
 
         AdvanceCurrentStep();
     }
 
     void HandleBoundaryHit()
     {
-        if (step != TutorialStep.FlipInstruction || !dangerCueActive)
+        if (step == TutorialStep.Inactive ||
+            step == TutorialStep.Completing ||
+            !dangerCueActive)
             return;
 
-        ClearDangerCue();
-        dangerCueSuppressedUntilClear = true;
-        gameManager.SetRunTimeScale(openingTimeScale);
+        DismissDangerCue(suppressUntilClear: true);
     }
 
     bool HasTapAdvanceTimedOut(float minimumDuration)
@@ -251,7 +245,7 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
             case TutorialStep.FlipInstruction:
                 if (stepElapsed >= flipInstructionMinimumDuration)
                 {
-                    gameManager.SetRunTimeScale(postFlipTimeScale);
+                    SetTutorialBaseTimeScale(postFlipTimeScale);
                     BeginGap(TutorialStep.GapBeforeSurvival);
                 }
                 break;
@@ -276,8 +270,6 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
         step = gapStep;
         stepElapsed = 0f;
         mainText.gameObject.SetActive(false);
-        ClearDangerCue();
-        dangerCueSuppressedUntilClear = false;
     }
 
     void ShowMessage(TutorialStep nextStep, string message)
@@ -286,7 +278,6 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
         stepElapsed = 0f;
         mainText.text = message;
         mainText.gameObject.SetActive(true);
-        warningText.gameObject.SetActive(false);
         overlayGroup.alpha = 1f;
     }
 
@@ -298,13 +289,26 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
         warningText.gameObject.SetActive(false);
     }
 
+    void DismissDangerCue(bool suppressUntilClear)
+    {
+        ClearDangerCue();
+        dangerCueSuppressedUntilClear = suppressUntilClear;
+        gameManager.SetRunTimeScale(tutorialBaseTimeScale);
+    }
+
+    void SetTutorialBaseTimeScale(float value)
+    {
+        tutorialBaseTimeScale = value;
+        if (!dangerCueActive)
+            gameManager.SetRunTimeScale(tutorialBaseTimeScale);
+    }
+
     void BeginCompletion()
     {
+        DismissDangerCue(suppressUntilClear: false);
         step = TutorialStep.Completing;
         stepElapsed = 0f;
-        restoreStartScale = gameManager.RunTimeScale;
-        warningText.gameObject.SetActive(false);
-        dangerCueSuppressedUntilClear = false;
+        restoreStartScale = tutorialBaseTimeScale;
     }
 
     void UpdateCompletion(float delta)
@@ -324,7 +328,7 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
         HideOverlay();
         UnsubscribeFromPlayer();
         step = TutorialStep.Inactive;
-        controlDemonstrated = false;
+        tutorialBaseTimeScale = 1f;
         dangerCueSuppressedUntilClear = false;
 
         PlayerPrefs.SetInt(CompletionKey, 1);
@@ -341,9 +345,9 @@ public class FirstRunInteractiveTutorialManager : MonoBehaviour
         HideOverlay();
         step = TutorialStep.Inactive;
         stepElapsed = 0f;
+        tutorialBaseTimeScale = 1f;
         dangerCueActive = false;
         dangerCueSuppressedUntilClear = false;
-        controlDemonstrated = false;
         gameManager?.ResetRunTimeScale();
     }
 
